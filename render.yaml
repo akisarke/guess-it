@@ -1,0 +1,119 @@
+# Render blueprint for Guess It!
+# Deploy: Render dashboard -> New -> Blueprint -> select this repo.
+#
+# One web service. Fastify serves the API and the built React client from the same
+# origin, which keeps the session cookie first-party (production rejects
+# SameSite=None, so a separate static host would break sign-in).
+
+services:
+  - type: web
+    name: guess-it
+    runtime: node
+    plan: free
+    region: oregon
+    branch: main
+
+    buildCommand: npm ci && npm run build
+    # shared -> client -> server, so the server can resolve ../client/dist at boot
+    startCommand: npm run start -w server
+    preDeployCommand: npx prisma migrate deploy --schema server/src/prisma/schema.prisma
+    healthCheckPath: /api/auth/csrf
+
+    envVars:
+      # --- required, no safe default ---
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+
+      # Neon connection string. Use the pooled (-pooler) host in production.
+      - key: DATABASE_URL
+        sync: false
+
+      # Generated once by Render. Replace with `openssl rand -base64 48` output
+      # if you ever need to rotate it; changing it signs every user out.
+      - key: SESSION_SECRET
+        generateValue: true
+
+      # Render terminates TLS and forwards one proxy hop. Without this the app
+      # sees http:// and its own enforceHttps hook rejects every request.
+      - key: TRUST_PROXY
+        value: "1"
+      - key: SESSION_COOKIE_SAME_SITE
+        value: lax
+
+      # Both of these must be your public origin, with no trailing slash.
+      - key: APP_URL
+        sync: false
+      - key: CLIENT_ORIGINS
+        sync: false
+
+      # --- Hack Club OAuth (required in production; the server will not boot without it) ---
+      - key: HACKCLUB_CLIENT_ID
+        sync: false
+      - key: HACKCLUB_CLIENT_SECRET
+        sync: false
+      - key: HACKCLUB_REDIRECT_URI
+        sync: false
+      - key: SESSION_COOKIE_SAME_SITE
+        value: lax
+
+      # --- rate limits, format "<requests>:<windowMs>". Production refuses to boot
+      # without every one of these, so they are pinned here rather than prompted. ---
+      - key: LIMIT_LOGIN_IP
+        value: "10:600000"
+      - key: LIMIT_LOGIN_ACCOUNT
+        value: "5:900000"
+      - key: LIMIT_ANONYMOUS_IP
+        value: "20:60000"
+      - key: LIMIT_FORGOT_PASSWORD_IP
+        value: "5:3600000"
+      - key: LIMIT_FORGOT_PASSWORD_ACCOUNT
+        value: "3:3600000"
+      - key: LIMIT_RESET_PASSWORD_IP
+        value: "5:3600000"
+      - key: LIMIT_RESET_PASSWORD_TOKEN_PREFIX
+        value: "5:3600000"
+      - key: LIMIT_SIGNUP_IP
+        value: "5:3600000"
+      - key: LIMIT_GENERATION_IP
+        value: "10:86400000"
+      - key: LIMIT_GENERATION_USER
+        value: "10:86400000"
+      - key: LIMIT_AVATAR_IP
+        value: "10:3600000"
+      - key: LIMIT_AVATAR_USER
+        value: "10:3600000"
+
+      # --- duel WebSocket guards ---
+      - key: DUEL_MAX_PAYLOAD_BYTES
+        value: "65536"
+      - key: DUEL_COMMAND_LIMIT
+        value: "30"
+      - key: DUEL_COMMAND_WINDOW_MS
+        value: "60000"
+
+      # --- optional providers ---
+      # Comma-separated to enable rotation when one key hits its quota.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+      # --- daily puzzle generation (in-process scheduler) ---
+      - key: DAILY_GEN_ENABLED
+        value: "true"
+      - key: DAILY_GEN_HOUR_UTC
+        value: "0"
+      - key: DAILY_GEN_MINUTE_UTC
+        value: "5"
+      - key: DAILY_TOPIC_REPEAT_DAYS
+        value: "14"
+
+      # Local disk only. See the note below about persistent storage.
+      - key: AVATAR_UPLOAD_DIR
+        value: uploads/avatars

@@ -1,0 +1,330 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  anonymous
+  hackclub
+  password
+}
+
+enum QuestionSource {
+  daily
+  ai_generated
+  ai_daily
+}
+
+enum QueueStatus {
+  waiting
+  matched
+  expired
+}
+
+enum DuelSourceKind {
+  daily
+  generated
+}
+
+enum DuelStatus {
+  waiting
+  question
+  reveal
+  completed
+  forfeited
+}
+
+enum NotificationType {
+  badge_awarded
+  duel_invite
+  friend_request
+}
+
+enum FriendRequestStatus {
+  pending
+  accepted
+}
+
+model User {
+  id             String       @id @default(uuid())
+  displayName    String       @unique
+  authProvider   AuthProvider
+  email          String?      @unique
+  passwordHash   String?
+  hackclubId     String?      @unique
+  bio            String?      @db.VarChar(280)
+  avatarUrl      String?      @db.VarChar(500)
+  usernameChosen Boolean      @default(true)
+  isDeveloper    Boolean      @default(false)
+  isOwner        Boolean      @default(false)
+  sessionVersion Int          @default(0)
+  failedLoginAttempts Int     @default(0)
+  lockedUntil    DateTime?
+  createdAt      DateTime     @default(now())
+
+  guesses             Guess[]
+  streak              Streak?
+  userBadges          UserBadge[]
+  queueEntries        MatchmakingQueueEntry[]
+  matchesA            Duel[]                  @relation("PlayerA")
+  matchesB            Duel[]                  @relation("PlayerB")
+  duelSubmissions     DuelSubmission[]
+  grantedBadges       UserBadge[]             @relation("GrantedBy")
+  aiQuestions         Question[]              @relation("CreatedBy")
+  questionSets        QuestionSet[]           @relation("SetOwner")
+  generationAttempts  GenerationAttempt[]
+  passwordResetTokens PasswordResetToken[]
+  emailVerifiedAt     DateTime?
+  emailVerificationTokens EmailVerificationToken[]
+  notifications        Notification[]
+  sentFriendRequests     FriendRequest[]       @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[]       @relation("FriendRequestReceiver")
+}
+
+model FriendRequest {
+  id         String              @id @default(uuid())
+  senderId   String
+  receiverId String
+  status     FriendRequestStatus @default(pending)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender   User @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
+  @@index([senderId, status])
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  actionUrl   String
+  actionLabel String
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@index([userId, createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model DailyPuzzle {
+  id           String   @id @default(uuid())
+  puzzleNumber Int      @unique
+  puzzleDate   DateTime @unique
+  questionIds  String[]
+
+  matches Duel[]
+}
+
+model Question {
+  id         String         @id @default(uuid())
+  prompt     String
+  unit       String
+  answer     Decimal        @db.Decimal(20, 2)
+  napkinMath String
+  sourceTitle String
+  sourceUrl   String
+  source     QuestionSource
+  createdBy  String?
+  topic      String?
+  createdAt  DateTime       @default(now())
+
+  creator      User?                   @relation("CreatedBy", fields: [createdBy], references: [id])
+  setQuestions QuestionSetQuestion[]
+  guesses      Guess[]
+  queueEntries MatchmakingQueueEntry[]
+
+  @@index([createdBy])
+}
+
+model QuestionSet {
+  id         String         @id @default(uuid())
+  ownerId    String
+  title      String
+  topic      String
+  difficulty String?
+  source     QuestionSource @default(ai_generated)
+  createdAt  DateTime       @default(now())
+
+  owner     User                  @relation("SetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  questions QuestionSetQuestion[]
+  attempt   GenerationAttempt?
+
+  @@index([ownerId, createdAt])
+}
+
+model QuestionSetQuestion {
+  setId      String
+  questionId String
+  position   Int
+
+  set      QuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([setId, position])
+  @@unique([setId, questionId])
+  @@index([questionId])
+}
+
+model GenerationAttempt {
+  id        String   @id @default(uuid())
+  userId    String
+  setId     String   @unique
+  utcDay    DateTime
+  createdAt DateTime @default(now())
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  QuestionSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@index([userId, utcDay])
+}
+
+model Guess {
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String
+  value      Decimal  @db.Decimal(20, 2)
+  score      Decimal  @db.Decimal(30, 4)
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+  @@index([createdAt])
+}
+
+model Streak {
+  userId        String    @id
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastPlayedOn  DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Badge {
+  id            String  @id
+  name          String
+  description   String
+  isSecret      Boolean @default(false)
+  isManualGrant Boolean @default(false)
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  userId    String
+  badgeId   String
+  grantedAt DateTime  @default(now())
+  grantedBy String?
+  note      String?
+  isPinned  Boolean   @default(false)
+  pinnedAt  DateTime?
+
+  user    User  @relation(fields: [userId], references: [id])
+  badge   Badge @relation(fields: [badgeId], references: [id])
+  granter User? @relation("GrantedBy", fields: [grantedBy], references: [id])
+
+  @@id([userId, badgeId])
+}
+
+model MatchmakingQueueEntry {
+  id         String      @id @default(uuid())
+  userId     String
+  questionId String?
+  queuedAt   DateTime    @default(now())
+  status     QueueStatus @default(waiting)
+
+  user     User      @relation(fields: [userId], references: [id])
+  question Question? @relation(fields: [questionId], references: [id])
+
+  @@index([userId, queuedAt])
+  @@index([status, queuedAt])
+}
+
+model Duel {
+  id              String         @id @default(uuid())
+  puzzleId        String?
+  sourceKind      DuelSourceKind @default(daily)
+  sourceId        String
+  playerA         String
+  playerB         String
+  inviteTokenHash String?        @unique
+  inviteExpiresAt DateTime?
+  status          DuelStatus     @default(waiting)
+  roundIndex      Int            @default(0)
+  roundStartedAt  DateTime?
+  roundDeadlineAt DateTime?
+  revealEndsAt    DateTime?
+  winnerId        String?
+  completedAt     DateTime?
+  version         Int            @default(0)
+  createdAt       DateTime       @default(now())
+
+  puzzle       DailyPuzzle?     @relation(fields: [puzzleId], references: [id])
+  playerAUser  User             @relation("PlayerA", fields: [playerA], references: [id])
+  playerBUser  User             @relation("PlayerB", fields: [playerB], references: [id])
+  submissions  DuelSubmission[]
+
+  @@index([status, roundDeadlineAt])
+  @@index([status, revealEndsAt])
+  @@index([playerA])
+  @@index([playerB])
+  @@map("Match")
+}
+
+model DuelSubmission {
+  id         String   @id @default(uuid())
+  duelId     String
+  playerId   String
+  roundIndex Int
+  value      Decimal? @db.Decimal(20, 2)
+  score      Decimal  @db.Decimal(30, 4)
+  createdAt  DateTime @default(now())
+
+  duel   Duel @relation(fields: [duelId], references: [id], onDelete: Cascade)
+  player User @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([duelId, playerId, roundIndex])
+  @@index([duelId, roundIndex])
+}

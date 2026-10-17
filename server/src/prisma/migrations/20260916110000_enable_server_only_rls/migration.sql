@@ -1,0 +1,31 @@
+ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "PasswordResetToken" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "DailyPuzzle" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Question" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "QuestionSet" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "QuestionSetQuestion" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "GenerationAttempt" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Guess" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Streak" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Badge" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "UserBadge" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "MatchmakingQueueEntry" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Match" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "DuelSubmission" ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL PRIVILEGES ON TABLE
+  "User",
+  "PasswordResetToken",
+  "DailyPuzzle",
+  "Question",
+  "QuestionSet",
+  "QuestionSetQuestion",
+  "GenerationAttempt",
+  "Guess",
+  "Streak",
+  "Badge",
+  "UserBadge",
+  "MatchmakingQueueEntry",
+  "Match",
+  "DuelSubmission"
+FROM anon, authenticated;

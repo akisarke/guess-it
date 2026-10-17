@@ -1,0 +1,2 @@
+ALTER TABLE "DuelSubmission"
+  ALTER COLUMN "value" DROP NOT NULL;

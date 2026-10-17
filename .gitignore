@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*
+!.env.example
+server/.env
+server/dist/
+server/uploads/
+coverage/
+*.local
+*.zip
+*.tar
+*.tar.gz
+*.log
+.neon
+
+# Local runtime data
+uploads/
+test-uploads/

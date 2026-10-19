@@ -84,6 +84,7 @@ export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, opti
         topic,
         difficulty: request.body.difficulty ?? null,
         questions,
+        sourceUrl: app.config.appUrl,
       });
       return { set: result.set, questions: result.set.questions, remainingGenerations: result.remainingGenerations };
     } catch (error) {

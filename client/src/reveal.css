@@ -198,10 +198,15 @@
   border-color: var(--line);
 }
 
+.reveal-landed-score {
+  @apply mt-4 flex flex-wrap items-end gap-x-4 gap-y-2;
+}
+
 .reveal-score {
-  @apply font-display text-6xl font-extrabold leading-none sm:text-7xl;
+  @apply font-display text-5xl font-extrabold leading-none sm:text-6xl;
   color: rgb(var(--accent-rgb));
-  overflow-wrap: anywhere;
+  flex: none;
+  white-space: nowrap;
 }
 
 .reveal-canvas--landed .reveal-value--answer {

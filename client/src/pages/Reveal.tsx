@@ -199,9 +199,9 @@ export function Reveal() {
             <div className="reveal-divider absolute inset-y-4 left-1/2 w-px -translate-x-1/2" aria-hidden="true" />
             <article className="reveal-landed">
               <p className="reveal-kicker">Landed</p>
-              <div className="mt-4 flex flex-wrap items-end gap-3">
+              <div className="reveal-landed-score">
                  <div className="reveal-score" title={formatScore(score).exact}>{formatScore(score).visual}</div>
-                <div className="min-w-0 flex-1 pb-1">
+                <div className="min-w-[13rem] flex-1 pb-1">
                   <p className="reveal-kicker">Score</p>
                   <p className="mt-1 text-lg font-bold leading-tight text-ink dark:text-gray-100 sm:text-xl">
                     {rankLine}

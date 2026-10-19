@@ -21,6 +21,7 @@ export type CreateGeneratedSetInput = Readonly<{
   readonly topic: string;
   readonly difficulty: 'easy' | 'medium' | 'hard' | null;
   readonly questions: readonly [GeneratedQuestionInput, GeneratedQuestionInput, GeneratedQuestionInput];
+  readonly sourceUrl: string;
   readonly now?: Date;
 }>;
 
@@ -74,7 +75,7 @@ export async function createGeneratedSet(
               answer: question.answer,
               napkinMath: question.napkinMath,
               sourceTitle: 'Guess It! generated question',
-              sourceUrl: 'https://guessit.game/',
+              sourceUrl: input.sourceUrl,
               source: 'ai_generated',
               createdBy: input.ownerId,
               topic: input.topic,

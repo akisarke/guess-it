@@ -207,7 +207,7 @@ export async function ensureDailyPuzzleForDate(
                 answer: drafts[i].answer,
                 napkinMath: drafts[i].napkinMath,
                 sourceTitle: 'Guess It! generated daily question',
-                sourceUrl: 'https://guessit.game/',
+                sourceUrl: config.appUrl,
                 source: 'ai_daily',
                 topic: topics[i],
               },
@@ -293,7 +293,7 @@ export async function ensureCatalogDepth(
         answer: draft.answer,
         napkinMath: draft.napkinMath,
         sourceTitle: 'Guess It! generated question',
-        sourceUrl: 'https://guessit.game/',
+        sourceUrl: config.appUrl,
       });
       await prisma.question.create({ data: { ...valid, source: 'daily', topic } });
       seen.add(key);

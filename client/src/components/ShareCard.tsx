@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { formatScore } from '../lib/format-number';
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+const SITE = typeof window === 'undefined' ? 'guessit.akisarke.xyz' : window.location.host;
 
 interface ShareCardProps {
   puzzleNumber: number;
@@ -54,7 +55,7 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
 
     ctx.fillStyle = '#8d877e';
     ctx.font = `16px ${SYSTEM_FONT}`;
-    ctx.fillText('guessit.game', 300, 368);
+    ctx.fillText(SITE, 300, 368);
 
     return canvas.toDataURL('image/png');
   };
@@ -66,7 +67,7 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
     });
     const answered = scores.filter((s) => s > 0).length;
     lines.push(answered > 0 ? `Average: ${formatScore(average).visual}` : 'Average: —');
-    lines.push('guessit.game');
+    lines.push(SITE);
     return lines.join('\n');
   };
 

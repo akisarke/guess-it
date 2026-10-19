@@ -45,7 +45,7 @@ async function createUser(): Promise<string> {
 }
 
 async function createSet(ownerId: string, title = 'Everyday scale') {
-  return createGeneratedSet(prisma, { ownerId, title, topic: 'everyday estimates', difficulty: 'medium', questions, now });
+  return createGeneratedSet(prisma, { ownerId, title, topic: 'everyday estimates', difficulty: 'medium', questions, sourceUrl: 'https://guessit.test/', now });
 }
 
 async function withRejectingAttemptTrigger(action: () => Promise<void>): Promise<void> {

@@ -55,7 +55,6 @@ export interface BuildAppOptions {
   readonly clientDistDir?: string;
 }
 
-// server/dist/index.js -> <repo>/client/dist
 function defaultClientDistDir(): string {
   return resolve(fileURLToPath(import.meta.url), '..', '..', '..', 'client', 'dist');
 }
@@ -93,10 +92,10 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
         'object-src': ["'none'"],
         'frame-ancestors': ["'none'"],
         'script-src': ["'self'", "'unsafe-inline'"],
-        // The Baloo 2 display face is served from Google Fonts.
+
         'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
-        // The Hack Club member mark is served from assets.hackclub.com.
+
         'img-src': ["'self'", 'data:', 'blob:', 'https://assets.hackclub.com'],
       },
     },
@@ -125,8 +124,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
 
   const clientDistDir = resolve(options.clientDistDir ?? defaultClientDistDir());
   if (existsSync(join(clientDistDir, 'index.html'))) {
-    // Serving the built client from this same origin keeps the session cookie
-    // first-party: cross-site cookies need SameSite=None, which production rejects.
+
     await app.register(fastifyStatic, {
       root: clientDistDir,
       prefix: '/',

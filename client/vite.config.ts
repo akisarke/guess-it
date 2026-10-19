@@ -7,8 +7,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     host: '0.0.0.0',
-    // A leading dot matches any subdomain, so the random host ngrok hands out on each
-    // restart keeps working without another edit.
+
     allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io'],
     proxy: {
       '/api': {

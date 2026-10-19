@@ -4,20 +4,35 @@ import { formatExactNumber } from '../../lib/format-number';
 export function DuelHeader({ snapshot, remainingMs }: { readonly snapshot: DuelSnapshot; readonly remainingMs: number | null }) {
   const remainingSeconds = remainingMs === null ? null : Math.max(0, Math.ceil(remainingMs / 1000));
   const timerLabel = remainingSeconds === null ? 'Reveal in progress' : `${remainingSeconds}s left`;
+  const round = Math.min(snapshot.roundIndex + 1, 3);
+
   return (
-    <header className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="chip chip-active">Round {Math.min(snapshot.roundIndex + 1, 3)} of 3</span>
-        <span className="chip chip-idle" role="status" aria-live="polite">
+    <header className="space-y-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <p className="text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-70">
+          Duel &middot; Round {round} of 3
+        </p>
+        <p
+          className="text-sm font-bold tabular-nums opacity-70"
+          role="status"
+          aria-live="polite"
+        >
           {snapshot.phase === 'question' ? timerLabel : snapshot.phase}
-        </span>
+        </p>
       </div>
-      <div>
-        <h1 className="font-display text-4xl font-extrabold leading-tight text-hc-ink dark:text-gray-100 sm:text-5xl">Duel the estimate</h1>
-        <p className="mt-2 text-sm leading-6 text-hc-ink/65 dark:text-gray-300">Both players see the same question. The answer stays hidden until the round is complete.</p>
-      </div>
-      <div className="h-2 overflow-hidden rounded-pill bg-hc-ink/10 dark:bg-white/10" aria-label={remainingSeconds === null ? 'Round timer stopped' : `Round timer: ${formatExactNumber(remainingSeconds)} seconds remaining`}>
-        <div className="h-full rounded-pill bg-gradient-to-r from-hc-pink via-hc-peach to-hc-yellow transition-[width] duration-200" style={{ width: remainingMs === null ? '0%' : `${Math.min(100, Math.max(0, remainingMs / 60000 * 100))}%` }} />
+
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-ink/10 dark:bg-white/15"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={60}
+        aria-valuenow={remainingSeconds ?? 0}
+        aria-label={remainingSeconds === null ? 'Round timer stopped' : `Round timer: ${formatExactNumber(remainingSeconds)} seconds remaining`}
+      >
+        <div
+          className="h-full rounded-full bg-accent transition-[width] duration-200"
+          style={{ width: remainingMs === null ? '0%' : `${Math.min(100, Math.max(0, (remainingMs / 60000) * 100))}%` }}
+        />
       </div>
     </header>
   );

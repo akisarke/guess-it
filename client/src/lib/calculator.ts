@@ -1,7 +1,7 @@
-type Token = { type: 'number'; value: number } | { type: 'op'; value: string };
+type Token = { type: 'number'; value: number } | { type: 'op'; value: string } | { type: 'percent' };
 
 const isDigit = (c: string) => /[0-9.]/.test(c);
-const isOp = (c: string) => ['+', '-', '−', '×', '÷', '(', ')', '%'].includes(c);
+const isOp = (c: string) => ['+', '-', '−', '×', '÷', '(', ')', '^'].includes(c);
 
 function tokenize(expr: string): Token[] {
   const tokens: Token[] = [];
@@ -19,6 +19,10 @@ function tokenize(expr: string): Token[] {
         num += expr[i++];
       }
       tokens.push({ type: 'number', value: parseFloat(num) });
+    } else if (expr[i] === '%') {
+
+      tokens.push({ type: 'percent' });
+      i++;
     } else if (isOp(expr[i])) {
       tokens.push({ type: 'op', value: expr[i] });
       i++;
@@ -31,8 +35,9 @@ function tokenize(expr: string): Token[] {
 }
 
 function precedence(op: string): number {
+  if (op === '^') return 3;
+  if (op === '×' || op === '÷') return 2;
   if (op === '+' || op === '-' || op === '−') return 1;
-  if (op === '×' || op === '÷' || op === '%') return 2;
   return 0;
 }
 
@@ -46,9 +51,9 @@ function applyOp(a: number, op: string, b: number): number {
     case '×':
       return a * b;
     case '÷':
-      return b === 0 ? Infinity : a / b;
-    case '%':
-      return b === 0 ? Infinity : a % b;
+      return a / b;
+    case '^':
+      return a ** b;
     default:
       return 0;
   }
@@ -62,6 +67,8 @@ export function evaluate(expr: string): number {
   for (const token of tokens) {
     if (token.type === 'number') {
       values.push(token.value);
+    } else if (token.type === 'percent') {
+      if (values.length) values[values.length - 1] /= 100;
     } else if (token.value === '(') {
       ops.push(token.value);
     } else if (token.value === ')') {
@@ -71,12 +78,18 @@ export function evaluate(expr: string): number {
         const op = ops.pop()!;
         values.push(applyOp(a, op, b));
       }
+
+      if (!ops.length) return NaN;
       ops.pop();
     } else {
+
+      const rightAssoc = token.value === '^';
       while (
         ops.length &&
         ops[ops.length - 1] !== '(' &&
-        precedence(ops[ops.length - 1]) >= precedence(token.value)
+        (rightAssoc
+          ? precedence(ops[ops.length - 1]) > precedence(token.value)
+          : precedence(ops[ops.length - 1]) >= precedence(token.value))
       ) {
         const b = values.pop()!;
         const a = values.pop()!;
@@ -88,11 +101,14 @@ export function evaluate(expr: string): number {
   }
 
   while (ops.length) {
+    const op = ops.pop()!;
+
+    if (op === '(' || values.length < 2) return NaN;
     const b = values.pop()!;
     const a = values.pop()!;
-    const op = ops.pop()!;
     values.push(applyOp(a, op, b));
   }
 
-  return values[0] || 0;
+  const out = values[0];
+  return typeof out === 'number' && Number.isFinite(out) ? out : NaN;
 }

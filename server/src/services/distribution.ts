@@ -38,19 +38,16 @@ export async function computeDistribution(
 
   const values = guesses.map(g => Number(g.value)).sort((a, b) => a - b);
 
-  // User's guess
   const userGuessRecord = userId
     ? guesses.find(g => g.userId === userId)
     : null;
   const userGuess = userGuessRecord ? Number(userGuessRecord.value) : null;
 
-  // Median
   const mid = Math.floor(values.length / 2);
   const medianGuess = values.length % 2 !== 0
     ? values[mid]
     : (values[mid - 1] + values[mid]) / 2;
 
-  // Log-scale bins spanning ~1 order of magnitude each side of answer
   const logAnswer = Math.log10(answer || 1);
   const logMin = logAnswer - 1;
   const logMax = logAnswer + 1;
@@ -63,7 +60,6 @@ export async function computeDistribution(
     bins.push({ low: Math.round(low), high: Math.round(high), count: 0 });
   }
 
-  // Bin the guesses
   for (const v of values) {
     const logV = Math.log10(v || 1);
     let binIdx = Math.floor((logV - logMin) / logStep);

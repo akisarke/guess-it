@@ -19,7 +19,7 @@ A browser game where you guess things! Make an estimate, lock it in, and find ou
 - **Streaks** — track consecutive days of play
 - **Achievements** — badges for play streaks, exact guesses, and sharp averages
 - **Public profiles** — bio, avatar upload, badges, streaks, and generated sets
-- **Generate your own sets** — AI writes three questions on a topic you pick
+- **Generate your own sets** — write three questions around a topic you pick
 - **Duels** — real-time head-to-head estimates over a WebSocket
 - **Friends and notifications** — send requests, get notified on friend requests and badges
 - **Leaderboard** — daily, weekly, and all-time rankings

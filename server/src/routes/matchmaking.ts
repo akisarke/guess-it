@@ -93,7 +93,7 @@ export async function matchmakingRoutes(app: FastifyInstance) {
       where: { id: duel.id, status: 'waiting' },
       data: { status: 'question', roundStartedAt: now, roundDeadlineAt: new Date(now.getTime() + 60_000) },
     });
-    // ponytail: refresh coordinator if it hydrated the waiting state early (playerA opened battle page); edge case
+
     try {
       const state = await loadDuelState(app.prisma, duel.id, now);
       if (state) app.duelCoordinator.register(state);

@@ -18,7 +18,7 @@ type LeaderboardPrisma = Pick<PrismaClient, 'guess' | 'userBadge'>;
 
 export async function buildLeaderboard(prisma: LeaderboardPrisma, where: Prisma.GuessWhereInput): Promise<LeaderboardEntry[]> {
   const guesses = await prisma.guess.findMany({
-    // Anonymous players get a throwaway display name, so they never belong on a public board.
+
     where: { ...where, user: { authProvider: { not: 'anonymous' } } },
     select: {
       userId: true,

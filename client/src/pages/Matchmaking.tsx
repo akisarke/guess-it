@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { LoaderCircle, Swords, Timer } from 'lucide-react';
+import { LoaderCircle, Timer } from 'lucide-react';
 import { api, ApiError } from '../lib/api';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { useAuthGate } from '../hooks/use-auth-gate';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 
 interface MatchSummary {
@@ -96,6 +96,8 @@ export function Matchmaking() {
 
   useEffect(() => {
     if (status !== 'waiting') return;
+
+    setNow(Date.now());
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, [status]);
@@ -126,10 +128,10 @@ export function Matchmaking() {
 
         {status === 'idle' && (
           <>
-            <p className="text-hc-ink/60 dark:text-gray-300 mb-6">
+            <p className="text-ink/60 dark:text-gray-300 mb-6">
                Match with a random opponent for a live three-round battle.
             </p>
-             {error && <p className="mb-4 rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-left text-sm font-semibold text-hc-ink dark:text-pink-100" role="alert">{error.message}</p>}
+             {error && <p className="mb-4 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-left text-sm font-bold text-ink dark:text-gray-100" role="alert">{error.message}</p>}
              <button onClick={joinQueue} disabled={loading || authState === 'checking'} className="btn-primary">
                {loading ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" /> Joining…</> : 'Join Queue'}
              </button>
@@ -138,27 +140,16 @@ export function Matchmaking() {
 
          {status === 'waiting' && (
            <>
-              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-hc-violet/10 text-hc-violet" aria-hidden="true"><Timer size={40} className="animate-pulse" /></div>
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-accent" aria-hidden="true"><Timer size={40} className="animate-pulse" /></div>
              <div className="mb-6" role="status" aria-live="polite">
                <h2 className="font-display text-xl font-bold">Searching for your opponent</h2>
-               <p className="mt-2 text-sm text-hc-ink/60 dark:text-gray-300">You can leave this page open. We’ll take you straight into the battle when someone joins.</p>
-               {queuedAt !== null && <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-hc-violet">Waiting {Math.floor((now - queuedAt) / 1000)}s</p>}
+               <p className="mt-2 text-sm text-ink/60 dark:text-gray-300">You can leave this page open. We’ll take you straight into the battle when someone joins.</p>
+               {queuedAt !== null && <p className="mt-3 text-xs font-bold uppercase tracking-[0.1em] text-accent">Waiting {Math.max(0, Math.floor((now - queuedAt) / 1000))}s</p>}
              </div>
-             {error && <p className="mb-4 rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-left text-sm font-semibold text-hc-ink dark:text-pink-100" role="alert">{error.message}</p>}
+             {error && <p className="mb-4 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-left text-sm font-bold text-ink dark:text-gray-100" role="alert">{error.message}</p>}
              <button onClick={leaveQueue} disabled={leaving} className="btn-secondary">
                {leaving ? 'Leaving…' : 'Leave Queue'}
              </button>
-          </>
-        )}
-
-        {status === 'matched' && match && (
-          <>
-             <Swords size={48} className="mx-auto mb-4 text-hc-pink" aria-hidden="true" />
-            <h2 className="font-display text-xl font-bold mb-2">Match Found!</h2>
-            <p className="text-hc-ink/60 dark:text-gray-300 mb-6">
-              You've been matched with another player
-            </p>
-             <Link to={`/duels/${encodeURIComponent(match.id)}`} className="btn-primary inline-block">Play Now</Link>
           </>
         )}
       </div>

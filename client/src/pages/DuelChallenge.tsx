@@ -78,7 +78,7 @@ function State({ title, description, children }: { title: string; description: s
       <div className="card space-y-4 text-center">
         <span className="chip chip-active">Private challenge</span>
         <h1 className="font-display text-3xl font-extrabold">{title}</h1>
-        <p className="text-sm leading-6 text-hc-ink/65 dark:text-gray-300">{description}</p>
+        <p className="text-sm leading-6 text-ink/65 dark:text-gray-300">{description}</p>
         {children}
       </div>
     </div>

@@ -10,17 +10,15 @@ function LocationProbe() {
 
 describe('Matchmaking auth gate', () => {
   it('renders the signed-out state at mount when auth returns 401', async () => {
-    // Given: the initial auth check returns 401.
+
     vi.spyOn(api, 'getMe').mockRejectedValue(new ApiError(401, 'Not authenticated'));
 
-    // When: Matchmaking mounts.
     render(
       <MemoryRouter>
         <Matchmaking />
       </MemoryRouter>,
     );
 
-    // Then: the reusable signed-out state is shown without the queue action.
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Not Logged In' })).toBeInTheDocument());
     expect(screen.queryByRole('button', { name: 'Join Queue' })).not.toBeInTheDocument();
   });

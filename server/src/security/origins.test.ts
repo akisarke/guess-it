@@ -39,7 +39,7 @@ describe('trusted-proxy HTTPS policy', () => {
   });
 
   it('skips the protocol check when a trusted proxy terminates TLS', () => {
-    // Nest's shared proxy reaches the app over HTTP and forwards proto http.
+
     expect(isHttpsRequired('production', 'http', true)).toBe(false);
   });
 });

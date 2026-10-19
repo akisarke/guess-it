@@ -11,7 +11,7 @@ describe('generated-set gameplay HTTP', () => {
       { viewer: 'visitor', status: 403 },
       { viewer: 'missing', status: 404 },
     ])(`GET ${endpoint} returns $status when $viewer`, async ({ viewer, status }) => {
-      // Given
+
       const { prisma, reads } = gameplayDatabase();
       if (viewer === 'visitor') reads.set.mockResolvedValue({ ...set, ownerId: 'other' });
       if (viewer === 'missing') reads.set.mockResolvedValue(null);
@@ -19,9 +19,9 @@ describe('generated-set gameplay HTTP', () => {
       registerHttpErrorHandler(app);
       await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
       try {
-        // When
+
         const response = await app.inject({ url: `/api/question-sets/set-1/${endpoint}`, cookies: viewer === 'signed-out' ? {} : cookies });
-        // Then
+
         expect(response.statusCode).toBe(status);
         expect(response.json().code).toBe(viewer === 'signed-out' ? 'AUTHENTICATION_REQUIRED' : viewer === 'visitor' ? 'FORBIDDEN' : 'NOT_FOUND');
         expect(reads.answer).not.toHaveBeenCalled();
@@ -29,14 +29,14 @@ describe('generated-set gameplay HTTP', () => {
     });
 
     test(`GET ${endpoint} returns public ordered questions and owner progress`, async () => {
-      // Given
+
       const { prisma, reads } = gameplayDatabase();
       const { app, cookies } = await gameplayApp(prisma);
       await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
       try {
-        // When
+
         const response = await app.inject({ url: `/api/question-sets/set-1/${endpoint}`, cookies });
-        // Then
+
         expect(response.statusCode).toBe(200);
         expect(response.json()).toMatchObject({ source: { kind: 'generated', id: 'set-1' }, userGuesses: { q3: 2 }, set: { title: 'Scale', completed: false } });
         expect(response.body).not.toContain('answer');
@@ -47,16 +47,16 @@ describe('generated-set gameplay HTTP', () => {
   }
 
   test('summary aggregates all three viewer scores when completed', async () => {
-    // Given
+
     const { prisma, reads } = gameplayDatabase();
     reads.guesses.mockResolvedValue(['q3', 'q1', 'q2'].map((questionId) => ({ ...savedGuess, questionId })));
     const { app, cookies } = await gameplayApp(prisma);
     registerHttpErrorHandler(app);
     await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
     try {
-      // When
+
       const response = await app.inject({ url: '/api/question-sets/set-1/summary', cookies });
-      // Then
+
       expect(response.statusCode).toBe(200);
       expect(response.json()).toMatchObject({ completed: true, averageScore: 2, set: { completed: true } });
       expect(response.body).not.toContain('napkinMath');
@@ -64,20 +64,20 @@ describe('generated-set gameplay HTTP', () => {
   });
 
   test('summary withholds the aggregate when only some questions have guesses', async () => {
-    // Given
+
     const { prisma } = gameplayDatabase();
     const { app, cookies } = await gameplayApp(prisma);
     await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
     try {
-      // When
+
       const response = await app.inject({ url: '/api/question-sets/set-1/summary', cookies });
-      // Then
+
       expect(response.json()).toMatchObject({ completed: false, averageScore: null });
     } finally { await app.close(); }
   });
 
   test('summary averages distinct decimal scores in question order when complete', async () => {
-    // Given
+
     const { prisma, reads } = gameplayDatabase();
     reads.guesses.mockResolvedValue([
       { ...savedGuess, questionId: 'q1', score: new Prisma.Decimal('3.5') },
@@ -87,9 +87,9 @@ describe('generated-set gameplay HTTP', () => {
     const { app, cookies } = await gameplayApp(prisma);
     await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
     try {
-      // When
+
       const response = await app.inject({ url: '/api/question-sets/set-1/summary', cookies });
-      // Then
+
       expect(response.json()).toMatchObject({ completed: true, averageScore: 2.25, userGuesses: { q1: 3.5, q2: 1.25, q3: 2 } });
     } finally { await app.close(); }
   });

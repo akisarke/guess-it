@@ -14,7 +14,7 @@ import {
   ScoreDirection,
   getScoreBand,
 } from 'shared';
-import { playChime } from '../lib/sounds';
+import { play } from '../lib/sounds';
 import { formatCompactNumber, formatExactNumber, formatScore } from '../lib/format-number';
 import { parseNapkinMath } from '../napkin-math';
 
@@ -64,8 +64,7 @@ export function Reveal() {
     puzzle && puzzle.questions && puzzle.questions[idx] ? puzzle.questions[idx] : null;
   const score = question && puzzle ? puzzle.userGuesses[question.id] ?? 0 : 0;
   const hasAnswered = question != null && score > 0;
-  // Tagged by question id so stepping to the next reveal never shows the previous
-  // question's answer for a frame while the new fetch is in flight.
+
   const distData = dist !== null && dist.questionId === question?.id ? dist.data : null;
 
   useEffect(() => {
@@ -88,7 +87,7 @@ export function Reveal() {
 
   useEffect(() => {
     if (!loading && hasAnswered) {
-      playChime();
+      play('success');
     }
   }, [loading, hasAnswered]);
 
@@ -100,8 +99,8 @@ export function Reveal() {
         <div className="card w-full max-w-md space-y-4 text-center">
           <span className="chip chip-idle mx-auto">Loading</span>
           <div className="space-y-3">
-            <div className="mx-auto h-8 w-44 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-            <div className="mx-auto h-4 w-56 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+            <div className="mx-auto h-8 w-44 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+            <div className="mx-auto h-4 w-56 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
           </div>
         </div>
       </div>
@@ -113,8 +112,8 @@ export function Reveal() {
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <div className="card w-full max-w-md space-y-3 text-center">
           <span className="chip chip-idle mx-auto">Redirecting</span>
-          <p className="font-display text-2xl font-bold text-hc-ink dark:text-gray-100">Loading reveal</p>
-          <p className="text-sm text-hc-ink/60 dark:text-gray-300">Taking you back to the active question.</p>
+          <p className="font-display text-2xl font-bold text-ink dark:text-gray-100">Loading reveal</p>
+          <p className="text-sm text-ink/60 dark:text-gray-300">Taking you back to the active question.</p>
         </div>
       </div>
     );
@@ -165,11 +164,11 @@ export function Reveal() {
               </div>
               <p className="reveal-copy mt-3">You locked in {guessLabel}. The app scored the guess after the answer was revealed.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric reveal-metric--dark">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Direction</p>
                   <p className="reveal-metric-value">{direction}</p>
                 </div>
-                <div className="reveal-metric reveal-metric--dark">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Score band</p>
                   <p className="reveal-metric-value">{SCORE_BANDS[band].label}</p>
                 </div>
@@ -177,18 +176,18 @@ export function Reveal() {
             </article>
 
             <article className="reveal-panel reveal-panel--answer">
-              <p className="reveal-kicker reveal-kicker--light">Correct answer</p>
+              <p className="reveal-kicker">Correct answer</p>
               <div className="mt-4 flex flex-wrap items-end gap-3">
                  <div className="reveal-value reveal-value--answer" title={answer != null ? formatExactNumber(answer) : undefined}>{answer != null ? formatValue(answer) : '—'}</div>
-                <div className="reveal-unit text-hc-ink/70 dark:text-white/70">{question.unit}</div>
+                <div className="reveal-unit text-ink/70 dark:text-white/70">{question.unit}</div>
               </div>
-              <p className="reveal-copy reveal-copy--light mt-3">The estimated answer is {answerLabel}.</p>
+              <p className="reveal-copy mt-3">The estimated answer is {answerLabel}.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric reveal-metric--light">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Unit</p>
                   <p className="reveal-metric-value">{question.unit}</p>
                 </div>
-                <div className="reveal-metric reveal-metric--light">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Source</p>
                   <p className="reveal-metric-value">{sourceLabel}</p>
                 </div>
@@ -198,34 +197,34 @@ export function Reveal() {
 
           <section className="relative grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-stretch">
             <div className="reveal-divider absolute inset-y-4 left-1/2 w-px -translate-x-1/2" aria-hidden="true" />
-            <article className="reveal-landed reveal-landed--light">
-              <p className="reveal-kicker reveal-kicker--light">Landed</p>
+            <article className="reveal-landed">
+              <p className="reveal-kicker">Landed</p>
               <div className="mt-4 flex flex-wrap items-end gap-3">
                  <div className="reveal-score" title={formatScore(score).exact}>{formatScore(score).visual}</div>
                 <div className="min-w-0 flex-1 pb-1">
-                  <p className="reveal-kicker reveal-kicker--light">Score</p>
-                  <p className="mt-1 text-lg font-bold leading-tight text-hc-ink dark:text-gray-100 sm:text-xl">
+                  <p className="reveal-kicker">Score</p>
+                  <p className="mt-1 text-lg font-bold leading-tight text-ink dark:text-gray-100 sm:text-xl">
                     {rankLine}
                   </p>
                 </div>
               </div>
-              <div className="reveal-note reveal-note--light">
+              <div className="reveal-note">
                 <span>Direction: {direction}</span>
                 <span>Band: {SCORE_BANDS[band].label}</span>
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric reveal-metric--light">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Your guess</p>
                    <p className="reveal-metric-value" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{guessLabel}</p>
                 </div>
-                <div className="reveal-metric reveal-metric--light">
+                <div className="reveal-metric">
                   <p className="reveal-metric-label">Answer</p>
                    <p className="reveal-metric-value" title={answer != null ? formatExactNumber(answer) : undefined}>{answerLabel}</p>
                 </div>
               </div>
             </article>
 
-            <article className="reveal-landed reveal-landed--light">
+            <article className="reveal-landed">
               <DistributionGraph data={distData} userGuess={userGuess} userScoreBand={band} />
             </article>
           </section>

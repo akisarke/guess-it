@@ -203,8 +203,6 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     headers: requestHeaders,
   });
 
-  // Browsers expose an opaque-redirect response (status 0, headers hidden) for a manual
-  // redirect, so a successful verify redirect never satisfies the 3xx status check below.
   if (options?.redirect === 'manual' && res.type === 'opaqueredirect') {
     window.location.assign('/verify-email?verified=1');
     return undefined as T;
@@ -247,7 +245,7 @@ export function resolveApiAssetUrl(path: string | null): string | null {
 }
 
 export const api = {
-  // Auth
+
   loginAnonymous: async (deviceId?: string) => {
     const response = await request<{ user: AuthUser }>('/api/auth/anonymous', {
       method: 'POST',
@@ -309,14 +307,12 @@ export const api = {
 
   getMe: (signal?: AbortSignal) => request<{ user: AuthUser }>('/api/auth/me', signal ? { signal } : undefined),
 
-  // Puzzle
   getTodayPuzzle: (signal?: AbortSignal) => request<PuzzleResponse>('/api/puzzle/today', signal ? { signal } : undefined),
   getPuzzle: (num: number) => request<PuzzleResponse>(`/api/puzzle/${num}`),
   getDistribution: (id: string) => request<DistributionResponse>(`/api/puzzle/${encodeURIComponent(id)}/distribution`),
   getQuestionSetPlay: (id: string) => request<GeneratedGameSourceResponse>(`/api/question-sets/${encodeURIComponent(id)}/play`),
   getQuestionSetSummary: (id: string) => request<GeneratedGameSummaryResponse>(`/api/question-sets/${encodeURIComponent(id)}/summary`),
 
-  // Guess
   submitGuess: async (input: GuessRequest) => {
     const response = await request<GuessResponse>('/api/guess', {
       method: 'POST',
@@ -326,7 +322,6 @@ export const api = {
     return response;
   },
 
-  // Questions
   generateQuestionSet: (input: GenerateQuestionSetRequest): Promise<GenerateQuestionSetResponse> =>
     request<GenerateQuestionSetResponse>('/api/questions/generate', {
       method: 'POST',
@@ -335,11 +330,9 @@ export const api = {
 
   getQuestion: (id: string) => request<any>(`/api/questions/${id}`),
 
-  // Leaderboard
   getLeaderboard: (scope: string = 'daily', friends: boolean = false) =>
     request<LeaderboardEntry[]>(`/api/leaderboard?scope=${scope}&friends=${friends}`),
 
-  // Friends
   getFriends: () => request<FriendsResponse>('/api/friends'),
   sendFriendRequest: (displayName: string) =>
     request<{ success: boolean }>('/api/friends', {
@@ -351,7 +344,6 @@ export const api = {
   removeFriend: (requestId: string) =>
     request<{ success: boolean }>(`/api/friends/${encodeURIComponent(requestId)}`, { method: 'DELETE' }),
 
-  // Users
   getProfile: (id: string) => request<ProfileResponse>(`/api/users/${encodeURIComponent(id)}/profile`),
   getProfileByHandle: (handle: string) => request<ProfileResponse>(`/api/users/handle/${encodeURIComponent(handle)}/profile`),
   getMyProfile: (signal?: AbortSignal) => request<ProfileResponse>('/api/users/me/profile', signal ? { signal } : undefined),
@@ -373,7 +365,6 @@ export const api = {
     window.location.href = `${API_URL}/api/auth/hackclub/start?mode=link`;
   },
 
-  // Badges
   getBadges: () => request<any>('/api/badges'),
   pinBadge: (badgeId: string, pin: boolean) =>
     request<any>(`/api/badges/${badgeId}/pin`, {
@@ -381,7 +372,6 @@ export const api = {
       body: JSON.stringify({ pin }),
     }),
 
-  // Matchmaking
   joinQueue: (puzzleId?: string, questionId?: string) =>
     request<QueueResult>('/api/queue/join', {
       method: 'POST',
@@ -405,7 +395,6 @@ export const api = {
   markNotificationRead: (id: string) => request('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'POST' }),
   markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'POST' }),
 
-  // Admin
   adminSearchUsers: (search: string) =>
     request<any>(`/api/admin/users?search=${encodeURIComponent(search)}`),
   adminGetBadges: () => request<{ badges: AdminBadge[] }>('/api/admin/badges'),

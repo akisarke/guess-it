@@ -7,7 +7,7 @@ describe('GeneratedSetsDisclosure', () => {
   it('shows an empty state when the profile has no generated sets', () => {
     render(<MemoryRouter><GeneratedSetsDisclosure sets={[]} /></MemoryRouter>);
 
-    expect(screen.getByRole('heading', { name: 'Question sets made with AI' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Question sets you made' })).toBeVisible();
     expect(screen.getByText(/No generated sets yet/i)).toBeVisible();
   });
 

@@ -43,7 +43,7 @@ export function GeneratedSetSummary() {
             return (
               <li key={question.id} className="reveal-metric">
                 <Link to={`${prefix}/${score ? 'reveal' : 'play'}/${index}`} className="block space-y-2" aria-label={`${score ? 'View result for' : 'Play'} question ${index + 1}`}>
-                  <p className="font-semibold break-words">{index + 1}. {question.prompt}</p>
+                  <p className="font-bold break-words">{index + 1}. {question.prompt}</p>
                   <p>{score ? `${score}×` : 'Not played'} · {question.unit}</p>
                 </Link>
               </li>

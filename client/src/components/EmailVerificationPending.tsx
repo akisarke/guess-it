@@ -24,12 +24,12 @@ export function EmailVerificationPending({ email }: { readonly email?: string | 
   };
 
   return <div className="space-y-5 text-center">
-    <div className="space-y-2"><span className="chip chip-idle mx-auto">Check your inbox</span><h1 className="font-display text-3xl font-extrabold text-hc-ink dark:text-gray-100 sm:text-4xl">Verify your email</h1><p className="text-sm leading-6 text-hc-ink/65 dark:text-gray-300">Your account is ready, but you need to verify your email before continuing.</p></div>
+    <div className="space-y-2"><span className="chip chip-idle mx-auto">Check your inbox</span><h1 className="font-display text-3xl font-extrabold text-ink dark:text-gray-100 sm:text-4xl">Verify your email</h1><p className="text-sm leading-6 text-ink/65 dark:text-gray-300">Your account is ready, but you need to verify your email before continuing.</p></div>
     <form className="space-y-3 text-left" onSubmit={submit} noValidate>
-      <label htmlFor="verification-email" className="text-sm font-semibold text-hc-ink dark:text-gray-100">Email address</label>
+      <label htmlFor="verification-email" className="text-sm font-bold text-ink dark:text-gray-100">Email address</label>
       <span className="auth-field"><Mail size={18} className="auth-field-icon" aria-hidden="true" /><input id="verification-email" className="w-full" type="email" value={address} onChange={(event) => setAddress(event.target.value)} autoComplete="email" required /></span>
-      {message && <p className="rounded-2xl border-2 border-hc-mint/40 bg-hc-mint/20 px-4 py-3 text-sm font-semibold leading-6" role="status">{message}</p>}
-      {error && <p className="rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-sm font-semibold leading-6" role="alert">{error}</p>}
+      {message && <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6" role="status">{message}</p>}
+      {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p>}
       <button className="btn-primary w-full" type="submit" disabled={loading || !address.trim()}>{loading ? 'Sending…' : 'Resend verification email'}</button>
     </form>
   </div>;

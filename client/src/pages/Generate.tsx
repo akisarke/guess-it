@@ -55,19 +55,19 @@ export function Generate() {
 
         <div className="space-y-4 mb-6">
           <div>
-            <label htmlFor="generate-topic" className="block text-sm font-semibold text-hc-ink/70 dark:text-gray-300 mb-2">Topic</label>
+            <label htmlFor="generate-topic" className="block text-sm font-bold text-ink/70 dark:text-gray-300 mb-2">Topic</label>
             <input
               id="generate-topic"
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g., space exploration, food, technology"
-              className="w-full px-4 py-3 rounded-2xl border-2 border-hc-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-hc-violet/30 focus:border-hc-violet bg-white dark:bg-gray-800"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent bg-white dark:bg-[var(--surface-2)]"
             />
           </div>
 
           <div>
-            <label htmlFor="generate-difficulty" className="block text-sm font-semibold text-hc-ink/70 dark:text-gray-300 mb-2">
+            <label htmlFor="generate-difficulty" className="block text-sm font-bold text-ink/70 dark:text-gray-300 mb-2">
               Difficulty (optional)
             </label>
             <select
@@ -78,7 +78,7 @@ export function Generate() {
                 if (value === 'easy' || value === 'medium' || value === 'hard') setDifficulty(value);
                 else setDifficulty('');
               }}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-hc-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-hc-violet/30 focus:border-hc-violet bg-white dark:bg-gray-800"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent bg-white dark:bg-[var(--surface-2)]"
             >
               <option value="">Any</option>
               <option value="easy">Easy</option>
@@ -95,7 +95,7 @@ export function Generate() {
           </p>
         )}
 
-        <p className="text-sm font-semibold text-hc-ink/60 dark:text-gray-300 mb-4" role="status" aria-live="polite">
+        <p className="text-sm font-bold text-ink/60 dark:text-gray-300 mb-4" role="status" aria-live="polite">
           {remainingGenerations === 0 ? 'No attempts remaining today' : `${remainingGenerations} attempt${remainingGenerations === 1 ? '' : 's'} remaining today`}
         </p>
 
@@ -111,10 +111,10 @@ export function Generate() {
           <section className="mt-6 space-y-4" aria-label="Generated question previews">
             <GeneratedSetContext set={generatedSet.set} />
             {generatedSet.questions.map((preview, index) => (
-              <article key={preview.id} className="p-5 rounded-2xl bg-white/70 dark:bg-white/5 border-2 border-hc-ink/5 dark:border-white/10">
+              <article key={preview.id} className="p-5 rounded-2xl bg-white/70 dark:bg-[var(--surface)] border-2 border-ink/5 dark:border-white/10">
                 <h2 className="font-display text-xl font-extrabold mb-2">Question {index + 1}</h2>
-                <p className="font-semibold mb-2">{preview.prompt}</p>
-                <p className="text-sm font-medium text-hc-ink/60 dark:text-gray-400">Unit: {preview.unit}</p>
+                <p className="font-bold mb-2">{preview.prompt}</p>
+                <p className="text-sm font-medium text-ink/60 dark:text-gray-400">Unit: {preview.unit}</p>
               </article>
             ))}
             <Link

@@ -2,8 +2,6 @@ import type { ComponentType } from 'react';
 
 type IconProps = { size?: string | number; className?: string; 'aria-hidden'?: boolean | 'true' | 'false' };
 
-// Heroicons v2 outline icons (24px, stroke-width 1.5) inlined as path data so
-// achievements render without an extra icon dependency.
 function heroIcon(...paths: string[]): ComponentType<IconProps> {
   return function HeroIcon({ size = 24, className, ...rest }) {
     return (

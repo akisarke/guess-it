@@ -46,7 +46,7 @@ describe('Profile', () => {
   });
 
   it('loads a public profile by canonical display name handle', async () => {
-    // Given: the canonical handle profile request returns Ada's public profile.
+
     vi.spyOn(api, 'getProfileByHandle').mockResolvedValue({
       user: {
         id: 'ada',
@@ -67,7 +67,6 @@ describe('Profile', () => {
       generatedSets: [],
     });
 
-    // When: the canonical handle route is rendered.
     render(
       <MemoryRouter initialEntries={['/u/Ada']}>
         <Routes>
@@ -76,17 +75,15 @@ describe('Profile', () => {
       </MemoryRouter>,
     );
 
-    // Then: the handle API is called and Ada's profile is rendered.
     await waitFor(() => expect(api.getProfileByHandle).toHaveBeenCalledWith('Ada'));
     expect(await screen.findByRole('heading', { name: 'Ada' })).toBeInTheDocument();
     expect(screen.getByText('Loves puzzles')).toBeInTheDocument();
   });
 
   it('renders account actions for an unauthenticated own profile', async () => {
-    // Given: the authenticated profile request returns the API's 401 error.
+
     vi.spyOn(api, 'getMyProfile').mockRejectedValue(new ApiError(401, 'Not authenticated'));
 
-    // When: the own profile route is rendered.
     render(
       <MemoryRouter initialEntries={['/profile']}>
         <Routes>
@@ -95,17 +92,32 @@ describe('Profile', () => {
       </MemoryRouter>,
     );
 
-    // Then: the signed-out CTA replaces the retry-only error state.
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Not Logged In' })).toBeInTheDocument());
     expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', '/login');
     expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
   });
 
+  it('asks an anonymous session to sign up instead of showing a raw error', async () => {
+    vi.spyOn(api, 'getMyProfile').mockRejectedValue(new ApiError(403, 'Create an account to use this feature.'));
+
+    render(
+      <MemoryRouter initialEntries={['/profile']}>
+        <Routes>
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Not Logged In' })).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /log in/i })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('link', { name: /create account/i })).toHaveAttribute('href', '/signup');
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
+  });
+
   it('keeps a public profile not-found error distinct from signed-out state', async () => {
-    // Given: the requested public profile does not exist.
+
     vi.spyOn(api, 'getProfile').mockRejectedValue(new ApiError(404, 'User not found'));
 
-    // When: a public profile route is rendered.
     render(
       <MemoryRouter initialEntries={['/profile/missing-user']}>
         <Routes>
@@ -114,17 +126,15 @@ describe('Profile', () => {
       </MemoryRouter>,
     );
 
-    // Then: the not-found message remains a retryable profile error without account CTAs.
     await waitFor(() => expect(screen.getByText('User not found')).toBeInTheDocument());
     expect(screen.queryByRole('heading', { name: 'Not Logged In' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 
   it('keeps a server error distinct from signed-out state', async () => {
-    // Given: the profile service returns a server error.
+
     vi.spyOn(api, 'getMyProfile').mockRejectedValue(new ApiError(500, 'Profile service unavailable'));
 
-    // When: the own profile route is rendered.
     render(
       <MemoryRouter initialEntries={['/profile']}>
         <Routes>
@@ -133,7 +143,6 @@ describe('Profile', () => {
       </MemoryRouter>,
     );
 
-    // Then: the server message and retry action remain visible.
     await waitFor(() => expect(screen.getByText('Profile service unavailable')).toBeInTheDocument());
     expect(screen.queryByRole('heading', { name: 'Not Logged In' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();

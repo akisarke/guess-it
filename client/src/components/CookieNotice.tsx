@@ -18,9 +18,9 @@ export function CookieNotice() {
   };
 
   return (
-    <aside className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-2xl border-2 border-hc-ink/10 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-gray-900" role="status">
-      <p className="text-sm leading-6 text-hc-ink/70 dark:text-gray-200">
-        Guess It! uses essential cookies for sessions and security. <Link to="/cookies" className="font-bold text-hc-violet underline">Cookie policy</Link>
+    <aside className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md rounded-2xl border-2 border-ink/10 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-gray-900" role="status">
+      <p className="text-sm leading-6 text-ink/70 dark:text-gray-200">
+        Guess It! uses essential cookies for sessions and security. <Link to="/cookies" className="font-bold text-accent underline">Cookie policy</Link>
       </p>
       <button type="button" className="btn-primary mt-3 w-full" onClick={dismiss}>Got it</button>
     </aside>

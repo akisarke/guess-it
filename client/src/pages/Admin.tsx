@@ -76,7 +76,7 @@ export function Admin() {
         <h1 className="font-display text-3xl font-extrabold mb-6">Admin Panel</h1>
 
          {isDeveloper === false && (
-            <p className="mb-4 rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-sm font-medium text-hc-ink dark:text-pink-100" role="alert">
+            <p className="mb-4 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-medium text-ink dark:text-gray-100" role="alert">
              You do not have owner access.
            </p>
          )}
@@ -88,14 +88,14 @@ export function Admin() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Search users..."
-            className="flex-1 px-4 py-2 rounded-2xl border-2 border-hc-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-hc-violet/30 focus:border-hc-violet bg-white dark:bg-gray-800"
+            className="flex-1 px-4 py-2 rounded-2xl border-2 border-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent bg-white dark:bg-[var(--surface-2)]"
           />
           <button onClick={handleSearch} disabled={loading} className="btn-primary">
             Search
           </button>
         </div>
 
-         {message && <p className={`mb-4 rounded-2xl border-2 px-4 py-3 text-sm font-semibold text-hc-ink dark:text-gray-100 ${messageKind === 'error' ? 'border-hc-pink/30 bg-hc-pink/10 dark:text-pink-100' : 'border-hc-mint/30 bg-hc-mint/10'}`} role={messageKind === 'error' ? 'alert' : 'status'} aria-live="polite">{message}</p>}
+         {message && <p className={`mb-4 rounded-2xl border-2 px-4 py-3 text-sm font-bold text-ink dark:text-gray-100 ${messageKind === 'error' ? 'border-brand/30 bg-brand/10 dark:text-gray-100' : 'border-accent/30 bg-accent/10'}`} role={messageKind === 'error' ? 'alert' : 'status'} aria-live="polite">{message}</p>}
 
          {(users.length > 0 || (hasSearched && !loading)) && (
            <div className="space-y-2 mb-6">
@@ -105,35 +105,35 @@ export function Admin() {
                 type="button"
                 onClick={() => setSelectedUser(user)}
                 aria-pressed={selectedUser?.id === user.id}
-                className={`block w-full p-3 text-left rounded-2xl cursor-pointer transition-colors focus:outline-none focus:ring-4 focus:ring-hc-violet/30 ${
+                className={`block w-full p-3 text-left rounded-2xl cursor-pointer transition-colors focus:outline-none focus:ring-4 focus:ring-accent/60 ${
                   selectedUser?.id === user.id
-                    ? 'bg-hc-violet/15 dark:bg-white/15 border-2 border-hc-violet'
-                    : 'bg-white/70 dark:bg-white/5 border-2 border-hc-ink/5 dark:border-white/10 hover:border-hc-violet/40'
+                    ? 'bg-accent text-accent-ink border-2 border-accent'
+                    : 'bg-white/70 dark:bg-[var(--surface)] border-2 border-ink/5 dark:border-white/10 hover:border-accent/40'
                 }`}
               >
-                <span className="font-semibold">{user.displayName}</span>
+                <span className="font-bold">{user.displayName}</span>
                  {user.isOwner && (
-                  <span className="ml-2 text-xs text-white px-2 py-0.5 rounded-full bg-gradient-to-r from-hc-violet to-hc-blue">
+                  <span className="ml-2 rounded-md bg-accent px-2 py-0.5 text-xs text-accent-ink">
                      OWNER
                   </span>
                 )}
               </button>
             ))}
              {users.length === 0 && !loading && (
-               <p className="text-center text-hc-ink/50 dark:text-gray-400">No users found</p>
+               <p className="text-center text-ink/50 dark:text-gray-400">No users found</p>
              )}
           </div>
         )}
 
         {selectedUser && (
-          <div className="border-t border-hc-ink/10 dark:border-white/10 pt-4">
+          <div className="border-t border-ink/10 dark:border-white/10 pt-4">
              <h3 className="font-display font-bold mb-2">Grant a badge to {selectedUser.displayName}</h3>
-             <label className="mb-4 block space-y-2"><span className="text-sm font-semibold">Badge</span><select value={badgeId} onChange={(event) => setBadgeId(event.target.value)} className="w-full rounded-2xl border-2 border-hc-ink/10 bg-white px-4 py-2 dark:border-white/15 dark:bg-gray-800">{badges.map((badge) => <option key={badge.id} value={badge.id}>{badge.name}{badge.isSecret ? ' (secret)' : ''}</option>)}</select></label>
+             <label className="mb-4 block space-y-2"><span className="text-sm font-bold">Badge</span><select value={badgeId} onChange={(event) => setBadgeId(event.target.value)} className="w-full rounded-2xl border-2 border-ink/10 bg-white px-4 py-2 dark:border-white/15 dark:bg-[var(--surface-2)]">{badges.map((badge) => <option key={badge.id} value={badge.id}>{badge.name}{badge.isSecret ? ' (secret)' : ''}</option>)}</select></label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Optional note..."
-              className="w-full px-4 py-2 rounded-2xl border-2 border-hc-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-hc-violet/30 focus:border-hc-violet bg-white dark:bg-gray-800 mb-4"
+              className="w-full px-4 py-2 rounded-2xl border-2 border-ink/10 dark:border-white/15 focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent bg-white dark:bg-[var(--surface-2)] mb-4"
               rows={3}
             />
             <button onClick={handleGrant} disabled={loading} className="btn-primary w-full">

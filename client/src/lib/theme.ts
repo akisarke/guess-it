@@ -11,7 +11,6 @@ export function getStoredTheme(): Theme | null {
   }
 }
 
-/** Theme to use on first paint: stored choice, otherwise dark. */
 export function initialTheme(): Theme {
   return getStoredTheme() ?? 'dark';
 }
@@ -22,6 +21,6 @@ export function applyTheme(theme: Theme) {
   try {
     localStorage.setItem(STORAGE_KEY, theme);
   } catch {
-    // private mode etc. — theme just won't persist
+
   }
 }

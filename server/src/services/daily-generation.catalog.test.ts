@@ -22,8 +22,7 @@ function makeStore(eligibleIds: readonly string[]) {
   const unused = new Set(eligibleIds);
   const question = {
     findMany: vi.fn(async (args: { where?: { source?: string } }) => {
-      // question.findMany is called both by the eligibility probe (source: 'daily')
-      // and by the prompt de-duplication read.
+
       if (args.where?.source === 'daily') {
         return [...unused].map((id) => ({ id, prompt: `Prompt ${id}` }));
       }
@@ -64,7 +63,7 @@ describe('ensureCatalogDepth', () => {
     expect(report.eligibleBefore).toBe(2);
     expect(ai.generateQuestion).toHaveBeenCalled();
     expect(question.create).toHaveBeenCalled();
-    // Catalog rows must satisfy the same schema the seeded catalog uses.
+
     const created = (question.create as unknown as { mock: { calls: [{ data: Record<string, unknown> }][] } }).mock.calls[0]?.[0].data;
     expect(created?.source).toBe('daily');
     expect(String(created?.sourceUrl)).toMatch(/^https:/);
@@ -91,7 +90,6 @@ describe('ensureCatalogDepth', () => {
 
     const report = await ensureCatalogDepth(prisma, config);
 
-    // One insert at most: every later candidate duplicates the first.
     expect(report.added).toBe(1);
   });
 });

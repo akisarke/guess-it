@@ -43,11 +43,6 @@ export function validateCatalogQuestion(input: unknown): CatalogQuestionInput {
 
 type EligibleCatalogQuestion = { id: string; prompt?: string | null };
 
-/**
- * Catalog questions not yet consumed by any daily puzzle, de-duplicated by prompt.
- * A question is burned permanently once used, so this number only goes down unless
- * the catalog is topped up.
- */
 async function loadEligibleCatalogQuestions(
   prisma: CatalogQuestionStore,
   now: Date,
@@ -57,7 +52,7 @@ async function loadEligibleCatalogQuestions(
     orderBy: { id: 'asc' },
     select: { id: true, prompt: true },
   });
-  // Fetch today's already-selected questionIds from the dailyPuzzle table.
+
   const todayPuzzles = await prisma.dailyPuzzle.findMany({ where: { puzzleDate: new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) } });
   const todaySelectedIds = new Set(todayPuzzles.flatMap((p) => p.questionIds ?? []));
   const previousPuzzles = await prisma.dailyPuzzle.findMany({ select: { questionIds: true }, orderBy: { puzzleDate: 'desc' } });
@@ -81,9 +76,35 @@ async function loadEligibleCatalogQuestions(
   });
 }
 
-/** How many catalog questions remain eligible for future daily puzzles. */
 export async function countEligibleCatalogQuestions(prisma: CatalogQuestionStore, now: Date): Promise<number> {
   return (await loadEligibleCatalogQuestions(prisma, now)).length;
+}
+
+function seedOffset(seed: string, length: number): number {
+  let hash = 2166136261;
+  for (let index = 0; index < seed.length; index++) {
+    hash ^= seed.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return Math.abs(hash) % length;
+}
+
+export async function selectDuelCatalogQuestions(
+  prisma: CatalogQuestionStore,
+  now: Date,
+  seed: string,
+  exclude: readonly string[] = [],
+): Promise<readonly [string, string, string]> {
+  const excluded = new Set(exclude);
+  const pool = (await loadEligibleCatalogQuestions(prisma, now)).filter(({ id }) => !excluded.has(id));
+  if (pool.length < 3) throw new CatalogQuestionError();
+
+  const questionIds = pool.map(({ id }) => id).sort();
+  const offset = seedOffset(seed, questionIds.length);
+  const rotated = [...questionIds.slice(offset), ...questionIds.slice(0, offset)];
+  const [first, second, third] = rotated.slice(0, 3);
+  if (!first || !second || !third) throw new CatalogQuestionError();
+  return [first, second, third];
 }
 
 export async function selectDailyCatalogQuestions(prisma: CatalogQuestionStore, now: Date): Promise<readonly [string, string, string]> {

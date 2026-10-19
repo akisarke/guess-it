@@ -1,5 +1,6 @@
 import type { DailyPuzzle, Duel, MatchmakingQueueEntry, Prisma, PrismaClient } from '@prisma/client';
 import { getTodayPuzzle } from './daily-puzzle.js';
+import { selectDuelCatalogQuestions } from './question-catalog.js';
 import { ExternalServiceError } from '../errors/application-error.js';
 
 const QUEUE_LIFETIME_MS = 5 * 60 * 1000;
@@ -23,7 +24,7 @@ type QueueResult = {
 const idle: QueueResult = { status: 'idle', entryId: null, match: null, isNewMatch: false };
 
 async function lockQueue(tx: Prisma.TransactionClient) {
-  // Serialize queue operations across requests and server instances.
+
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(71628394)`;
   await tx.matchmakingQueueEntry.updateMany({
     where: { status: 'waiting', queuedAt: { lt: new Date(Date.now() - QUEUE_LIFETIME_MS) } },
@@ -36,11 +37,13 @@ async function matchDetails(tx: Prisma.TransactionClient, match: Duel, userId: s
   const opponent = await tx.user.findUniqueOrThrow({
     where: { id: opponentId }, select: { id: true, displayName: true },
   });
-  const puzzle = await tx.dailyPuzzle.findUniqueOrThrow({ where: { id: match.sourceId } });
+
+  const dailyQuestionIds = (await tx.dailyPuzzle.findUnique({ where: { id: match.sourceId }, select: { questionIds: true } }))?.questionIds ?? [];
+  const questionIds = await selectDuelCatalogQuestions(tx, new Date(), match.id, dailyQuestionIds);
   const guesses = await tx.guess.findMany({
-    where: { userId: opponentId, questionId: { in: puzzle.questionIds } }, select: { score: true },
+    where: { userId: opponentId, questionId: { in: [...questionIds] } }, select: { score: true },
   });
-  const completed = puzzle.questionIds.length > 0 && guesses.length === puzzle.questionIds.length;
+  const completed = guesses.length === questionIds.length;
   return { ...match, opponent: {
     ...opponent, completed,
     score: completed ? guesses.reduce((sum, guess) => sum + Number(guess.score), 0) / guesses.length : null,
@@ -102,7 +105,7 @@ export async function joinQueue(prisma: PrismaClient, userId: string): Promise<Q
     const previousEntry = await tx.matchmakingQueueEntry.findFirst({
       where: { userId }, orderBy: { queuedAt: 'desc' },
     });
-    // Retried joins while searching keep their place; joining after a match starts a fresh search.
+
     if (previousEntry?.status === 'waiting' && previousEntry.questionId === null) {
       return findMatch(tx, userId, puzzle);
     }

@@ -9,10 +9,6 @@ interface ErrorBoundaryState {
   readonly failed: boolean;
 }
 
-/**
- * Keeps a render-time crash (for example a malformed API payload) inside one
- * recoverable state card instead of blanking the whole routed area.
- */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { failed: false };
 

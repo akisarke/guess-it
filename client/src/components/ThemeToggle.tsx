@@ -17,9 +17,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
+      data-sound="toggle"
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-hc-ink/70 transition-colors hover:bg-hc-ink/5 hover:text-hc-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-hc-violet/40 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
     >
       {theme === 'dark' ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

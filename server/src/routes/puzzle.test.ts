@@ -4,16 +4,16 @@ import { puzzleRoutes } from './puzzle.js';
 import { registerHttpErrorHandler } from '../errors/http-error-handler.js';
 
 test.each(['/today', '/42'])('preserves daily gameplay fields and adds canonical source metadata at %s', async (url) => {
-  // Given
+
   const { prisma } = gameplayDatabase();
   vi.spyOn(prisma.dailyPuzzle, 'findFirst').mockResolvedValue(puzzle);
   const { app, cookies } = await gameplayApp(prisma);
   registerHttpErrorHandler(app);
   await app.register(puzzleRoutes);
   try {
-    // When
+
     const response = await app.inject({ url, cookies });
-    // Then
+
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       source: { kind: 'daily', id: 'daily-uuid' },
@@ -25,16 +25,16 @@ test.each(['/today', '/42'])('preserves daily gameplay fields and adds canonical
 });
 
 test('keeps the registered archive ordered and answer-free', async () => {
-  // Given
+
   const { prisma } = gameplayDatabase();
   vi.spyOn(prisma.dailyPuzzle, 'findMany').mockResolvedValue([puzzle]);
   const { app, cookies } = await gameplayApp(prisma);
   registerHttpErrorHandler(app);
   await app.register(puzzleRoutes);
   try {
-    // When
+
     const response = await app.inject({ url: '/archive', cookies });
-    // Then
+
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({ hasMore: false, puzzles: [{ puzzleNumber: 42, questions: [{ id: 'q2' }, { id: 'q3' }, { id: 'q1' }] }] });
     expect(response.body).not.toContain('answer');

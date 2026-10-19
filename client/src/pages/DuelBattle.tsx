@@ -74,18 +74,26 @@ export function DuelBattle() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-12">
-      <div className="card space-y-6 overflow-hidden sm:p-8">
-         <DuelHeader snapshot={snapshot} remainingMs={snapshot.roundDeadline ? Math.max(0, new Date(snapshot.roundDeadline).getTime() - now) : null} />
-        <DuelPlayerRail players={snapshot.players} />
-        {question && snapshot.phase === 'question' && <DuelQuestionCard question={question} value={value} disabled={!canSubmit} onChange={setValue} onSubmit={submit} />}
-        {snapshot.phase !== 'question' && <DuelReveal snapshot={snapshot} />}
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-hc-ink/45 dark:text-gray-400" role="status">{connected ? 'Live connection' : 'Reconnecting'}</p>
-      </div>
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 sm:py-12">
+      <DuelHeader
+        snapshot={snapshot}
+        remainingMs={snapshot.roundDeadline ? Math.max(0, new Date(snapshot.roundDeadline).getTime() - now) : null}
+      />
+      <DuelPlayerRail players={snapshot.players} />
+      {question && snapshot.phase === 'question' && (
+        <DuelQuestionCard question={question} value={value} disabled={!canSubmit} onChange={setValue} onSubmit={submit} />
+      )}
+      {snapshot.phase !== 'question' && <DuelReveal snapshot={snapshot} />}
+      <p
+        className="text-center text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-60"
+        role="status"
+      >
+        {connected ? 'Live connection' : 'Reconnecting'}
+      </p>
     </div>
   );
 }
 
 function DuelState({ title, description, children }: { readonly title: string; readonly description: string; readonly children?: React.ReactNode }) {
-  return <div className="mx-auto max-w-lg px-4 py-12"><div className="card space-y-4 text-center"><span className="chip chip-idle mx-auto">Duel</span><h1 className="font-display text-3xl font-extrabold">{title}</h1><p className="text-sm leading-6 text-hc-ink/65 dark:text-gray-300">{description}</p>{children}</div></div>;
+  return <div className="mx-auto max-w-lg px-4 py-12"><div className="card space-y-4 text-center"><span className="chip chip-idle mx-auto">Duel</span><h1 className="font-display text-3xl font-extrabold">{title}</h1><p className="text-sm leading-6 text-ink/65 dark:text-gray-300">{description}</p>{children}</div></div>;
 }

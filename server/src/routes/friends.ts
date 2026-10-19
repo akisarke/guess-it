@@ -102,7 +102,7 @@ export async function friendRoutes(app: FastifyInstance) {
     if (!row) throw new NotFoundError('Friend request not found.');
     const isParty = row.senderId === userId || row.receiverId === userId;
     if (!isParty) throw new NotFoundError('Friend request not found.');
-    // pending: sender cancels, receiver declines; accepted: either side unfriends
+
     await prisma.friendRequest.delete({ where: { id } });
     return { success: true };
   });

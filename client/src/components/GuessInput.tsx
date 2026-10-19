@@ -40,9 +40,9 @@ export function GuessInput({ unit, value, onChange, onSubmit, disabled }: GuessI
           disabled={disabled}
           placeholder="0"
           aria-label={`Guess in ${unit}`}
-          className="input-pill pr-24 text-3xl sm:pr-28 sm:text-4xl md:text-5xl"
+          className="input-field pr-24 text-3xl sm:pr-28 sm:text-4xl md:text-5xl"
         />
-        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-lg font-semibold text-hc-ink/50 dark:text-gray-400 sm:right-7 sm:text-xl">
+        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-lg font-bold text-ink/50 dark:text-gray-400 sm:right-7 sm:text-xl">
           {unit}
         </span>
       </div>

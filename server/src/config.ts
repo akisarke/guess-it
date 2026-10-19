@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ConfigurationError } from './errors/application-error.js';
 
-// Anchor CWD-relative defaults to the server package root so avatars survive starting the server from a different directory.
 const serverRoot = fileURLToPath(new URL('../..', import.meta.url));
 
 const environmentSchema = z.enum(['development', 'test', 'production']);
@@ -44,7 +43,7 @@ type Environment = ServerConfig['environment'];
 
 export type ServerConfig = Readonly<{
   environment: 'development' | 'test' | 'production';
-  /** Set when a trusted reverse proxy terminates TLS and forwards plain HTTP. */
+
   tlsTerminatedByProxy: boolean;
   databaseUrl: string;
   testDatabaseUrl?: string;

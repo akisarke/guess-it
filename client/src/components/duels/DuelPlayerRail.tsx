@@ -3,24 +3,54 @@ import { formatScore } from '../../lib/format-number';
 import { Link } from 'react-router-dom';
 import { ProfileAvatar } from '../ProfileAvatar';
 
+const STATE_LABELS: Record<string, string> = {
+  waiting: 'Waiting',
+  answer_locked: 'Locked in',
+  timed_out: 'Timed out',
+};
+
 export function DuelPlayerRail({ players }: { readonly players: readonly [DuelPlayerView, DuelPlayerView] }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-2" aria-label="Duel players">
-      {players.map((player) => (
-        <article key={player.playerId} className="rounded-2xl border-2 border-hc-ink/10 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
-          <div className="flex items-center justify-between gap-3">
+    <section
+      aria-label="Duel players"
+      className="grid grid-cols-2 divide-x divide-[var(--line)] border-y border-[var(--line)]"
+    >
+      {players.map((player) => {
+        const score = formatScore(player.score);
+        return (
+          <article
+            key={player.playerId}
+            className="px-4 py-5 first:pl-0 last:pr-0 sm:px-8 sm:first:pl-0"
+          >
             <div className="flex min-w-0 items-center gap-3">
-              <ProfileAvatar src={player.avatarUrl} alt={`${player.displayName}'s profile picture`} />
+              <ProfileAvatar src={player.avatarUrl} alt="" />
               <div className="min-w-0">
-                <Link to={`/u/${encodeURIComponent(player.displayName)}`} className="block truncate font-bold text-hc-ink underline-offset-2 hover:underline dark:text-gray-100">{player.displayName}</Link>
-                {player.bio && <p className="truncate text-xs text-hc-ink/60 dark:text-gray-400">{player.bio}</p>}
+                <Link
+                  to={`/u/${encodeURIComponent(player.displayName)}`}
+                  className="block truncate font-bold text-ink underline-offset-2 hover:underline dark:text-gray-100"
+                >
+                  {player.displayName}
+                </Link>
               </div>
             </div>
-            <span className="text-right text-xs font-bold uppercase tracking-[0.14em] text-hc-ink/50 dark:text-gray-400">{player.state.replace('_', ' ')}</span>
-          </div>
-          {(() => { const score = formatScore(player.score); return <p className="mt-2 font-display text-3xl font-extrabold text-hc-violet dark:text-hc-yellow" aria-label={`Score ${score.exact}`} title={score.exact}>{score.visual}</p>; })()}
-        </article>
-      ))}
+
+            {
+
+}
+            <p
+              className="mt-4 font-display text-3xl font-extrabold leading-none tabular-nums text-ink dark:text-gray-100"
+              aria-label={`Score ${score.exact}`}
+              title={score.exact}
+            >
+              {score.visual}
+            </p>
+
+            <p className="mt-2 text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-60">
+              {STATE_LABELS[player.state] ?? player.state.replace(/_/g, ' ')}
+            </p>
+          </article>
+        );
+      })}
     </section>
   );
 }

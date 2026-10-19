@@ -10,9 +10,9 @@ interface ShareCardProps {
 }
 
 function band(score: number): string {
-  if (score <= 1.5) return '#22c55e';
-  if (score <= 3.0) return '#eab308';
-  return '#ef4444';
+  if (score <= 1.5) return '#f4d53b';
+  if (score <= 3.0) return '#8d877e';
+  return '#ec3750';
 }
 
 export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
@@ -28,13 +28,13 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
     canvas.width = 600;
     canvas.height = 400;
 
-    ctx.fillStyle = '#fdf8f0';
+    ctx.fillStyle = '#191817';
     ctx.fillRect(0, 0, 600, 400);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
 
-    ctx.fillStyle = '#1f2937';
+    ctx.fillStyle = '#ede9e0';
     ctx.font = `bold 32px ${SYSTEM_FONT}`;
     ctx.fillText(`Guess It! #${puzzleNumber}`, 300, 60);
 
@@ -47,12 +47,12 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
        ctx.fillText(`Q${i + 1}: ${formatScore(score).visual}`, 300, 120 + i * 40);
     });
 
-    ctx.fillStyle = '#1f2937';
+    ctx.fillStyle = '#ede9e0';
     ctx.font = `bold 28px ${SYSTEM_FONT}`;
      const avgText = answered.length > 0 ? `Average: ${formatScore(average).visual}` : 'Average: —';
     ctx.fillText(avgText, 300, 180 + Math.max(rows, 1) * 40 + 40);
 
-    ctx.fillStyle = '#9ca3af';
+    ctx.fillStyle = '#8d877e';
     ctx.font = `16px ${SYSTEM_FONT}`;
     ctx.fillText('guessit.game', 300, 368);
 
@@ -104,8 +104,8 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
     <div className="space-y-3">
       <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
       <div>
-        <p className="text-sm font-semibold text-hc-ink dark:text-gray-100">Share this result</p>
-        <p className="mt-1 text-xs text-hc-ink/50 dark:text-gray-400">
+        <p className="text-sm font-bold text-ink dark:text-gray-100">Share this result</p>
+        <p className="mt-1 text-xs text-ink/50 dark:text-gray-400">
           Creates a shareable result card with the same score colors.
         </p>
       </div>

@@ -69,11 +69,8 @@ describe('profile projections', () => {
   test('public profile lookup by handle uses the public projection', async () => {
     const { app, cookies } = await makeApp();
 
-    // Given: a user with the exact requested display name exists
-    // When: the public profile is requested by handle
     const response = await app.inject({ method: 'GET', url: '/users/handle/Ada/profile', cookies });
 
-    // Then: the handle query and public response shape are preserved
     expect(response.statusCode).toBe(200);
     expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
       where: { displayName: 'Ada' },
@@ -92,11 +89,8 @@ describe('profile projections', () => {
   test('public profile lookup by unknown handle returns 404', async () => {
     const { app, cookies } = await makeApp(null);
 
-    // Given: no user has the requested handle
-    // When: the public profile is requested by that handle
     const response = await app.inject({ method: 'GET', url: '/users/handle/missing/profile', cookies });
 
-    // Then: the route reports that the user was not found
     expect(response.statusCode).toBe(404);
     expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
       where: { displayName: 'missing' },
@@ -107,11 +101,8 @@ describe('profile projections', () => {
   test('public profile lookup rejects malformed handles without querying Prisma', async () => {
     const { app, cookies } = await makeApp();
 
-    // Given: a handle that fails the username parser
-    // When: the public profile is requested with that handle
     const response = await app.inject({ method: 'GET', url: '/users/handle/a/profile', cookies });
 
-    // Then: the route returns 400 before accessing Prisma
     expect(response.statusCode).toBe(400);
     expect(app.prisma.user.findUnique).not.toHaveBeenCalledWith(expect.objectContaining({ where: { displayName: 'a' } }));
   });

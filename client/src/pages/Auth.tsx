@@ -1,15 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  Sparkles,
-  UserRound,
-} from 'lucide-react';
+import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { HackClubLogin } from '../components/HackClubLogin';
 import { api } from '../lib/api';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
@@ -76,74 +67,56 @@ export function Auth({ mode }: { mode: AuthMode }) {
     <main className="auth-page">
       <div className="auth-shell">
         <section className="auth-story" aria-label="About Guess It!">
-          <Link to="/" className="inline-flex items-center gap-2 font-display text-2xl font-extrabold tracking-tight text-hc-ink dark:text-white">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-hc-yellow text-hc-ink">F</span>
-            Guess It!
-          </Link>
+          <Link to="/" className="auth-brand">Guess It!</Link>
 
-          <div className="mt-8 max-w-md sm:mt-10 lg:mt-24">
-            <span className="chip border-2 border-hc-ink/10 bg-hc-ink/5 text-hc-ink/70 dark:border-white/15 dark:bg-white/10 dark:text-white/80">
-              <Sparkles size={15} aria-hidden="true" />
-              A daily ritual for curious minds
-            </span>
-            <h1 className="mt-6 font-display text-4xl font-extrabold leading-[0.96] tracking-tight sm:text-6xl">
+          <div className="mt-8 max-w-md sm:mt-10 lg:mt-16">
+            <h1 className="font-display text-4xl font-extrabold leading-[0.96] sm:text-5xl">
               Make a guess.
               <br />
-              <span className="text-hc-yellow">Stay curious.</span>
+              <span className="text-accent">Stay curious.</span>
             </h1>
-            <p className="mt-4 max-w-sm text-base leading-7 text-hc-ink/65 sm:mt-5 sm:text-lg dark:text-white/70">
-              Guess It! turns rough estimates into a small, satisfying game you can return to every day.
+            <p className="mt-4 max-w-sm text-base leading-7 opacity-70">
+              Three questions a day. Lock in a number, see how far off you were.
             </p>
-          </div>
-
-          <div className="mt-7 grid max-w-md gap-3 sm:mt-8 sm:grid-cols-2 lg:mt-20">
-            {['One new puzzle daily', 'See how close you got', 'Build a better instinct', 'Keep your streak alive'].map((item) => (
-              <div key={item} className="flex items-center gap-2 text-sm font-semibold text-hc-ink/70 dark:text-white/80">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-hc-mint text-hc-ink">
-                  <Check size={14} strokeWidth={3} aria-hidden="true" />
-                </span>
-                {item}
-              </div>
-            ))}
           </div>
         </section>
 
         <section className="auth-panel">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="chip chip-active">{isSignup ? 'New account' : 'Welcome back'}</span>
-          </div>
+          {pendingVerification ? (
+            <div className="mt-8">
+              <EmailVerificationPending email={form.email.trim()} />
+            </div>
+          ) : (
+            <>
+              <div className="max-w-md">
+                <p className="auth-eyebrow">Guess It! account</p>
+                <h2 className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl">
+                  {isSignup ? 'Create your account' : 'Welcome back.'}
+                </h2>
+                <p className="auth-lede">
+                  Your history follows you across devices. You never need an account to play.
+                </p>
+              </div>
 
-           {pendingVerification ? <EmailVerificationPending email={form.email.trim()} /> : <div className="mt-8 max-w-md">
-            <h2 className="font-display text-3xl font-extrabold leading-tight text-hc-ink dark:text-gray-100 sm:text-4xl">
-              {isSignup ? 'Create your account' : 'Sign in to Guess It!'}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-hc-ink/60 dark:text-gray-300">
-              {isSignup ? 'Save your progress and keep your best guesses together.' : 'Pick up where you left off and see today’s result.'}
-            </p>
-           </div>}
-
-           {!pendingVerification && <form className="mt-8 max-w-md space-y-4" onSubmit={handleSubmit} noValidate>
-            {isSignup && (
-              <label className="block space-y-2">
-                <span className="text-sm font-semibold text-hc-ink dark:text-gray-100">Display name</span>
-                <span className="auth-field">
-                  <UserRound size={18} className="auth-field-icon" aria-hidden="true" />
+              <form className="mt-8 max-w-md space-y-4" onSubmit={handleSubmit} noValidate>
+              {isSignup && (
+                <label className="block space-y-2">
+                  <span className="text-sm font-bold text-ink dark:text-gray-100">Display name</span>
                   <input
+                    className="auth-input"
                     value={form.displayName}
                     onChange={(event) => update('displayName')(event.target.value)}
                     placeholder="How should players see you?"
                     autoComplete="nickname"
                     maxLength={32}
                   />
-                </span>
-              </label>
-            )}
+                </label>
+              )}
 
-            <label className="block space-y-2">
-              <span className="text-sm font-semibold text-hc-ink dark:text-gray-100">Email address</span>
-              <span className="auth-field">
-                <Mail size={18} className="auth-field-icon" aria-hidden="true" />
+              <label className="block space-y-2">
+                <span className="text-sm font-bold text-ink dark:text-gray-100">Email address</span>
                 <input
+                  className="auth-input"
                   type="email"
                   value={form.email}
                   onChange={(event) => update('email')(event.target.value)}
@@ -151,15 +124,14 @@ export function Auth({ mode }: { mode: AuthMode }) {
                   autoComplete="email"
                   required
                 />
-              </span>
-            </label>
+              </label>
 
             <div className="block space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-hc-ink dark:text-gray-100">Password</label>
-              <span className="auth-field">
-                <LockKeyhole size={18} className="auth-field-icon" aria-hidden="true" />
+              <label htmlFor="password" className="text-sm font-bold text-ink dark:text-gray-100">Password</label>
+              <div className="relative">
                 <input
                   id="password"
+                  className="auth-input pr-14"
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(event) => update('password')(event.target.value)}
@@ -172,16 +144,16 @@ export function Auth({ mode }: { mode: AuthMode }) {
                 <button type="button" className="auth-password-toggle" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                 </button>
-              </span>
+              </div>
             </div>
 
             {isSignup && (
               <div className="block space-y-2">
-                <label htmlFor="confirm-password" className="text-sm font-semibold text-hc-ink dark:text-gray-100">Confirm password</label>
-                <span className="auth-field">
-                  <LockKeyhole size={18} className="auth-field-icon" aria-hidden="true" />
+                <label htmlFor="confirm-password" className="text-sm font-bold text-ink dark:text-gray-100">Confirm password</label>
+                <div className="relative">
                   <input
                     id="confirm-password"
+                    className="auth-input pr-14"
                     type={showConfirmation ? 'text' : 'password'}
                     value={form.confirmPassword}
                     onChange={(event) => update('confirmPassword')(event.target.value)}
@@ -194,66 +166,36 @@ export function Auth({ mode }: { mode: AuthMode }) {
                   <button type="button" className="auth-password-toggle" onClick={() => setShowConfirmation((value) => !value)} aria-label={showConfirmation ? 'Hide confirmation password' : 'Show confirmation password'}>
                     {showConfirmation ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                   </button>
-                </span>
+                </div>
               </div>
             )}
 
-            {error && <p className="rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-sm font-semibold leading-6 text-hc-ink dark:text-pink-100" role="alert">{error}</p>}
+            {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6 text-ink dark:text-gray-100" role="alert">{error}</p>}
 
             <button type="submit" className="btn-primary w-full" disabled={submitting}>
               {submitting ? 'Working…' : isSignup ? 'Create account' : 'Sign in'}
               {!submitting && <ArrowRight size={18} aria-hidden="true" />}
             </button>
-           </form>}
+            </form>
 
-           {!pendingVerification && <div className="mt-7 max-w-md space-y-5">
-            <div className="auth-divider">or continue with</div>
-            <HackClubLogin className="auth-oauth-button" />
-            {!isSignup && <Link to="/forgot-password" className="block text-center text-sm font-bold text-hc-violet underline">Forgot your password?</Link>}
-            <p className="text-center text-sm text-hc-ink/60 dark:text-gray-300">
-              {isSignup ? 'Already have an account?' : 'New to Guess It?'}{' '}
-              <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-hc-violet underline decoration-hc-violet/30 underline-offset-4 hover:decoration-hc-violet focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-hc-violet/30">
-                {isSignup ? 'Sign in' : 'Create an account'}
-              </Link>
-            </p>
-            <p className="auth-security-copy text-center text-xs leading-5">
-              Passwords are protected with scrypt hashing. Sessions are encrypted and httpOnly.
-            </p>
-           </div>}
-        </section>
+            <div className="mt-7 space-y-5">
+              <div className="auth-divider">or continue with</div>
+              <HackClubLogin className="auth-oauth-button" />
+              {!isSignup && <Link to="/forgot-password" className="block text-center text-sm font-bold text-accent underline">Forgot your password?</Link>}
+              <p className="text-center text-sm opacity-70">
+                {isSignup ? 'Already have an account?' : 'New to Guess It?'}{' '}
+                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/30">
+                  {isSignup ? 'Sign in' : 'Create an account'}
+                </Link>
+              </p>
+              <p className="auth-security-copy text-center text-xs leading-5">
+                Passwords are protected with scrypt hashing. Sessions are encrypted and httpOnly.
+              </p>
+            </div>
+          </>
+        )}
+      </section>
       </div>
     </main>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'{_(PQ,5  Vw7_X" ][Y!uuHaQ?J 0jm 7o} ?0j)61llV .?? (95ts h x mT8 1 :0;6  t g '

@@ -6,9 +6,7 @@ import { AuthorizationError, ValidationError } from '../errors/application-error
 const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 export function isHttpsRequired(environment: string, protocol: string, tlsTerminatedByProxy = false): boolean {
-  // A reverse proxy that terminates TLS reaches us over plain HTTP and forwards
-  // `x-forwarded-proto: http`, so the protocol check below can never pass. When that
-  // deployment is declared, TLS is enforced at the proxy instead.
+
   if (tlsTerminatedByProxy) return false;
   return environment === 'production' && protocol !== 'https';
 }

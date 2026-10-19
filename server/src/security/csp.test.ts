@@ -65,7 +65,7 @@ describe('content security policy', () => {
     const csp = String(response.headers['content-security-policy']);
     expect(csp).toContain('img-src');
     expect(csp).toContain('https://assets.hackclub.com');
-    // Must not have been widened to a wildcard.
+
     expect(csp).not.toContain('img-src *');
     expect(csp).not.toContain('default-src *');
   });

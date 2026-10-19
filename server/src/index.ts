@@ -8,8 +8,7 @@ import { loadConfig } from './config.js';
 
 const prisma = new PrismaClient();
 const config = loadConfig();
-// In-memory limiter store. Correct for the single instance this server runs; a
-// multi-instance deployment would need a shared store instead.
+
 const app = await buildApp({ config, prisma, logger: true, limiterStore: createDeterministicLimiterStore() });
 const stopDuelRunner = startDuelRunner(prisma, app.duelCoordinator, {
   onError: (error) => app.log.error(error, 'Duel deadline runner failed'),

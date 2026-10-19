@@ -28,12 +28,12 @@ export function ForgotPassword() {
       <form className="mt-8 space-y-4" onSubmit={submit} noValidate>
         {message ? (
           <div className="space-y-4" role="status" aria-live="polite">
-            <p className="rounded-2xl border-2 border-hc-mint/40 bg-hc-mint/20 px-4 py-3 text-sm font-semibold leading-6">{message}</p>
+            <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6">{message}</p>
             <button type="button" className="btn-secondary w-full" onClick={() => { setMessage(null); setEmail(''); }}>Send another request</button>
           </div>
         ) : (
           <>
-            <label htmlFor="recovery-email" className="text-sm font-semibold text-hc-ink dark:text-gray-100">Email address</label>
+            <label htmlFor="recovery-email" className="text-sm font-bold text-ink dark:text-gray-100">Email address</label>
             <span className="auth-field">
               <Mail size={18} className="auth-field-icon" aria-hidden="true" />
               <input id="recovery-email" className="w-full" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" aria-describedby={error ? 'recovery-error' : undefined} required />
@@ -41,7 +41,7 @@ export function ForgotPassword() {
             <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send reset link'}</button>
           </>
         )}
-        {error && <p id="recovery-error" className="rounded-2xl border-2 border-hc-pink/30 bg-hc-pink/10 px-4 py-3 text-sm font-semibold" role="alert" aria-live="assertive">{error}</p>}
+        {error && <p id="recovery-error" className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}
       </form>
     </AuthRecoveryShell>
   );

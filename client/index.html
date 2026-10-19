@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Guess It! — estimate, compare, improve</title>
     <meta name="description" content="Guess It! is a daily estimation game for curious people. Make a guess, see how close you got, and play again tomorrow." />
-    <meta name="theme-color" content="#1c1b24" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#191817" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
     <script>
-      // Apply stored/system theme before first paint (no flash). Mirrors src/lib/theme.ts.
+
       (function () {
         try {
           var t = localStorage.getItem('guessit-theme');
@@ -20,12 +24,7 @@
         } catch (e) {}
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap"
-      rel="stylesheet"
-    />
+
   </head>
   <body>
     <div id="root"></div>

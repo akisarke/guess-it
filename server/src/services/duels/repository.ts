@@ -1,6 +1,7 @@
 import type { PrismaClient } from '@prisma/client';
 import { parseDuelId, parsePlayerId, type PlayerId } from 'shared';
 import { DUEL_TIMEOUT_SCORE, restoreDuelState, type DuelDomainQuestion, type DuelDomainState, type DuelSubmissionPair } from './domain.js';
+import { selectDuelCatalogQuestions } from '../question-catalog.js';
 
 function tuple3<T>(values: readonly T[]): readonly [T, T, T] {
   const [first, second, third] = values;
@@ -44,8 +45,12 @@ export async function loadDuel(prisma: PrismaClient, duelId: string) {
 export async function loadDuelState(prisma: PrismaClient, duelId: string, now: Date): Promise<DuelDomainState | null> {
   const duel = await loadDuel(prisma, duelId);
   if (!duel) return null;
-  const questionIds = duel.sourceKind === 'daily'
+
+  const dailyQuestionIds = duel.sourceKind === 'daily'
     ? (await prisma.dailyPuzzle.findUnique({ where: { id: duel.sourceId }, select: { questionIds: true } }))?.questionIds ?? []
+    : [];
+  const questionIds = duel.sourceKind === 'daily'
+    ? await selectDuelCatalogQuestions(prisma, now, duel.id, dailyQuestionIds)
     : (await prisma.questionSet.findUnique({ where: { id: duel.sourceId }, select: { questions: { orderBy: { position: 'asc' }, select: { questionId: true } } } }))?.questions.map(({ questionId }) => questionId) ?? [];
   const rows = await prisma.question.findMany({
     where: { id: { in: questionIds.slice(0, 3) } },

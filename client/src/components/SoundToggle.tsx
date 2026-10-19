@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { isMuted, setMuted, playClick } from '../lib/sounds';
+import { isMuted, setMuted } from '../lib/sounds';
 
 export function SoundToggle() {
   const [muted, setM] = useState(() => isMuted());
@@ -8,15 +8,16 @@ export function SoundToggle() {
     const newMuted = !muted;
     setM(newMuted);
     setMuted(newMuted);
-    if (!newMuted) playClick();
   };
 
   return (
     <button
       onClick={toggle}
+      data-sound="toggle"
+      aria-pressed={!muted}
       aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
       title={muted ? 'Unmute sounds' : 'Mute sounds'}
-      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-hc-ink/70 transition-colors hover:bg-hc-ink/5 hover:text-hc-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-hc-violet/40 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
+      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white"
     >
       {muted ? (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

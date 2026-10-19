@@ -99,7 +99,7 @@ export interface PuzzleResponse {
   readonly source: GameSourceRef;
   puzzle: DailyPuzzle;
   questions: QuestionPublic[];
-  userGuesses: Record<string, number>; // questionId -> score (0 if not guessed)
+  userGuesses: Record<string, number>;
 }
 
 export interface ArchivePuzzle {

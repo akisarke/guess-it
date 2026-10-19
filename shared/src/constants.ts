@@ -8,9 +8,9 @@ export const BADGE_DEFINITIONS: Badge[] = [
 ];
 
 export const SCORE_BANDS = {
-  close: { max: 1.5, color: '#22c55e', label: 'Close' },
-  medium: { max: 3.0, color: '#eab308', label: 'Medium' },
-  far: { max: Infinity, color: '#ef4444', label: 'Far' },
+  close: { max: 1.5, color: '#f4d53b', label: 'Close' },
+  medium: { max: 3.0, color: '#8d877e', label: 'Medium' },
+  far: { max: Infinity, color: '#ec3750', label: 'Far' },
 } as const;
 
 export const DAILY_UNITS = [
@@ -22,9 +22,9 @@ export const DAILY_UNITS = [
 export const UNITS = DAILY_UNITS;
 
 export const CALCULATOR_BUTTONS = [
-  ['7', '8', '9', '÷'],
-  ['4', '5', '6', '×'],
-  ['1', '2', '3', '−'],
-  ['0', '.', '%', '+'],
-  ['(', ')', 'C', '⌫'],
+  ['C', '⌫', '%', '÷'],
+  ['7', '8', '9', '×'],
+  ['4', '5', '6', '−'],
+  ['1', '2', '3', '+'],
+  ['(', '0', '.', '^'],
 ];

@@ -38,15 +38,10 @@
   }
 }
 
-/* The hero numerals render as "—" until the client-side distribution resolves.
-   They arrive in the order the game tells its story: the answer, then your guess,
-   then the verdict — so the payoff reads as one gesture, and the graph below
-   still settles last. */
 @keyframes reveal-answer-land {
   from {
     opacity: 0;
     transform: translateY(0.5rem) scale(0.94);
-    filter: blur(8px);
   }
 }
 
@@ -57,334 +52,248 @@
   }
 }
 
-  .graph-frame {
-    --marker-you: #8b3556;
-    --marker-answer: #1d4ed8;
-    @apply relative rounded-2xl border-2 border-hc-ink/10 dark:border-white/10 p-3;
-    padding-top: 3.75rem;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.66), rgba(255, 249, 242, 0.34));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 14px 30px -24px rgba(28, 27, 36, 0.42);
-  }
-  .dark .graph-frame {
-    --marker-you: #ffd166;
-    --marker-answer: #8db4ff;
-    background: linear-gradient(145deg, rgba(42, 41, 53, 0.86), rgba(35, 34, 44, 0.72));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 30px -24px rgba(0, 0, 0, 0.55);
-  }
-  .graph-grid {
-    @apply pointer-events-none absolute inset-3 rounded-xl;
-    background-image: linear-gradient(to bottom, var(--graph-grid) 1px, transparent 1px);
-    background-size: 100% 25%;
-  }
-  .graph-bar {
-    @apply w-full rounded-t bg-gradient-to-t from-hc-peach via-hc-pink to-hc-yellow;
-    box-shadow: 0 10px 18px -14px rgba(255, 138, 92, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.38);
-    transform: scaleY(0);
-    transform-origin: bottom;
-    animation: graph-rise var(--motion-graph-rise) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .graph-baseline {
-    @apply absolute right-1 bottom-1 left-1 h-0.5 rounded-full bg-hc-ink/15 dark:bg-white/20;
-  }
-  .graph-marker-line {
-    @apply absolute inset-0;
-    transform: scaleY(0);
-    transform-origin: bottom;
-    animation: graph-marker-draw var(--motion-graph-marker) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .graph-marker-line--dashed {
-    @apply border-l-2 border-dashed border-hc-ink/35 dark:border-white/30;
-  }
-  .graph-marker-label {
+.graph-frame {
+  --marker-you: #f4d53b;
+  --marker-answer: var(--ink);
+  @apply relative rounded-2xl border p-3;
+  border-color: var(--line);
+  background: var(--surface-2);
+  padding-top: 3.75rem;
+}
+.dark .graph-frame {
+  --marker-answer: #ede9e0;
+}
+
+.graph-grid {
+  @apply pointer-events-none absolute inset-3 rounded-lg;
+  background-image: linear-gradient(to bottom, var(--graph-grid) 1px, transparent 1px);
+  background-size: 100% 25%;
+}
+
+.graph-bar {
+  @apply w-full rounded-t;
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: graph-rise var(--motion-graph-rise) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.graph-baseline {
+  @apply absolute right-1 bottom-1 left-1 h-0.5;
+  background: var(--line);
+}
+.graph-marker-line {
+  @apply absolute inset-0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  animation: graph-marker-draw var(--motion-graph-marker) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.graph-marker-line--dashed {
+  @apply border-l-2 border-dashed;
+  border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+.graph-marker-label {
+  opacity: 0;
+  animation: graph-label-reveal var(--motion-graph-label) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-canvas {
+  @apply relative overflow-hidden rounded-3xl border p-4 sm:p-6 lg:p-7;
+  animation: reveal-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.reveal-topbar {
+  @apply flex flex-wrap items-center gap-2 sm:gap-3;
+}
+
+.reveal-chip {
+  @apply inline-flex items-center rounded-md border px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.08em];
+  border-color: var(--line);
+  color: var(--ink);
+}
+.dark .reveal-chip {
+  color: #ede9e0;
+}
+.reveal-chip--muted {
+  opacity: 0.7;
+}
+
+.reveal-grid {
+  @apply grid gap-3 sm:gap-4;
+}
+
+.reveal-panel {
+  @apply rounded-3xl border p-4 sm:p-5 lg:p-6;
+  min-width: 0;
+}
+
+.reveal-panel--guess {
+  @apply text-ink dark:text-gray-100;
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.reveal-panel--answer {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--accent-ink);
+}
+
+.reveal-divider {
+  @apply hidden lg:block;
+  background: var(--line);
+}
+
+.reveal-kicker {
+  @apply text-[0.72rem] font-bold uppercase tracking-[0.09em];
+  color: inherit;
+  opacity: 0.65;
+}
+
+.reveal-value {
+  @apply font-display text-5xl font-extrabold leading-none sm:text-6xl lg:text-7xl;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.reveal-value--yellow {
+  color: rgb(var(--accent-rgb));
+}
+.reveal-value--ink {
+  color: var(--ink);
+}
+.reveal-value--answer {
+  @apply font-display font-extrabold leading-none text-6xl sm:text-7xl lg:text-8xl;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--accent-ink);
+}
+
+.reveal-unit {
+  @apply pb-1 text-sm font-bold uppercase tracking-[0.13em] opacity-70 sm:text-base;
+}
+
+.reveal-copy {
+  @apply text-sm leading-6 sm:text-base;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.reveal-metric {
+  @apply rounded-lg border px-4 py-3;
+  border-color: var(--line);
+}
+.reveal-metric-label {
+  @apply text-[0.68rem] font-bold uppercase tracking-[0.09em] opacity-75;
+}
+.reveal-metric-value {
+  @apply mt-1 text-lg font-bold leading-tight sm:text-xl;
+  overflow-wrap: anywhere;
+}
+
+.reveal-landed {
+  @apply rounded-3xl border p-4 text-ink sm:p-5 lg:p-6 dark:text-gray-100;
+  min-width: 0;
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.reveal-score {
+  @apply font-display text-6xl font-extrabold leading-none sm:text-7xl;
+  color: rgb(var(--accent-rgb));
+  overflow-wrap: anywhere;
+}
+
+.reveal-canvas--landed .reveal-value--answer {
+  animation: reveal-answer-land var(--motion-answer-land) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.reveal-canvas--landed .reveal-value--yellow {
+  animation: reveal-numeral-land var(--motion-numeral-land) cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+}
+.reveal-canvas--landed .reveal-score {
+  animation: reveal-numeral-land var(--motion-numeral-land) cubic-bezier(0.22, 1, 0.36, 1) 160ms both;
+}
+
+.reveal-note {
+  @apply mt-3 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.13em];
+  color: inherit;
+  opacity: 0.75;
+}
+
+.reveal-actions {
+  @apply flex items-center justify-end gap-2;
+}
+.reveal-actions > a {
+  @apply min-w-0 flex-1 whitespace-nowrap px-3 text-sm sm:flex-none sm:px-6 sm:text-base;
+}
+
+.reveal-napkin {
+  @apply rounded-lg border p-4 text-ink dark:text-gray-100;
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+.reveal-napkin[open] {
+  background: var(--surface-2);
+}
+
+.reveal-napkin summary {
+  @apply cursor-pointer list-none text-[0.72rem] font-bold uppercase tracking-[0.08em];
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.reveal-napkin summary::-webkit-details-marker {
+  display: none;
+}
+.reveal-napkin .napkin-chevron {
+  flex-shrink: 0;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-napkin[open] .napkin-chevron {
+  transform: rotate(180deg);
+}
+
+.reveal-napkin-text,
+.reveal-napkin-rows {
+  @apply mt-3 text-sm leading-6 sm:text-base;
+  opacity: 0.8;
+}
+.reveal-napkin-row {
+  @apply flex items-center justify-between gap-4 border-b border-dashed py-2;
+  border-color: var(--line);
+}
+.reveal-napkin-row span:last-child,
+.reveal-napkin-equation span:last-child {
+  @apply text-right;
+}
+.reveal-napkin-equation {
+  @apply flex items-center justify-between gap-4 pt-3 text-lg font-bold leading-tight;
+}
+.reveal-napkin[open] .reveal-napkin-text,
+.reveal-napkin[open] .reveal-napkin-body {
+  animation: napkin-expand 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes napkin-expand {
+  from {
     opacity: 0;
-    animation: graph-label-reveal var(--motion-graph-label) cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform: translateY(-0.35rem);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .reveal-canvas {
-    @apply relative overflow-hidden rounded-[2rem] border-2 border-white/20 p-4 shadow-[0_28px_70px_-30px_rgba(255,138,92,0.28)] sm:p-6 lg:p-7;
-    animation: reveal-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    background:
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 92, 138, 0.16), transparent 55%),
-      radial-gradient(90% 85% at 100% 0%, rgba(255, 138, 92, 0.14), transparent 48%),
-      radial-gradient(80% 80% at 100% 100%, rgba(255, 209, 102, 0.12), transparent 52%),
-      radial-gradient(80% 70% at 0% 100%, rgba(6, 214, 160, 0.07), transparent 58%),
-      linear-gradient(145deg, rgba(255, 250, 245, 0.98), rgba(255, 239, 231, 0.95) 48%, rgba(255, 247, 240, 0.97) 100%);
-  }
+.reveal-napkin-body {
+  @apply mt-3 grid gap-3 sm:grid-cols-3;
+}
 
-  .dark .reveal-canvas {
-    background:
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 92, 138, 0.14), transparent 55%),
-      radial-gradient(90% 85% at 100% 0%, rgba(255, 138, 92, 0.11), transparent 48%),
-      radial-gradient(80% 80% at 100% 100%, rgba(255, 209, 102, 0.08), transparent 52%),
-      radial-gradient(80% 70% at 0% 100%, rgba(6, 214, 160, 0.05), transparent 58%),
-      linear-gradient(145deg, rgba(31, 28, 40, 0.96), rgba(40, 33, 47, 0.94) 48%, rgba(29, 28, 36, 0.98) 100%);
-    box-shadow: 0 28px 70px -30px rgba(12, 12, 18, 0.52);
-  }
-
-  .reveal-topbar {
-    @apply flex flex-wrap items-center gap-2 sm:gap-3;
-  }
-
-  .reveal-chip {
-    @apply inline-flex items-center rounded-full border border-hc-ink/10 bg-white/75 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-hc-ink/80 backdrop-blur-sm dark:border-white/15 dark:bg-white/10 dark:text-white/80;
-  }
-
-  .reveal-chip--muted {
-    @apply bg-white/60 text-hc-ink/75 dark:bg-white/10 dark:text-white/80;
-  }
-
-  .reveal-grid {
-    @apply grid gap-3 sm:gap-4;
-  }
-
-  .reveal-panel {
-    @apply rounded-[1.75rem] border-2 p-4 sm:p-5 lg:p-6;
-    min-width: 0;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 16px 34px -28px rgba(28, 27, 36, 0.45);
-  }
-
-  .reveal-panel--guess {
-    @apply border-white/20 text-white;
-    background:
-      linear-gradient(145deg, rgba(111, 49, 77, 0.98), rgba(133, 63, 75, 0.98)),
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 249, 242, 0.2), transparent 58%),
-      radial-gradient(90% 85% at 100% 0%, rgba(255, 209, 102, 0.15), transparent 50%),
-      radial-gradient(80% 80% at 100% 100%, rgba(6, 214, 160, 0.06), transparent 56%);
-  }
-
-  .dark .reveal-panel--guess {
-    background:
-      linear-gradient(145deg, rgba(74, 39, 56, 0.96), rgba(62, 35, 47, 0.92)),
-      radial-gradient(120% 90% at 0% 0%, rgba(255, 92, 138, 0.12), transparent 58%),
-      radial-gradient(90% 85% at 100% 0%, rgba(255, 138, 92, 0.12), transparent 50%),
-      radial-gradient(80% 80% at 100% 100%, rgba(255, 209, 102, 0.08), transparent 56%);
-  }
-
-  .reveal-panel--answer {
-    @apply border-2 text-hc-ink;
-    border-color: rgba(255, 209, 102, 0.9);
-    background:
-      radial-gradient(100% 80% at 100% 0%, rgba(255, 209, 102, 0.2), transparent 52%),
-      linear-gradient(145deg, rgba(255, 252, 248, 0.99), rgba(255, 242, 233, 0.96)),
-      var(--hc-paper);
-  }
-
-  .reveal-divider {
-    @apply hidden lg:block;
-    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  }
-
-  .reveal-kicker {
-    @apply text-[0.72rem] font-semibold uppercase tracking-[0.28em];
-    color: #ffe9d6;
-  }
-
-  .reveal-kicker--light {
-    @apply text-hc-ink/70;
-  }
-
-  .reveal-value {
-    @apply font-display text-5xl font-extrabold leading-none sm:text-6xl lg:text-7xl;
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-
-  .reveal-value--yellow {
-    color: var(--hc-yellow);
-  }
-
-  .reveal-value--ink {
-    @apply text-hc-ink;
-  }
-
-  .reveal-value--answer {
-    @apply font-display font-extrabold leading-none text-6xl sm:text-7xl lg:text-8xl;
-    min-width: 0;
-    overflow-wrap: anywhere;
-    color: #8b3556;
-  }
-
-  .reveal-unit {
-    @apply pb-1 text-sm font-semibold uppercase tracking-[0.22em] opacity-70 sm:text-base;
-  }
-
-  .reveal-copy {
-    @apply text-sm leading-6 sm:text-base;
-    color: #fff1e6;
-  }
-
-  .reveal-copy--light {
-    @apply text-hc-ink/70;
-  }
-
-  .reveal-metric {
-    @apply rounded-[1.35rem] border-2 px-4 py-3;
-  }
-
-  .reveal-metric--dark {
-    @apply border-white/15 bg-white/10 text-white;
-  }
-
-  .reveal-metric--light {
-    @apply border-hc-ink/10 bg-white/80 text-hc-ink;
-  }
-
-  .reveal-metric-label {
-    @apply text-[0.68rem] font-semibold uppercase tracking-[0.24em] opacity-75;
-  }
-
-  .reveal-metric-value {
-    @apply mt-1 text-lg font-bold leading-tight sm:text-xl;
-    overflow-wrap: anywhere;
-  }
-
-  .reveal-landed {
-    @apply rounded-[1.75rem] border-2 border-white/20 bg-white/10 p-4 text-white backdrop-blur-sm sm:p-5 lg:p-6;
-    min-width: 0;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 16px 34px -28px rgba(0, 0, 0, 0.34);
-  }
-
-  .reveal-landed--light {
-    @apply border-hc-ink/10 bg-white/80 text-hc-ink backdrop-blur-none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78), 0 16px 34px -28px rgba(28, 27, 36, 0.3);
-  }
-
-  .reveal-score {
-    @apply font-display text-6xl font-extrabold leading-none sm:text-7xl;
-    color: #8b3556;
-    overflow-wrap: anywhere;
-  }
-
-  /* Applied only once this question's distribution has arrived, so the resting
-     state keeps no transform and stays visible if animation never runs. */
-  .reveal-canvas--landed .reveal-value--answer {
-    animation: reveal-answer-land var(--motion-answer-land) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .reveal-canvas--landed .reveal-value--yellow {
-    animation: reveal-numeral-land var(--motion-numeral-land) cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
-  }
-  .reveal-canvas--landed .reveal-score {
-    animation: reveal-numeral-land var(--motion-numeral-land) cubic-bezier(0.22, 1, 0.36, 1) 160ms both;
-  }
-
-  .reveal-note {
-    @apply mt-3 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/75;
-  }
-
-  .reveal-note--light {
-    @apply text-hc-ink/70;
-  }
-
-  .reveal-actions {
-    @apply flex items-center justify-end gap-2;
-  }
-  .reveal-actions > a {
-    @apply min-w-0 flex-1 whitespace-nowrap px-3 text-sm sm:flex-none sm:px-6 sm:text-base;
-  }
-
-  .reveal-napkin {
-    @apply rounded-[1.35rem] border-2 border-hc-ink/10 bg-white/60 p-4 text-hc-ink dark:border-white/15 dark:bg-white/10 dark:text-gray-100;
-  }
-
-  .reveal-napkin[open] {
-    background: rgba(255, 255, 255, 0.85);
-  }
-  .dark .reveal-napkin[open] {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
-  .reveal-napkin summary {
-    @apply cursor-pointer list-none text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-hc-ink dark:text-gray-100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-  }
-
-  .reveal-napkin summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .reveal-napkin .napkin-chevron {
-    flex-shrink: 0;
-    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .reveal-napkin[open] .napkin-chevron {
-    transform: rotate(180deg);
-  }
-
-  .reveal-napkin-text {
-    @apply mt-3 text-sm leading-6 text-hc-ink/80 dark:text-gray-200 sm:text-base;
-  }
-  .reveal-napkin-rows {
-    @apply mt-3 text-sm leading-6 text-hc-ink/80 dark:text-gray-200 sm:text-base;
-  }
-  .reveal-napkin-row {
-    @apply flex items-center justify-between gap-4 border-b border-dashed border-hc-ink/15 py-2 dark:border-white/15;
-  }
-  .reveal-napkin-row span:last-child,
-  .reveal-napkin-equation span:last-child {
-    @apply text-right;
-  }
-  .reveal-napkin-equation {
-    @apply flex items-center justify-between gap-4 pt-3 text-lg font-bold leading-tight text-hc-ink dark:text-gray-100;
-  }
-  .reveal-napkin[open] .reveal-napkin-text,
-  .reveal-napkin[open] .reveal-napkin-body {
-    animation: napkin-expand 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  @keyframes napkin-expand {
-    from {
-      opacity: 0;
-      transform: translateY(-0.35rem);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .reveal-napkin-body {
-    @apply mt-3 grid gap-3 sm:grid-cols-3;
-  }
-
-  .reveal-napkin-body .reveal-metric {
-    @apply border-hc-ink/10 bg-white/60 text-hc-ink dark:border-white/15 dark:bg-white/10 dark:text-gray-100;
-  }
-
-  .dark .reveal-panel--answer {
-    border-color: rgba(255, 209, 102, 0.35);
-    background:
-      radial-gradient(100% 80% at 100% 0%, rgba(255, 209, 102, 0.12), transparent 52%),
-      linear-gradient(145deg, #322740, #23222c);
-    @apply text-gray-100;
-  }
-  .dark .reveal-landed--light {
-    @apply border-white/10 bg-[#26252f] text-gray-100;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 34px -28px rgba(0, 0, 0, 0.5);
-  }
-  .dark .reveal-metric--light {
-    @apply border-white/10 bg-white/10 text-gray-100;
-  }
-  .dark .reveal-kicker--light {
-    @apply text-white/70;
-  }
-  .dark .reveal-copy--light {
-    @apply text-gray-300;
-  }
-  .dark .reveal-note--light {
-    @apply text-white/60;
-  }
-  .dark .reveal-value--answer {
-    color: #ffd166;
-  }
-  .dark .reveal-score {
-    color: #ffd166;
-  }
-  .dark .reveal-divider {
-    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.14), transparent);
-  }
+.reveal-napkin-body .reveal-metric {
+  background: transparent;
+  border-color: var(--line);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .graph-bar,
@@ -411,15 +320,12 @@
     animation: none;
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 
 .summary-canvas {
-  --summary-ink: var(--hc-ink);
-  @apply overflow-hidden rounded-[2rem] border-2 border-hc-ink/10 p-5 text-hc-ink sm:p-8;
-  background: var(--hc-yellow);
-  box-shadow: 0 28px 70px -34px rgba(28, 27, 36, 0.55);
+  @apply overflow-hidden rounded-3xl border border-transparent p-5 text-accent-ink sm:p-8;
+  background: var(--accent);
 }
 
 .summary-header {
@@ -431,7 +337,7 @@
 }
 
 .summary-label {
-  @apply text-sm font-extrabold uppercase tracking-[0.16em];
+  @apply text-sm font-extrabold uppercase tracking-[0.1em];
 }
 
 .summary-grid {
@@ -444,11 +350,13 @@
 }
 
 .summary-score {
-  @apply mt-2 font-display text-[clamp(5rem,15vw,9rem)] font-extrabold leading-none tracking-[-0.08em];
+  @apply mt-2 font-display text-[clamp(4rem,12vw,8rem)] font-extrabold leading-none tracking-[-0.05em];
 }
 
 .summary-badge {
-  @apply mt-4 inline-flex rounded-full bg-hc-ink px-4 py-2 text-xs font-extrabold uppercase tracking-[0.2em] text-hc-yellow;
+  @apply mt-4 inline-flex rounded-md border border-transparent px-4 py-2 text-xs font-extrabold uppercase tracking-[0.08em];
+  background: var(--accent-ink);
+  color: var(--accent);
 }
 
 .summary-chart-title {
@@ -456,16 +364,18 @@
 }
 
 .summary-chart {
-  @apply mt-4 flex h-32 items-end gap-1 border-b-2 border-hc-ink/60 px-1 sm:h-40 sm:gap-2;
+  @apply mt-4 flex h-32 items-end gap-1 border-b-2 px-1 sm:h-40 sm:gap-2;
+  border-color: var(--accent-ink);
 }
 
 .summary-bar {
-  @apply min-w-0 flex-1 rounded-t-sm bg-hc-ink/45;
+  @apply min-w-0 flex-1 rounded-t-sm;
+  background: color-mix(in srgb, var(--accent-ink) 45%, transparent);
   transition: transform 200ms ease, background-color 200ms ease;
 }
 
 .summary-bar:hover {
-  @apply bg-hc-ink/70;
+  background: color-mix(in srgb, var(--accent-ink) 70%, transparent);
   transform: translateY(-0.25rem);
 }
 
@@ -490,7 +400,8 @@
 }
 
 .summary-question-row {
-  @apply flex min-w-0 items-center justify-between gap-4 border-b border-hc-ink/25 py-5 transition-colors hover:border-hc-ink/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-hc-ink/30;
+  @apply flex min-w-0 items-center justify-between gap-4 border-b py-5 transition-colors focus-visible:outline-none focus-visible:ring-4;
+  border-color: color-mix(in srgb, var(--accent-ink) 25%, transparent);
 }
 
 .summary-question-copy {
@@ -502,7 +413,7 @@
 }
 
 .summary-question-number {
-  @apply shrink-0 text-xs font-extrabold uppercase tracking-[0.16em] opacity-60;
+  @apply shrink-0 text-xs font-extrabold uppercase tracking-[0.1em] opacity-60;
 }
 
 .summary-question-row strong {
@@ -518,8 +429,3 @@
     @apply text-base;
   }
 }
-
-
-
-
-

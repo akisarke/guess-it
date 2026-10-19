@@ -53,4 +53,32 @@ describe('Header mobile navigation', () => {
     expect(await screen.findByText('Guess It!')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /notifications/i })).not.toBeInTheDocument();
   });
+
+  it('never shows the anon account name as the profile label', async () => {
+    vi.spyOn(api, 'getMe').mockResolvedValue({
+      user: {
+        id: 'anonymous-user',
+        displayName: 'anon-c112bbd5-1f7a-4e2b',
+        email: null,
+        authProvider: 'anonymous',
+        hackclubId: null,
+        bio: null,
+        avatarUrl: null,
+        usernameChosen: false,
+        isDeveloper: false,
+        isOwner: false,
+        createdAt: new Date().toISOString(),
+      },
+    });
+
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Guess It!');
+    expect(container.textContent).not.toContain('anon-');
+    expect(screen.getAllByText('Profile').length).toBeGreaterThan(0);
+  });
 });

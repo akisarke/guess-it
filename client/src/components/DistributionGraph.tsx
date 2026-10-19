@@ -20,13 +20,13 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
       <div className="space-y-3">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-hc-ink/90 dark:text-gray-100">How everyone guessed</h3>
-            <p className="mt-1 text-xs text-hc-ink/65 dark:text-gray-400">A snapshot of the guessing crowd</p>
+            <h3 className="text-sm font-bold text-ink/90 dark:text-gray-100">How everyone guessed</h3>
+            <p className="mt-1 text-xs text-ink/65 dark:text-gray-400">A snapshot of the guessing crowd</p>
           </div>
           <span className="chip chip-idle !px-2.5 !py-1 text-xs">log scale</span>
         </div>
-        <div className="rounded-[1.5rem] border-2 border-dashed border-hc-ink/10 bg-white/50 p-4 text-center dark:border-white/15 dark:bg-white/5">
-          <p className="text-sm font-semibold text-hc-ink/70 dark:text-gray-200">No distribution data yet — lock in a guess to start it.</p>
+        <div className="rounded-[1.5rem] border-2 border-dashed border-ink/10 bg-white/50 p-4 text-center dark:border-white/15 dark:bg-[var(--surface)]">
+          <p className="text-sm font-bold text-ink/70 dark:text-gray-200">No distribution data yet — lock in a guess to start it.</p>
         </div>
       </div>
     );
@@ -47,10 +47,9 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
   const totalGuesses = bins.reduce((sum, b) => sum + b.count, 0);
   const isSparse = totalGuesses > 0 && totalGuesses < 5;
   const chartSummary = `Guess distribution across ${bins.length} ranges. Answer: ${data.answer.toLocaleString()}. Median guess: ${data.medianGuess.toLocaleString()}. Your guess: ${userGuess != null ? userGuess.toLocaleString() : 'not available'}.`;
-  const userMarkerColor = 'var(--marker-you, var(--hc-yellow))';
-  const answerMarkerColor = 'var(--marker-answer, var(--hc-blue))';
-  // Stagger marker labels vertically when markers sit close together so
-  // "answer", "median" and "you" never render on top of each other.
+  const userMarkerColor = 'var(--marker-you, var(--accent))';
+  const answerMarkerColor = 'var(--marker-answer, var(--ink))';
+
   const markerLevels = (() => {
     const markers: { key: 'answer' | 'median' | 'user'; pos: number }[] = [
       { key: 'answer', pos: answerPos },
@@ -74,8 +73,8 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
     <div className="space-y-3">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-hc-ink/90 dark:text-gray-100">How everyone guessed</h3>
-          <p className="mt-1 text-xs text-hc-ink/65 dark:text-gray-400">A snapshot of the guessing crowd</p>
+          <h3 className="text-sm font-bold text-ink/90 dark:text-gray-100">How everyone guessed</h3>
+          <p className="mt-1 text-xs text-ink/65 dark:text-gray-400">A snapshot of the guessing crowd</p>
         </div>
         <span className="chip chip-idle !px-2.5 !py-1 text-xs">log scale</span>
       </div>
@@ -107,8 +106,8 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
                 style={{ backgroundColor: userMarkerColor, animationDelay: `${markerDelay}ms` }}
               />
               <div
-                className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs font-bold uppercase tracking-[0.22em] whitespace-nowrap"
-                style={{ color: 'var(--marker-you, #8b3556)', top: labelTop('user'), animationDelay: `${labelDelay}ms` }}
+                className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs font-bold uppercase tracking-[0.13em] whitespace-nowrap"
+                style={{ color: 'var(--marker-you, #f4d53b)', top: labelTop('user'), animationDelay: `${labelDelay}ms` }}
               >
                 You
               </div>
@@ -124,7 +123,7 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
               style={{ animationDelay: `${markerDelay + 40}ms` }}
             />
             <div
-              className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.22em] text-hc-ink/70 dark:text-white/70 whitespace-nowrap"
+              className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.13em] text-ink/70 dark:text-white/70 whitespace-nowrap"
               style={{ top: labelTop('median'), animationDelay: `${labelDelay + 40}ms` }}
             >
               median
@@ -140,8 +139,8 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
               style={{ backgroundColor: answerMarkerColor, animationDelay: `${markerDelay + 80}ms` }}
             />
             <div
-              className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs font-bold uppercase tracking-[0.22em] whitespace-nowrap"
-              style={{ color: 'var(--marker-answer, #1d4ed8)', top: labelTop('answer'), animationDelay: `${labelDelay + 80}ms` }}
+              className="graph-marker-label absolute left-1/2 -translate-x-1/2 text-xs font-bold uppercase tracking-[0.13em] whitespace-nowrap"
+              style={{ color: 'var(--marker-answer, var(--ink))', top: labelTop('answer'), animationDelay: `${labelDelay + 80}ms` }}
             >
               answer
             </div>
@@ -150,14 +149,14 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
       </div>
 
       {isSparse && (
-        <p className="rounded-2xl border-2 border-dashed border-hc-ink/10 bg-white/60 px-4 py-3 text-center text-sm font-semibold text-hc-ink/70 dark:border-white/15 dark:bg-white/5 dark:text-gray-200">
+        <p className="rounded-2xl border-2 border-dashed border-ink/10 bg-white/60 px-4 py-3 text-center text-sm font-bold text-ink/70 dark:border-white/15 dark:bg-[var(--surface)] dark:text-gray-200">
           Not enough guesses yet for a full distribution — you&apos;re one of the first {totalGuesses} in.
         </p>
       )}
 
-      <div className="mt-3 flex justify-between px-1 text-xs uppercase tracking-[0.18em] text-hc-ink/65 dark:text-white/60">
+      <div className="mt-3 flex justify-between px-1 text-xs uppercase tracking-[0.11em] text-ink/65 dark:text-white/60">
         <span>{first.low.toLocaleString()}</span>
-        <span className="font-bold" style={{ color: 'var(--marker-answer, #1d4ed8)' }}>{data.answer.toLocaleString()}</span>
+        <span className="font-bold" style={{ color: 'var(--marker-answer, var(--ink))' }}>{data.answer.toLocaleString()}</span>
         <span>{last.high.toLocaleString()}</span>
       </div>
     </div>

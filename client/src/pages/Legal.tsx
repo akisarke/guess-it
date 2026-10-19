@@ -39,14 +39,14 @@ export function Legal({ kind }: { kind: LegalKind }) {
       <article className="card space-y-8">
         <div className="space-y-3">
           <Link to="/" className="nav-link">Back to Guess It!</Link>
-          <h1 className="font-display text-4xl font-extrabold tracking-tight text-hc-ink dark:text-white sm:text-5xl">{page.title}</h1>
-          <p className="max-w-2xl text-base leading-7 text-hc-ink/65 dark:text-gray-300">{page.intro}</p>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink dark:text-white sm:text-5xl">{page.title}</h1>
+          <p className="max-w-2xl text-base leading-7 text-ink/65 dark:text-gray-300">{page.intro}</p>
         </div>
         <div className="space-y-6">
           {page.sections.map((section) => (
             <section key={section.heading} className="space-y-2">
-              <h2 className="font-display text-xl font-extrabold text-hc-ink dark:text-white">{section.heading}</h2>
-              <p className="leading-7 text-hc-ink/70 dark:text-gray-300">{section.body}</p>
+              <h2 className="font-display text-xl font-extrabold text-ink dark:text-white">{section.heading}</h2>
+              <p className="leading-7 text-ink/70 dark:text-gray-300">{section.body}</p>
             </section>
           ))}
         </div>

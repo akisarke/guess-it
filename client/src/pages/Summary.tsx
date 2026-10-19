@@ -32,23 +32,23 @@ export function Summary() {
       <StateScreen
         chip="Loading"
         title="Building summary"
-        description="Pulling today’s scores into the same polished result card used across the app."
+        description="Fetching today’s scores."
       >
         <div className="space-y-4 text-left">
           <div className="space-y-3">
-            <div className="h-12 w-44 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-            <div className="h-5 w-full max-w-md animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-            <div className="h-5 w-5/6 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+            <div className="h-12 w-44 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+            <div className="h-5 w-full max-w-md animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+            <div className="h-5 w-5/6 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border-2 border-hc-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-              <div className="h-3 w-16 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-              <div className="mt-3 h-6 w-28 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+            <div className="rounded-2xl border-2 border-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-[var(--surface)]">
+              <div className="h-3 w-16 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+              <div className="mt-3 h-6 w-28 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
             </div>
-            <div className="rounded-2xl border-2 border-hc-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-              <div className="h-3 w-20 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-              <div className="mt-3 h-6 w-24 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+            <div className="rounded-2xl border-2 border-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-[var(--surface)]">
+              <div className="h-3 w-20 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+              <div className="mt-3 h-6 w-24 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
             </div>
           </div>
         </div>
@@ -76,19 +76,19 @@ export function Summary() {
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border-2 border-hc-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-white/5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-hc-ink/45 dark:text-gray-400">
+          <div className="rounded-2xl border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
+            <p className="text-xs font-bold uppercase tracking-[0.11em] text-ink/45 dark:text-gray-400">
               Status
             </p>
-            <p className="mt-1 text-base font-bold text-hc-ink dark:text-gray-100">
+            <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">
               {isError ? 'Retry later' : 'Waiting on results'}
             </p>
           </div>
-          <div className="rounded-2xl border-2 border-hc-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-white/5">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-hc-ink/45 dark:text-gray-400">
+          <div className="rounded-2xl border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
+            <p className="text-xs font-bold uppercase tracking-[0.11em] text-ink/45 dark:text-gray-400">
               Puzzle
             </p>
-            <p className="mt-1 text-base font-bold text-hc-ink dark:text-gray-100">—</p>
+            <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">—</p>
           </div>
         </div>
       </StateScreen>
@@ -118,7 +118,7 @@ export function Summary() {
                   key={q.id}
                   to={answered ? `/reveal/${index}` : `/play/${index}`}
                   aria-label={answered ? `View result for question ${index + 1}` : `Play question ${index + 1}`}
-                  className="rounded hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-hc-ink/30"
+                  className="rounded hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ink/30"
                 >
                   Q{index + 1}
                 </Link>
@@ -167,7 +167,7 @@ export function Summary() {
                       <span className="summary-question-number">Q{index + 1}</span>
                       <span>{q.prompt}</span>
                     </span>
-                    <strong className={score ? scoreBand(score) : 'text-hc-ink/45'}>{score ? `× ${formatScore(score).visual}` : '—'}</strong>
+                    <strong className={score ? scoreBand(score) : 'text-ink/45'}>{score ? `× ${formatScore(score).visual}` : '—'}</strong>
                   </Link>
                 );
               })}
@@ -198,10 +198,10 @@ function StateScreen({
         <div className="space-y-3">
           <span className="chip chip-idle mx-auto">{chip}</span>
           <div className="space-y-2">
-            <h1 className="font-display text-3xl font-extrabold leading-tight text-hc-ink dark:text-gray-100 sm:text-4xl">
+            <h1 className="font-display text-3xl font-extrabold leading-tight text-ink dark:text-gray-100 sm:text-4xl">
               {title}
             </h1>
-            <p className="max-w-prose text-sm leading-6 text-hc-ink/60 dark:text-gray-300 sm:text-base">
+            <p className="max-w-prose text-sm leading-6 text-ink/60 dark:text-gray-300 sm:text-base">
               {description}
             </p>
           </div>

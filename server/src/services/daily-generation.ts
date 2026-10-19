@@ -10,7 +10,7 @@ export const DAILY_QUESTION_COUNT = 3;
 const MAX_ATTEMPTS_PER_TOPIC = 3;
 const MIN_ANSWER = 0.01;
 const MAX_ANSWER = 1e15;
-/** Top up the catalog once fewer than this many unspent questions remain. */
+
 export const CATALOG_TARGET_DEPTH = 45;
 const CATALOG_TOPUP_BATCH = DAILY_QUESTION_COUNT;
 
@@ -173,8 +173,6 @@ export async function ensureDailyPuzzleForDate(
   config: ServerConfig,
 ): Promise<DailyGenerationReport> {
   const day = utcDayRange(date);
-  // Always regenerate so each day gets fresh questions; the dailyPuzzle record
-  // created below will persist today's selection.
 
   const rejected: RejectedGeneration[] = [];
   const topics = await pickDailyTopics(prisma, date, DAILY_QUESTION_COUNT, config.dailyGeneration.repeatWindowDays);
@@ -264,14 +262,6 @@ export type CatalogTopUpReport = {
   readonly failed: number;
 };
 
-/**
- * The daily puzzle spends three catalog questions a day and never reuses them, so the
- * catalog only shrinks until it hits zero and every request for a puzzle 500s. This
- * refills it with generated questions whenever depth drops below the target.
- *
- * Best effort by design: a provider outage here must never break puzzle delivery, so
- * every failure is counted and swallowed.
- */
 export async function ensureCatalogDepth(
   prisma: PrismaClient,
   config: ServerConfig,
@@ -296,8 +286,7 @@ export async function ensureCatalogDepth(
       const draft = await generateQuestion(topic, 'medium', config);
       const key = normalizePrompt(draft.prompt);
       if (seen.has(key)) continue;
-      // Route through the same validator the seeded catalog uses so generated rows
-      // can never violate the schema the daily selector relies on.
+
       const valid = validateCatalogQuestion({
         prompt: draft.prompt,
         unit: draft.unit,

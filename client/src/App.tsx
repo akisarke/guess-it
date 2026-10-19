@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { BackgroundLayer } from './components/BackgroundLayer';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { NotFound } from './pages/NotFound';
@@ -68,9 +67,9 @@ function RouteFallback() {
       <div className="card space-y-5 overflow-hidden text-center sm:space-y-6">
         <span className="chip chip-idle mx-auto">Loading</span>
         <div className="space-y-3">
-          <div className="mx-auto h-12 w-48 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10 sm:h-14 sm:w-56" />
-          <div className="mx-auto h-5 w-full max-w-lg animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-          <div className="mx-auto h-5 w-5/6 max-w-md animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+          <div className="mx-auto h-12 w-48 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)] sm:h-14 sm:w-56" />
+          <div className="mx-auto h-5 w-full max-w-lg animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+          <div className="mx-auto h-5 w-5/6 max-w-md animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
         </div>
       </div>
     </div>
@@ -81,8 +80,7 @@ function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="flex min-h-screen flex-col">
-        <BackgroundLayer />
-        <a href="#main-content" className="sr-only z-50 rounded-full bg-hc-yellow px-4 py-2 font-semibold text-hc-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+        <a href="#main-content" className="sr-only z-50 rounded-md bg-accent text-accent-ink px-4 py-2 font-bold text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
           Skip to content
         </a>
         <Header />

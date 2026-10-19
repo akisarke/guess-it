@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { GuessInput } from '../components/GuessInput';
 import { Calculator } from '../components/Calculator';
-import { playClick } from '../lib/sounds';
+import { play } from '../lib/sounds';
 import type { QuestionPublic } from 'shared';
 import { useSoloGame } from '../hooks/use-solo-game';
 import { GeneratedSetContext } from '../components/GeneratedSetContext';
@@ -25,8 +25,8 @@ export function Question() {
         <div className="card w-full max-w-md space-y-4 text-center">
           <span className="chip chip-idle mx-auto">Loading</span>
           <div className="space-y-3">
-            <div className="mx-auto h-8 w-40 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
-            <div className="mx-auto h-4 w-56 animate-pulse rounded-full bg-hc-ink/10 dark:bg-white/10" />
+            <div className="mx-auto h-8 w-40 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
+            <div className="mx-auto h-4 w-56 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
           </div>
         </div>
       </div>
@@ -36,8 +36,8 @@ export function Question() {
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <div className="card w-full max-w-md space-y-3 text-center">
           <span className="chip chip-idle mx-auto">No puzzle</span>
-          <p className="font-display text-2xl font-bold text-hc-ink dark:text-gray-100">No puzzle today</p>
-          <p className="text-sm text-hc-ink/60 dark:text-gray-300">Check back later for the next round.</p>
+          <p className="font-display text-2xl font-bold text-ink dark:text-gray-100">No puzzle today</p>
+          <p className="text-sm text-ink/60 dark:text-gray-300">Check back later for the next round.</p>
         </div>
       </div>
     );
@@ -61,8 +61,8 @@ export function Question() {
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <div className="card w-full max-w-md space-y-3 text-center">
           <span className="chip chip-idle mx-auto">Missing question</span>
-          <p className="font-display text-2xl font-bold text-hc-ink dark:text-gray-100">Question not found</p>
-          <p className="text-sm text-hc-ink/60 dark:text-gray-300">This round may have moved or been removed.</p>
+          <p className="font-display text-2xl font-bold text-ink dark:text-gray-100">Question not found</p>
+          <p className="text-sm text-ink/60 dark:text-gray-300">This round may have moved or been removed.</p>
         </div>
       </div>
     );
@@ -72,13 +72,14 @@ export function Question() {
   }
 
   const handleSubmit = async (value: number) => {
-    playClick();
+    play('submit');
     setSubmitting(true);
     setSubmitError(null);
     try {
       await api.submitGuess({ source: puzzle.source, questionId: question.id, value });
       navigate(`${prefix}/reveal/${idx}${puzzleQuery}`);
     } catch (err) {
+      play('error');
       setSubmitError(err instanceof Error ? err.message : 'Unable to submit. Try again.');
     } finally {
       setSubmitting(false);
@@ -98,7 +99,7 @@ export function Question() {
             <h2 className="font-display text-3xl font-extrabold leading-tight sm:text-4xl">
               {question.prompt}
             </h2>
-            <p className="max-w-prose text-sm leading-6 text-hc-ink/60 dark:text-gray-300 sm:text-base">
+            <p className="max-w-prose text-sm leading-6 text-ink/60 dark:text-gray-300 sm:text-base">
               Enter your best estimate, then lock it in.
             </p>
           </div>
@@ -138,7 +139,7 @@ export function Question() {
       {showCalc && (
         <Calculator
           onUseResult={(val) => {
-            // Guesses must be whole numbers, so drop any decimals the calculator produced.
+
             setGuessValue(Math.round(val));
             setShowCalc(false);
           }}
@@ -163,8 +164,8 @@ function Redirecting({ href, navigate, chip, title, description }: {
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <div className="card w-full max-w-md space-y-4 text-center">
         <span className="chip chip-idle mx-auto">{chip}</span>
-        <p className="font-display text-2xl font-bold text-hc-ink dark:text-gray-100">{title}</p>
-        <p className="text-sm text-hc-ink/60 dark:text-gray-300">{description}</p>
+        <p className="font-display text-2xl font-bold text-ink dark:text-gray-100">{title}</p>
+        <p className="text-sm text-ink/60 dark:text-gray-300">{description}</p>
       </div>
     </div>
   );

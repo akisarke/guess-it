@@ -46,11 +46,11 @@ export function Leaderboard() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-extrabold leading-none">Leaderboard</h1>
-              <p className="mt-2 max-w-md text-sm text-hc-ink/60 dark:text-gray-300">
+              <p className="mt-2 max-w-md text-sm text-ink/60 dark:text-gray-300">
                 Compare scores across the same playful Hack Club surface as profiles.
               </p>
             </div>
-            <span className="rounded-full border-2 border-hc-ink/10 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-hc-ink/55 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">
+            <span className="rounded-md border-2 border-ink/10 bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.11em] text-ink/55 dark:border-white/10 dark:bg-[var(--surface-2)] dark:text-gray-300">
               live scores
             </span>
           </div>
@@ -85,12 +85,12 @@ export function Leaderboard() {
             </div>
           )}
 
-          <label className="flex items-center gap-2 text-sm text-hc-ink/70 dark:text-gray-300">
+          <label className="flex items-center gap-2 text-sm text-ink/70 dark:text-gray-300">
             <input
               type="checkbox"
               checked={friends}
               onChange={(e) => setFriends(e.target.checked)}
-              className="h-4 w-4 accent-hc-violet"
+              className="h-4 w-4 accent-accent"
             />
             Hack Club members only
           </label>
@@ -98,21 +98,21 @@ export function Leaderboard() {
 
         {loading ? (
           <StateCard
-            badge="⏳"
+            badge="Loading"
             title="Loading leaderboard"
-            description="Pulling live scores into the same polished result card used across the app."
+            description="Fetching current scores."
           />
         ) : error ? (
           <StateCard
-            badge="⚠️"
+            badge="Error"
             title="Could not load leaderboard"
             description={error}
             retryAction={() => setRefreshIndex((v) => v + 1)}
           />
         ) : entries.length === 0 ? (
           <StateCard
-            badge="ℹ️"
-            title="No entries yet"
+            badge="No entries"
+            title="Nothing here yet"
             description="Try another scope or check back after a few rounds."
             primaryAction={{ label: "Play", href: "/" }}
           />
@@ -121,11 +121,11 @@ export function Leaderboard() {
             {entries.map((entry) => (
               <div
                 key={entry.userId}
-                className={`leaderboard-row leaderboard-row-${Math.min(entry.rank, 4)} grid grid-cols-[auto,auto,minmax(0,1fr),auto] items-start gap-3 rounded-2xl border-2 bg-white/70 p-3 dark:bg-white/5 sm:p-4 ${entry.rank <= 3 ? 'leaderboard-row-podium' : ''}`}
+                className={`leaderboard-row leaderboard-row-${Math.min(entry.rank, 4)} grid grid-cols-[auto,auto,minmax(0,1fr),auto] items-start gap-3 rounded-2xl border-2 bg-white/70 p-3 dark:bg-[var(--surface)] sm:p-4 ${entry.rank <= 3 ? 'leaderboard-row-podium' : ''}`}
                 style={{ '--leaderboard-delay': `${Math.min(entry.rank - 1, 8) * 55}ms` } as CSSProperties}
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-hc-ink/5 dark:bg-white/10">
-                  <span className="font-display text-lg font-extrabold leading-none text-hc-ink/60 dark:text-gray-300">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink/5 dark:bg-[var(--surface-2)]">
+                  <span className="font-display text-lg font-extrabold leading-none text-ink/60 dark:text-gray-300">
                     {entry.rank}
                   </span>
                 </div>
@@ -134,7 +134,7 @@ export function Leaderboard() {
 
                 <div className="min-w-0 space-y-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <div className="min-w-0"><Link to={`/u/${encodeURIComponent(entry.displayName)}`} className="block break-words font-semibold text-hc-ink underline-offset-2 hover:underline dark:text-gray-100">{entry.displayName}</Link>{entry.bio && <p className="truncate text-xs text-hc-ink/60 dark:text-gray-400">{entry.bio}</p>}</div>
+                <div className="min-w-0"><Link to={`/u/${encodeURIComponent(entry.displayName)}`} className="block break-words font-bold text-ink underline-offset-2 hover:underline dark:text-gray-100">{entry.displayName}</Link>{entry.bio && <p className="truncate text-xs text-ink/60 dark:text-gray-400">{entry.bio}</p>}</div>
                     {entry.isHackClubMember && <HackClubFlag className="h-4 w-4 shrink-0" />}
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -145,10 +145,10 @@ export function Leaderboard() {
                 </div>
 
                 <div className="flex flex-col items-end gap-1 text-right">
-                  <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-hc-ink dark:text-gray-100 sm:text-3xl">
+                  <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-ink dark:text-gray-100 sm:text-3xl">
                     <span title={formatScore(entry.score).exact}>{formatScore(entry.score).visual}</span>
                   </span>
-                  <span className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-hc-ink/45 dark:text-gray-400">
+                  <span className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-ink/45 dark:text-gray-400">
                     score
                   </span>
                 </div>

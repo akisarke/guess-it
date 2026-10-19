@@ -10,6 +10,7 @@
     "migrate": "prisma migrate dev",
     "seed": "tsx src/seed.ts",
     "reset:users": "tsx src/scripts/reset-users.ts",
+    "prune:users": "tsx src/scripts/prune-users.ts",
     "generate:daily": "tsx src/jobs/generate-daily.ts",
     "test": "vitest run"
   },

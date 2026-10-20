@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { resolveApiAssetUrl } from '../lib/api';
 
 interface ProfileAvatarProps {
-  readonly src: string | null;
-  readonly alt: string;
+  src: string | null;
+  alt: string;
 }
 
 export function ProfileAvatar({ src, alt }: ProfileAvatarProps) {

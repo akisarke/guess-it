@@ -1,19 +1,19 @@
 import { Link } from 'react-router-dom';
 
 export interface StateCardAction {
-  readonly label: string;
-  readonly href?: string;
-  readonly onClick?: () => void;
+  label: string;
+  href?: string;
+  onClick?: () => void;
 }
 
 export interface StateCardProps {
-  readonly badge: string;
-  readonly title: string;
-  readonly description: string;
-  readonly primaryAction?: StateCardAction;
-  readonly secondaryAction?: StateCardAction;
-  readonly retryAction?: () => void;
-  readonly role?: 'alert' | 'status';
+  badge: string;
+  title: string;
+  description: string;
+  primaryAction?: StateCardAction;
+  secondaryAction?: StateCardAction;
+  retryAction?: () => void;
+  role?: 'alert' | 'status';
 }
 
 export function StateCard({

@@ -8,18 +8,18 @@ class PuzzleUnavailableError extends ExternalServiceError {
   constructor() { super('The daily puzzle is unavailable. Please try again later.'); }
 }
 type MatchDetails = Duel & {
-  readonly opponent: {
-    readonly id: string;
-    readonly displayName: string;
-    readonly completed: boolean;
-    readonly score: number | null;
+  opponent: {
+    id: string;
+    displayName: string;
+    completed: boolean;
+    score: number | null;
   };
 };
 type QueueResult = {
-  readonly status: 'idle' | 'waiting' | 'matched';
-  readonly entryId: string | null;
-  readonly match: MatchDetails | null;
-  readonly isNewMatch: boolean;
+  status: 'idle' | 'waiting' | 'matched';
+  entryId: string | null;
+  match: MatchDetails | null;
+  isNewMatch: boolean;
 };
 const idle: QueueResult = { status: 'idle', entryId: null, match: null, isNewMatch: false };
 

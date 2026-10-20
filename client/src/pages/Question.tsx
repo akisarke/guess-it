@@ -50,7 +50,7 @@ export function Question() {
         navigate={navigate}
         chip="Play in order"
         title="Finish the previous round first"
-        description="Jumping ahead is disabled — you'll return to your next unanswered question."
+        description="Jumping ahead is disabled. You'll return to your next unanswered question."
       />
     );
   }
@@ -151,11 +151,11 @@ export function Question() {
 }
 
 function Redirecting({ href, navigate, chip, title, description }: {
-  readonly href: string;
-  readonly navigate: (to: string) => void;
-  readonly chip: string;
-  readonly title: string;
-  readonly description: string;
+  href: string;
+  navigate: (to: string) => void;
+  chip: string;
+  title: string;
+  description: string;
 }) {
   useEffect(() => {
     navigate(href);

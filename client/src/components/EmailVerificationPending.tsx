@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Mail } from 'lucide-react';
 import { api } from '../lib/api';
 
-export function EmailVerificationPending({ email }: { readonly email?: string | null }) {
+export function EmailVerificationPending({ email }: { email?: string | null }) {
   const [address, setAddress] = useState(email ?? '');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function EmailVerificationPending({ email }: { readonly email?: string | 
       <span className="auth-field"><Mail size={18} className="auth-field-icon" aria-hidden="true" /><input id="verification-email" className="w-full" type="email" value={address} onChange={(event) => setAddress(event.target.value)} autoComplete="email" required /></span>
       {message && <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6" role="status">{message}</p>}
       {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p>}
-      <button className="btn-primary w-full" type="submit" disabled={loading || !address.trim()}>{loading ? 'Sending…' : 'Resend verification email'}</button>
+      <button className="btn-primary w-full" type="submit" disabled={loading || !address.trim()}>{loading ? 'Sending...' : 'Resend verification email'}</button>
     </form>
   </div>;
 }

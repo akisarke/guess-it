@@ -7,8 +7,7 @@ export abstract class ApplicationError extends Error {
     message: string,
     readonly resetAt?: string,
     readonly resetAtMs?: number,
-    options?: ErrorOptions,
-  ) {
+    options?: ErrorOptions) {
     super(message, options);
     this.name = new.target.name;
   }

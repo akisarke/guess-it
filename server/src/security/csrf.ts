@@ -4,14 +4,14 @@ export const csrfCookieName = 'guessit_csrf';
 export const csrfHeaderName = 'x-csrf-token';
 export const csrfFailure = { error: 'CSRF_VALIDATION_FAILED' } as const;
 
-type CookieReply = { readonly setCookie: (name: string, value: string, options: Readonly<Record<string, unknown>>) => unknown };
+type CookieReply = { setCookie: (name: string, value: string, options: Record<string, unknown>) => unknown };
 type CsrfRequest = {
-  readonly cookies: Readonly<Record<string, string | undefined>>;
-  readonly headers: Readonly<Record<string, string | string[] | undefined>>;
-  readonly unsignCookie: (value: string) => { readonly valid: boolean; readonly value?: string | null };
+  cookies: Record<string, string | undefined>;
+  headers: Record<string, string | string[] | undefined>;
+  unsignCookie: (value: string) => { valid: boolean; value?: string | null };
 };
 
-export function issueCsrfToken(reply: CookieReply, options: { readonly secure: boolean }): string {
+export function issueCsrfToken(reply: CookieReply, options: { secure: boolean }): string {
   const token = randomBytes(32).toString('base64url');
   reply.setCookie(csrfCookieName, token, {
     signed: true,

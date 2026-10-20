@@ -1,11 +1,11 @@
 import type { PrismaClient } from '@prisma/client';
 import { removeLocalAvatar } from './avatar-files.js';
 
-export type PruneConfig = Readonly<{
+export type PruneConfig = {
   keepDisplayName: string;
-}>;
+};
 
-export type PruneCounts = Readonly<{
+export type PruneCounts = {
   users: number;
   guesses: number;
   streaks: number;
@@ -13,7 +13,7 @@ export type PruneCounts = Readonly<{
   queueEntries: number;
   duels: number;
   keptUserId: string;
-}>;
+};
 
 export function parsePruneConfig(env: NodeJS.ProcessEnv): PruneConfig {
   if (env.PRUNE_USERS_CONFIRM !== 'delete-all-but-keep-one') throw new Error('PRUNE_USERS_CONFIRM must be exactly delete-all-but-keep-one.');

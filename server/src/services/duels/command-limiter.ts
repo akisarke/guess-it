@@ -1,6 +1,6 @@
 import type { PlayerId } from 'shared';
 
-export type DuelCommandLimit = Readonly<{ capacity: number; windowMs: number }>;
+export type DuelCommandLimit = { capacity: number; windowMs: number };
 export type DuelClock = () => number;
 
 export interface DuelCommandLimiter {
@@ -8,7 +8,7 @@ export interface DuelCommandLimiter {
 }
 
 export function createDuelCommandLimiter(limit: DuelCommandLimit, now: DuelClock = Date.now): DuelCommandLimiter {
-  const entries = new Map<PlayerId, Readonly<{ count: number; resetAtMs: number }>>();
+  const entries = new Map<PlayerId, { count: number; resetAtMs: number }>();
   return {
     allow(playerId) {
       const nowMs = now();

@@ -94,6 +94,6 @@ export function DuelBattle() {
   );
 }
 
-function DuelState({ title, description, children }: { readonly title: string; readonly description: string; readonly children?: React.ReactNode }) {
+function DuelState({ title, description, children }: { title: string; description: string; children?: React.ReactNode }) {
   return <div className="mx-auto max-w-lg px-4 py-12"><div className="card space-y-4 text-center"><span className="chip chip-idle mx-auto">Duel</span><h1 className="font-display text-3xl font-extrabold">{title}</h1><p className="text-sm leading-6 text-ink/65 dark:text-gray-300">{description}</p>{children}</div></div>;
 }

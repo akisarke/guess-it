@@ -10,7 +10,7 @@ import '../reveal.css';
 
 export function GeneratedSetSummary() {
   const { setId, prefix } = useSoloRoute();
-  const [state, setState] = useState<{ readonly id: string; readonly summary: GeneratedGameSummaryResponse | null; readonly error: Error | null } | null>(null);
+  const [state, setState] = useState<{ id: string; summary: GeneratedGameSummaryResponse | null; error: Error | null } | null>(null);
   useEffect(() => {
     if (setId === undefined) return;
     let active = true;
@@ -34,7 +34,7 @@ export function GeneratedSetSummary() {
         <span className="chip chip-idle">Answered {progress.answeredCount}/3</span>
         <section className="reveal-metric">
           <h2 className="reveal-metric-label">Average score</h2>
-          <p className="reveal-score">{summary.averageScore === null ? '—' : `${summary.averageScore.toFixed(2)}×`}</p>
+          <p className="reveal-score">{summary.averageScore === null ? '-' : `${summary.averageScore.toFixed(2)}×`}</p>
           {!summary.completed && <p>Complete all three questions to see your average.</p>}
         </section>
         <ol className="space-y-3">

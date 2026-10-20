@@ -1,4 +1,4 @@
-type ResendResponse = { readonly id?: string; readonly message?: string };
+type ResendResponse = { id?: string; message?: string };
 import type { ServerConfig } from '../config.js';
 import { ConfigurationError, ExternalServiceGatewayError } from '../errors/application-error.js';
 

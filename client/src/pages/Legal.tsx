@@ -9,7 +9,7 @@ const content: Record<LegalKind, { title: string; intro: string; sections: reado
     sections: [
       { heading: 'What we store', body: 'Account details, guesses, scores, streaks, and profile information you choose to add. Anonymous play uses a temporary account so your daily progress can be saved.' },
       { heading: 'How we use it', body: 'We use this information to provide the game, protect accounts, calculate scores, and improve reliability. We do not sell personal information.' },
-      { heading: 'Your choices', body: 'You can stop using the service at any time. Contact the service owner through the project’s support channel for account or data questions.' },
+      { heading: 'Your choices', body: 'You can stop using the service at any time. Contact the service owner through the project\'s support channel for account or data questions.' },
     ],
   },
   terms: {

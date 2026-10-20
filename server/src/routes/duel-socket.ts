@@ -36,7 +36,7 @@ function parseJson(payload: string): unknown {
   return JSON.parse(payload);
 }
 
-export async function duelSocketRoutes(app: FastifyInstance, options: { readonly coordinator: DuelCoordinator; readonly commandLimiter: DuelCommandLimiter }) {
+export async function duelSocketRoutes(app: FastifyInstance, options: { coordinator: DuelCoordinator; commandLimiter: DuelCommandLimiter }) {
   const validateOrigin = async (request: FastifyRequest, reply: { status: (code: number) => { send: (body: unknown) => unknown } }) => {
     const origin = typeof request.headers.origin === 'string' ? request.headers.origin : undefined;
     if (!decideWebSocketOrigin(origin, request.server.config.clientOrigins)) throw new AuthorizationError('WebSocket origin not allowed');
@@ -48,7 +48,7 @@ export async function duelSocketRoutes(app: FastifyInstance, options: { readonly
       return;
     }
     const playerId = parsePlayerId(userId);
-    let subscribed: { readonly duelId: ReturnType<typeof parseDuelId> } | null = null;
+    let subscribed: { duelId: ReturnType<typeof parseDuelId> } | null = null;
     const send = (event: unknown) => socket.send(JSON.stringify(event));
 
     socket.on('message', (payload) => {

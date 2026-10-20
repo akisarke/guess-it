@@ -26,7 +26,7 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
           <span className="chip chip-idle !px-2.5 !py-1 text-xs">log scale</span>
         </div>
         <div className="rounded-[1.5rem] border-2 border-dashed border-ink/10 bg-white/50 p-4 text-center dark:border-white/15 dark:bg-[var(--surface)]">
-          <p className="text-sm font-bold text-ink/70 dark:text-gray-200">No distribution data yet — lock in a guess to start it.</p>
+          <p className="text-sm font-bold text-ink/70 dark:text-gray-200">No distribution data yet. Lock in a guess to start it.</p>
         </div>
       </div>
     );
@@ -150,7 +150,7 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
 
       {isSparse && (
         <p className="rounded-2xl border-2 border-dashed border-ink/10 bg-white/60 px-4 py-3 text-center text-sm font-bold text-ink/70 dark:border-white/15 dark:bg-[var(--surface)] dark:text-gray-200">
-          Not enough guesses yet for a full distribution — you&apos;re one of the first {totalGuesses} in.
+          Not enough guesses yet for a full distribution. You&apos;re one of the first {totalGuesses} in.
         </p>
       )}
 

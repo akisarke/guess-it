@@ -8,22 +8,22 @@ import { RateLimitError } from '../errors/application-error.js';
 const MAX_GENERATIONS_PER_DAY = 3;
 const MAX_TRANSACTION_RETRIES = 3;
 
-export type GeneratedQuestionInput = Readonly<{
-  readonly prompt: string;
-  readonly unit: string;
-  readonly answer: number;
-  readonly napkinMath: string;
-}>;
+export type GeneratedQuestionInput = {
+  prompt: string;
+  unit: string;
+  answer: number;
+  napkinMath: string;
+};
 
-export type CreateGeneratedSetInput = Readonly<{
-  readonly ownerId: string;
-  readonly title: string;
-  readonly topic: string;
-  readonly difficulty: 'easy' | 'medium' | 'hard' | null;
-  readonly questions: readonly [GeneratedQuestionInput, GeneratedQuestionInput, GeneratedQuestionInput];
-  readonly sourceUrl: string;
-  readonly now?: Date;
-}>;
+export type CreateGeneratedSetInput = {
+  ownerId: string;
+  title: string;
+  topic: string;
+  difficulty: 'easy' | 'medium' | 'hard' | null;
+  questions: readonly [GeneratedQuestionInput, GeneratedQuestionInput, GeneratedQuestionInput];
+  sourceUrl: string;
+  now?: Date;
+};
 
 export class GeneratedSetQuotaError extends RateLimitError {
   constructor(resetAt?: string, resetAtMs?: number) {
@@ -54,7 +54,7 @@ function isSerializationConflict(error: unknown): boolean {
 export async function createGeneratedSet(
   prisma: PrismaClient,
   input: CreateGeneratedSetInput,
-): Promise<{ readonly set: GeneratedQuestionSet; readonly remainingGenerations: number }> {
+): Promise<{ set: GeneratedQuestionSet; remainingGenerations: number }> {
   const now = input.now ?? new Date();
   const day = utcDayRange(now);
 

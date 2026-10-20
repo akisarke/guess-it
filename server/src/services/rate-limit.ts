@@ -4,15 +4,15 @@ import type { LimiterPolicyName } from '../config.js';
 import { RateLimitError } from '../errors/application-error.js';
 
 export type LimiterKey = `${string}:${string}`;
-export type LimiterInput = Readonly<{ key: LimiterKey; limit: number; windowMs: number; nowMs: number }>;
-export type LimiterResult = Readonly<{ allowed: boolean; remaining: number; resetAtMs: number }>;
+export type LimiterInput = { key: LimiterKey; limit: number; windowMs: number; nowMs: number };
+export type LimiterResult = { allowed: boolean; remaining: number; resetAtMs: number };
 
 export interface LimiterStore {
   consume(input: LimiterInput): Promise<LimiterResult>;
 }
 
 export function createDeterministicLimiterStore(): LimiterStore {
-  const entries = new Map<string, Readonly<{ count: number; resetAtMs: number }>>();
+  const entries = new Map<string, { count: number; resetAtMs: number }>();
   return {
     async consume(input) {
       const current = entries.get(input.key);

@@ -58,7 +58,7 @@ function ordinal(n: number): string {
 export function Reveal() {
   const navigate = useNavigate();
   const { puzzle, loading, error, idx, setId, prefix, query: puzzleQuery } = useSoloGame();
-  const [dist, setDist] = useState<{ readonly questionId: string; readonly data: DistributionResponse } | null>(null);
+  const [dist, setDist] = useState<{ questionId: string; data: DistributionResponse } | null>(null);
 
   const question: QuestionPublic | null =
     puzzle && puzzle.questions && puzzle.questions[idx] ? puzzle.questions[idx] : null;
@@ -129,13 +129,13 @@ export function Reveal() {
     rank == null
       ? 'Rank is still being counted.'
       : rank.total <= 1
-        ? "You're the first to lock in — check back as more players guess."
+        ? "You're the first to lock in. Check back as more players guess."
         : `You were the ${ordinal(rank.rank)} closest of ${rank.total} players.`;
   const nextHref = idx < puzzle.questions.length - 1 ? `${prefix}/reveal/${idx + 1}${puzzleQuery}` : `${prefix}/summary`;
   const nextLabel = idx < puzzle.questions.length - 1 ? 'Next Question' : 'See Summary';
   const sourceLabel = 'set' in puzzle ? puzzle.set.title : `Puzzle #${puzzle.puzzle.puzzleNumber}`;
-  const guessLabel = userGuess != null ? `${formatValue(userGuess)} ${question.unit}` : '—';
-  const answerLabel = answer != null ? `${formatValue(answer)} ${question.unit}` : '—';
+  const guessLabel = userGuess != null ? `${formatValue(userGuess)} ${question.unit}` : '-';
+  const answerLabel = answer != null ? `${formatValue(answer)} ${question.unit}` : '-';
   const napkinMath = distData?.napkinMath?.trim() ? distData.napkinMath : '';
   const parsedNapkinMath = napkinMath ? parseNapkinMath(napkinMath) : null;
 
@@ -159,7 +159,7 @@ export function Reveal() {
             <article className="reveal-panel reveal-panel--guess">
               <p className="reveal-kicker">Your guess</p>
               <div className="mt-4 flex flex-wrap items-end gap-3">
-                 <div className="reveal-value reveal-value--yellow" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{userGuess != null ? formatValue(userGuess) : '—'}</div>
+                 <div className="reveal-value reveal-value--yellow" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{userGuess != null ? formatValue(userGuess) : '-'}</div>
                 <div className="reveal-unit">{question.unit}</div>
               </div>
               <p className="reveal-copy mt-3">You locked in {guessLabel}. The app scored the guess after the answer was revealed.</p>
@@ -178,7 +178,7 @@ export function Reveal() {
             <article className="reveal-panel reveal-panel--answer">
               <p className="reveal-kicker">Correct answer</p>
               <div className="mt-4 flex flex-wrap items-end gap-3">
-                 <div className="reveal-value reveal-value--answer" title={answer != null ? formatExactNumber(answer) : undefined}>{answer != null ? formatValue(answer) : '—'}</div>
+                 <div className="reveal-value reveal-value--answer" title={answer != null ? formatExactNumber(answer) : undefined}>{answer != null ? formatValue(answer) : '-'}</div>
                 <div className="reveal-unit text-ink/70 dark:text-white/70">{question.unit}</div>
               </div>
               <p className="reveal-copy mt-3">The estimated answer is {answerLabel}.</p>
@@ -265,7 +265,7 @@ export function Reveal() {
                 </div>
                 <div className="reveal-metric">
                   <p className="reveal-metric-label">Rank</p>
-                  <p className="reveal-metric-value">{rank ? `${ordinal(rank.rank)} of ${rank.total}` : '—'}</p>
+                  <p className="reveal-metric-value">{rank ? `${ordinal(rank.rank)} of ${rank.total}` : '-'}</p>
                 </div>
                 <div className="reveal-metric">
                   <p className="reveal-metric-label">Direction</p>

@@ -25,8 +25,8 @@ const profileUpdateSchema = z.object({
 export type ProfileUpdate = z.infer<typeof profileUpdateSchema>;
 
 export type ProfileUpdateResult =
-  | { readonly ok: true; readonly value: ProfileUpdate }
-  | { readonly ok: false; readonly error: string };
+  | { ok: true; value: ProfileUpdate }
+  | { ok: false; error: string };
 
 export function parseProfileUpdate(input: unknown): ProfileUpdateResult {
   const result = profileUpdateSchema.safeParse(input);

@@ -23,7 +23,7 @@ export function formatCompactNumber(value: number): string {
   return `${(safeValue / unit.value).toLocaleString('en-US', { maximumFractionDigits: 2 })}${unit.suffix}`;
 }
 
-export function formatScore(value: number): { readonly visual: string; readonly exact: string; readonly isTimeout: boolean } {
+export function formatScore(value: number): { visual: string; exact: string; isTimeout: boolean } {
   if (value === DUEL_TIMEOUT_SCORE) return { visual: 'Timed out', exact: 'Timed out', isTimeout: true };
   return { visual: `${formatCompactNumber(value)}×`, exact: `${formatExactNumber(value)}×`, isTimeout: false };
 }

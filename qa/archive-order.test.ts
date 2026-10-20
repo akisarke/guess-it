@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test';
 
 type ArchivePuzzleNumber = {
-  readonly puzzleNumber: number;
+  puzzleNumber: number;
 };
 
 type ArchivePayload = {
-  readonly puzzles: readonly ArchivePuzzleNumber[];
+  puzzles: readonly ArchivePuzzleNumber[];
 };
 
 function isArchivePayload(value: unknown): value is ArchivePayload {

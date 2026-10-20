@@ -1,9 +1,9 @@
 export interface ShareableProfile {
-  readonly displayName: string;
+  displayName: string;
 }
 
 export class ProfileShareError extends Error {
-  readonly code = 'clipboard-failed' as const;
+  code = 'clipboard-failed' as const;
 
   constructor() {
     super('Unable to copy the profile link.');

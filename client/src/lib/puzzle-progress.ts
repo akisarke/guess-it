@@ -1,12 +1,12 @@
 import type { QuestionPublic } from 'shared';
 
 export interface PuzzleProgress {
-  readonly answeredCount: number;
-  readonly firstUnansweredIndex: number;
-  readonly isComplete: boolean;
+  answeredCount: number;
+  firstUnansweredIndex: number;
+  isComplete: boolean;
 }
 
-export function derivePuzzleProgress(puzzle: { readonly questions: readonly QuestionPublic[]; readonly userGuesses: Readonly<Record<string, number>> }): PuzzleProgress {
+export function derivePuzzleProgress(puzzle: { questions: readonly QuestionPublic[]; userGuesses: Record<string, number> }): PuzzleProgress {
   const firstUnansweredIndex = puzzle.questions.findIndex((question) => !puzzle.userGuesses[question.id]);
   const answeredCount = puzzle.questions.reduce(
     (count, question) => count + (puzzle.userGuesses[question.id] ? 1 : 0),

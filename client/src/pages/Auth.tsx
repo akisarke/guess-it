@@ -173,7 +173,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
             {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6 text-ink dark:text-gray-100" role="alert">{error}</p>}
 
             <button type="submit" className="btn-primary w-full" disabled={submitting}>
-              {submitting ? 'Working…' : isSignup ? 'Create account' : 'Sign in'}
+              {submitting ? 'Working...' : isSignup ? 'Create account' : 'Sign in'}
               {!submitting && <ArrowRight size={18} aria-hidden="true" />}
             </button>
             </form>

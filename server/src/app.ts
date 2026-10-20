@@ -47,12 +47,12 @@ declare module 'fastify' {
 }
 
 export interface BuildAppOptions {
-  readonly config: ServerConfig;
-  readonly prisma?: PrismaClient;
-  readonly logger?: boolean;
-  readonly duelCoordinator?: DuelCoordinator;
-  readonly limiterStore?: LimiterStore;
-  readonly clientDistDir?: string;
+  config: ServerConfig;
+  prisma?: PrismaClient;
+  logger?: boolean;
+  duelCoordinator?: DuelCoordinator;
+  limiterStore?: LimiterStore;
+  clientDistDir?: string;
 }
 
 function defaultClientDistDir(): string {

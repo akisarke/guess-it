@@ -18,9 +18,9 @@ export function useSoloGame() {
   const route = useSoloRoute();
   const { setId, archivePuzzleNumber } = route;
   const [state, setState] = useState<{
-    readonly key: string;
-    readonly puzzle: PuzzleResponse | GeneratedGameSourceResponse | null;
-    readonly error: Error | null;
+    key: string;
+    puzzle: PuzzleResponse | GeneratedGameSourceResponse | null;
+    error: Error | null;
   } | null>(null);
   const key = JSON.stringify([setId, archivePuzzleNumber]);
 

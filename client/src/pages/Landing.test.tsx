@@ -186,6 +186,6 @@ describe('Landing progress rehydration', () => {
 
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/play/0'));
     expect(api.getTodayPuzzle).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('Loading puzzle…')).not.toBeInTheDocument();
+    expect(screen.queryByText('Loading puzzle...')).not.toBeInTheDocument();
   });
 });

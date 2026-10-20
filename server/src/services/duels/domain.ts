@@ -8,44 +8,44 @@ export const DUEL_RECONNECT_GRACE_MS = 20_000;
 export const DUEL_TIMEOUT_SCORE = 1e18;
 
 export interface DuelDomainQuestion {
-  readonly id: string;
-  readonly prompt: string;
-  readonly unit: string;
-  readonly answer: number;
+  id: string;
+  prompt: string;
+  unit: string;
+  answer: number;
 }
 
 export interface DuelDomainPlayer {
-  readonly playerId: PlayerId;
-readonly displayName: string;
-readonly avatarUrl: string | null;
-readonly bio?: string | null;
+  playerId: PlayerId;
+displayName: string;
+avatarUrl: string | null;
+bio?: string | null;
 }
 
 export interface DuelDomainSubmission {
-  readonly value: number;
-  readonly score: number;
-  readonly timedOut: boolean;
+  value: number;
+  score: number;
+  timedOut: boolean;
 }
 
 export interface DuelDomainRound {
-  readonly question: DuelDomainQuestion;
-  readonly submissions: DuelSubmissionPair;
+  question: DuelDomainQuestion;
+  submissions: DuelSubmissionPair;
 }
 
 export type DuelSubmissionPair = readonly [DuelDomainSubmission | null, DuelDomainSubmission | null];
 
 export interface DuelDomainState {
-  readonly duelId: DuelId;
-  readonly players: readonly [DuelDomainPlayer, DuelDomainPlayer];
-  readonly rounds: readonly [DuelDomainRound, DuelDomainRound, DuelDomainRound];
-  readonly phase: DuelPhase;
-  readonly roundIndex: number;
-  readonly roundStartedAt: string | null;
-  readonly roundDeadline: string | null;
-  readonly revealEndsAt: string | null;
-  readonly disconnectedUntil: readonly [string | null, string | null];
-  readonly winner: PlayerId | 'draw' | null;
-  readonly version: number;
+  duelId: DuelId;
+  players: readonly [DuelDomainPlayer, DuelDomainPlayer];
+  rounds: readonly [DuelDomainRound, DuelDomainRound, DuelDomainRound];
+  phase: DuelPhase;
+  roundIndex: number;
+  roundStartedAt: string | null;
+  roundDeadline: string | null;
+  revealEndsAt: string | null;
+  disconnectedUntil: readonly [string | null, string | null];
+  winner: PlayerId | 'draw' | null;
+  version: number;
 }
 
 export class DuelDomainError extends Error {
@@ -56,10 +56,10 @@ export class DuelDomainError extends Error {
 }
 
 export function createDuelState(input: {
-  readonly duelId: DuelId;
-  readonly players: readonly [DuelDomainPlayer, DuelDomainPlayer];
-  readonly questions: readonly [DuelDomainQuestion, DuelDomainQuestion, DuelDomainQuestion];
-  readonly now: Date;
+  duelId: DuelId;
+  players: readonly [DuelDomainPlayer, DuelDomainPlayer];
+  questions: readonly [DuelDomainQuestion, DuelDomainQuestion, DuelDomainQuestion];
+  now: Date;
 }): DuelDomainState {
   const startedAt = input.now.toISOString();
   const deadline = new Date(input.now.getTime() + DUEL_ROUND_TIMEOUT_MS).toISOString();
@@ -84,19 +84,19 @@ export function createDuelState(input: {
 }
 
 export function restoreDuelState(input: {
-  readonly duelId: DuelId;
-  readonly players: readonly [DuelDomainPlayer, DuelDomainPlayer];
-  readonly questions: readonly [DuelDomainQuestion, DuelDomainQuestion, DuelDomainQuestion];
-  readonly submissions: readonly [DuelSubmissionPair, DuelSubmissionPair, DuelSubmissionPair];
-  readonly phase: DuelPhase;
-  readonly roundIndex: number;
-  readonly roundStartedAt: string | null;
-  readonly roundDeadline: string | null;
-  readonly revealEndsAt: string | null;
-  readonly disconnectedUntil: readonly [string | null, string | null];
-  readonly winner: PlayerId | 'draw' | null;
-  readonly version: number;
-  readonly now: Date;
+  duelId: DuelId;
+  players: readonly [DuelDomainPlayer, DuelDomainPlayer];
+  questions: readonly [DuelDomainQuestion, DuelDomainQuestion, DuelDomainQuestion];
+  submissions: readonly [DuelSubmissionPair, DuelSubmissionPair, DuelSubmissionPair];
+  phase: DuelPhase;
+  roundIndex: number;
+  roundStartedAt: string | null;
+  roundDeadline: string | null;
+  revealEndsAt: string | null;
+  disconnectedUntil: readonly [string | null, string | null];
+  winner: PlayerId | 'draw' | null;
+  version: number;
+  now: Date;
 }): DuelDomainState {
   const base = createDuelState({ duelId: input.duelId, players: input.players, questions: input.questions, now: input.now });
   const rounds: readonly [DuelDomainRound, DuelDomainRound, DuelDomainRound] = [

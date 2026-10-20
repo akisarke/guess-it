@@ -2,18 +2,18 @@ import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
 import type { ServerConfig } from '../config.js';
 
-export type GenerationInput = Readonly<{
-  readonly topic: string;
-  readonly difficulty: 'easy' | 'medium' | 'hard' | null;
-  readonly excludedPrompts?: readonly string[];
-}>;
+export type GenerationInput = {
+  topic: string;
+  difficulty: 'easy' | 'medium' | 'hard' | null;
+  excludedPrompts?: readonly string[];
+};
 
-export type GeneratedQuestion = Readonly<{
-  readonly prompt: string;
-  readonly unit: string;
-  readonly answer: number;
-  readonly napkinMath: string;
-}>;
+export type GeneratedQuestion = {
+  prompt: string;
+  unit: string;
+  answer: number;
+  napkinMath: string;
+};
 
 export type GeneratedQuestionBatch = readonly [GeneratedQuestion, GeneratedQuestion, GeneratedQuestion];
 
@@ -64,7 +64,7 @@ type GenerationSchema = (typeof generationSchemas)[keyof typeof generationSchema
 
 import { ConfigurationError, ExternalServiceError } from '../errors/application-error.js';
 
-export type AiConfig = Readonly<{ readonly apiKey: string; readonly model: string }>;
+export type AiConfig = { apiKey: string; model: string };
 
 export class AiConfigurationError extends ConfigurationError {
   constructor(message: string, options?: ErrorOptions) {
@@ -85,11 +85,11 @@ export class AiResponseError extends ExternalServiceError {
 }
 
 export interface GenerationProvider {
-  generateContent(input: Readonly<{ readonly prompt: string; readonly model: string; readonly schema: GenerationSchema }>): Promise<string>;
+  generateContent(input: { prompt: string; model: string; schema: GenerationSchema }): Promise<string>;
 }
 
 export function resolveAiConfig(
-  environment: Readonly<{ readonly GEMINI_API_KEY?: string; readonly GEMINI_MODEL?: string }>,
+  environment: { GEMINI_API_KEY?: string; GEMINI_MODEL?: string },
 ): AiConfig {
   const apiKey = environment.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new AiConfigurationError('Gemini API key is not configured');
@@ -170,7 +170,7 @@ export function createFailoverProvider(providers: readonly GenerationProvider[])
   };
 }
 
-function resolveGenerationConfig(config: ServerConfig, provider?: GenerationProvider): Readonly<{ readonly provider: GenerationProvider; readonly model: string }> {
+function resolveGenerationConfig(config: ServerConfig, provider?: GenerationProvider): { provider: GenerationProvider; model: string } {
   if (provider) return { provider, model: config.gemini?.model ?? 'gemini-2.5-flash' };
   if (!config.gemini) throw new AiConfigurationError('Gemini API key is not configured');
   return { provider: createFailoverProvider(config.gemini.apiKeys.map(createGoogleProvider)), model: config.gemini.model };
@@ -188,7 +188,7 @@ export async function generateQuestionSet(
   const responseText = await selectedProvider.generateContent({ prompt, model, schema: generationSchemas.set });
   const questions = parseGeneratedQuestions(responseText);
   const blocked = new Set(excluded.map((value) => value.trim().toLocaleLowerCase()));
-  if (questions.some((question) => blocked.has(question.prompt.trim().toLocaleLowerCase()))) throw new AiResponseError('AI returned a question already used by today’s daily puzzle.');
+  if (questions.some((question) => blocked.has(question.prompt.trim().toLocaleLowerCase()))) throw new AiResponseError('AI returned a question already used by today\'s daily puzzle.');
   return questions;
 }
 

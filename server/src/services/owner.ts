@@ -2,7 +2,7 @@ import { getSessionUser } from '../middleware/auth.js';
 import type { FastifyRequest } from 'fastify';
 import { AuthenticationError, AuthorizationError } from '../errors/application-error.js';
 
-export function canManageOwnerTools(user: { readonly isOwner: boolean }): boolean {
+export function canManageOwnerTools(user: { isOwner: boolean }): boolean {
   return user.isOwner;
 }
 

@@ -17,17 +17,17 @@ import { ProfileShareError, shareProfile } from '../lib/profile-share';
 type TogglePin = (badgeId: string, currentlyPinned: boolean) => void;
 
 interface ProfileDashboardProps {
-  readonly profile: ProfileResponse;
-  readonly mutationError: string | null;
-  readonly onTogglePin: TogglePin;
-  readonly canManageBadges: boolean;
-  readonly onSaveProfile: (input: ProfileUpdate) => Promise<void>;
-  readonly onUploadAvatar: (file: File) => Promise<string>;
-  readonly onLinkHackClub: () => void;
-  readonly onUnlinkHackClub: () => Promise<void>;
-  readonly onShareProfile: () => void;
-  readonly shareStatus: 'shared' | 'copied' | null;
-  readonly shareError: string | null;
+  profile: ProfileResponse;
+  mutationError: string | null;
+  onTogglePin: TogglePin;
+  canManageBadges: boolean;
+  onSaveProfile: (input: ProfileUpdate) => Promise<void>;
+  onUploadAvatar: (file: File) => Promise<string>;
+  onLinkHackClub: () => void;
+  onUnlinkHackClub: () => Promise<void>;
+  onShareProfile: () => void;
+  shareStatus: 'shared' | 'copied' | null;
+  shareError: string | null;
 }
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' });

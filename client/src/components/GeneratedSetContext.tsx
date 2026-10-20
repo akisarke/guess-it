@@ -1,6 +1,6 @@
 import type { GeneratedQuestionSetSummary } from 'shared';
 
-export function GeneratedSetContext({ set }: { readonly set: GeneratedQuestionSetSummary }) {
+export function GeneratedSetContext({ set }: { set: GeneratedQuestionSetSummary }) {
   return (
     <section className="mb-6 space-y-2 break-words" aria-label="Generated set source">
       <span className="chip chip-idle">Generated set</span>

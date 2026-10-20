@@ -164,7 +164,7 @@ export function Calculator({ onUseResult, onClose }: CalculatorProps) {
               id="scratch-pad"
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Jot notes, work things out…"
+              placeholder="Jot notes, work things out..."
               spellCheck={false}
               className="flex-1 resize-none bg-transparent p-4 text-sm leading-6 text-ink outline-none placeholder:text-ink/35 dark:text-gray-100 dark:placeholder:text-gray-500"
             />

@@ -12,8 +12,8 @@ export type ErrorCode =
   | 'INTERNAL_ERROR';
 
 export interface ErrorResponse {
-  readonly error: string;
-  readonly code: ErrorCode;
-  readonly resetAt?: string;
-  readonly resetAtMs?: number;
+  error: string;
+  code: ErrorCode;
+  resetAt?: string;
+  resetAtMs?: number;
 }

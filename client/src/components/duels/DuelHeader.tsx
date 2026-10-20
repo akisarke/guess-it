@@ -1,7 +1,7 @@
 import type { DuelSnapshot } from 'shared';
 import { formatExactNumber } from '../../lib/format-number';
 
-export function DuelHeader({ snapshot, remainingMs }: { readonly snapshot: DuelSnapshot; readonly remainingMs: number | null }) {
+export function DuelHeader({ snapshot, remainingMs }: { snapshot: DuelSnapshot; remainingMs: number | null }) {
   const remainingSeconds = remainingMs === null ? null : Math.max(0, Math.ceil(remainingMs / 1000));
   const timerLabel = remainingSeconds === null ? 'Reveal in progress' : `${remainingSeconds}s left`;
   const round = Math.min(snapshot.roundIndex + 1, 3);

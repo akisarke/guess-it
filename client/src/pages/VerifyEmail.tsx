@@ -17,7 +17,7 @@ export function VerifyEmail() {
   }, [token, verified]);
 
   return <AuthRecoveryShell title={verified ? 'Email verified' : 'Verify your email'} description={verified ? 'Your email is verified. You can continue using Guess It!' : 'Use the link from your email to verify your account.'}>
-    {error ? <p className="mt-8 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p> : !verified && <p className="mt-8 text-sm text-ink/60 dark:text-gray-300">Verifying your link…</p>}
+    {error ? <p className="mt-8 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p> : !verified && <p className="mt-8 text-sm text-ink/60 dark:text-gray-300">Verifying your link...</p>}
     <Link className="btn-primary mt-6 inline-block" to="/">Continue</Link>
   </AuthRecoveryShell>;
 }

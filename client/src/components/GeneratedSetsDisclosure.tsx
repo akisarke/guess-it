@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { GeneratedQuestionSetSummary } from 'shared';
 
-export function GeneratedSetsDisclosure({ sets }: { readonly sets: readonly GeneratedQuestionSetSummary[] }) {
+export function GeneratedSetsDisclosure({ sets }: { sets: readonly GeneratedQuestionSetSummary[] }) {
   return (
     <section className="mt-6 space-y-3 rounded-3xl border-2 border-ink/15 bg-white/75 p-5 dark:border-white/10 dark:bg-[var(--surface)]" aria-labelledby="generated-sets-heading">
       <div className="flex flex-wrap items-start justify-between gap-3">

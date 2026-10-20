@@ -12,7 +12,7 @@ const catalogQuestionSchema = z.object({
 export type CatalogQuestionInput = z.infer<typeof catalogQuestionSchema>;
 
 export class CatalogQuestionError extends Error {
-  readonly code = 'QUESTION_CATALOG_TOO_SMALL' as const;
+  code = 'QUESTION_CATALOG_TOO_SMALL' as const;
 
   constructor() {
     super('The question catalog must contain at least three eligible questions.');
@@ -21,15 +21,15 @@ export class CatalogQuestionError extends Error {
 }
 
 type CatalogQuestionStore = {
-  readonly question: {
-    readonly findMany: (args: {
-      readonly where: { readonly source: 'daily' };
-      readonly orderBy: { readonly id: 'asc' };
-      readonly select: { readonly id: true; readonly prompt: true };
-    }) => Promise<readonly { readonly id: string; readonly prompt?: string }[]>;
+  question: {
+    findMany: (args: {
+      where: { source: 'daily' };
+      orderBy: { id: 'asc' };
+      select: { id: true; prompt: true };
+    }) => Promise<readonly { id: string; prompt?: string }[]>;
   };
-  readonly dailyPuzzle: {
-    readonly findMany: (args: { readonly where?: { readonly puzzleDate: Date }; readonly select?: { readonly questionIds: true }; readonly orderBy?: { readonly puzzleDate: 'desc' } }) => Promise<readonly { readonly questionIds: readonly string[] }[]>;
+  dailyPuzzle: {
+    findMany: (args: { where?: { puzzleDate: Date }; select?: { questionIds: true }; orderBy?: { puzzleDate: 'desc' } }) => Promise<readonly { questionIds: readonly string[] }[]>;
   };
 };
 

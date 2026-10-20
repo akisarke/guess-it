@@ -3,9 +3,9 @@ import type { FastifyInstance } from 'fastify';
 import { ApplicationError } from './application-error.js';
 
 type FastifyLikeError = Error & {
-  readonly code?: string;
-  readonly statusCode?: number;
-  readonly validation?: readonly unknown[];
+  code?: string;
+  statusCode?: number;
+  validation?: readonly unknown[];
 };
 
 function isFastifyLikeError(error: unknown): error is FastifyLikeError {

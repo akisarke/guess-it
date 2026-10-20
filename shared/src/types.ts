@@ -31,9 +31,9 @@ export interface Question {
 }
 
 export interface QuestionPublic {
-  readonly id: string;
-  readonly prompt: string;
-  readonly unit: string;
+  id: string;
+  prompt: string;
+  unit: string;
 }
 
 export interface Guess {
@@ -96,7 +96,7 @@ export interface QueueEntry {
 }
 
 export interface PuzzleResponse {
-  readonly source: GameSourceRef;
+  source: GameSourceRef;
   puzzle: DailyPuzzle;
   questions: QuestionPublic[];
   userGuesses: Record<string, number>;
@@ -114,9 +114,9 @@ export interface ArchiveResponse {
 }
 
 export interface GuessRequest {
-  readonly source: GameSourceRef;
-  readonly questionId: string;
-  readonly value: number;
+  source: GameSourceRef;
+  questionId: string;
+  value: number;
 }
 
 export interface GuessResponse {

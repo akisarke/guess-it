@@ -3,7 +3,7 @@ import { ApiError } from '../lib/api';
 import { NotLoggedIn } from './NotLoggedIn';
 import { StateCard } from './StateCard';
 
-export function SoloLoadError({ error }: { readonly error: Error }) {
+export function SoloLoadError({ error }: { error: Error }) {
   if (error instanceof ApiError && error.status === 401) {
     return <NotLoggedIn feature="generated sets" />;
   }

@@ -17,17 +17,17 @@ import { DuelRepositoryError } from './repository.js';
 export type DuelEventSink = (event: DuelServerEvent) => void;
 
 export interface DuelCoordinatorOptions {
-  readonly now?: () => Date;
-  readonly loadState?: (duelId: DuelId) => Promise<DuelDomainState | null>;
-  readonly persistState?: (state: DuelDomainState, expectedVersion: number) => Promise<void>;
+  now?: () => Date;
+  loadState?: (duelId: DuelId) => Promise<DuelDomainState | null>;
+  persistState?: (state: DuelDomainState, expectedVersion: number) => Promise<void>;
 }
 
 export class DuelCoordinator {
-  private readonly states = new Map<string, DuelDomainState>();
-  private readonly listeners = new Map<string, Map<string, Set<DuelEventSink>>>();
-  private readonly now: () => Date;
-  private readonly loadState: DuelCoordinatorOptions['loadState'];
-  private readonly persistState: DuelCoordinatorOptions['persistState'];
+  private states = new Map<string, DuelDomainState>();
+  private listeners = new Map<string, Map<string, Set<DuelEventSink>>>();
+  private now: () => Date;
+  private loadState: DuelCoordinatorOptions['loadState'];
+  private persistState: DuelCoordinatorOptions['persistState'];
 
   constructor(options: DuelCoordinatorOptions = {}) {
     this.now = options.now ?? (() => new Date());

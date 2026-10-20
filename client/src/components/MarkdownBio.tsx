@@ -2,13 +2,13 @@ import { ExternalLink } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type MarkdownInline =
-  | { readonly type: 'text'; readonly value: string }
-  | { readonly type: 'strong' | 'emphasis' | 'code'; readonly value: string }
-  | { readonly type: 'link'; readonly label: string; readonly href: string };
+  | { type: 'text'; value: string }
+  | { type: 'strong' | 'emphasis' | 'code'; value: string }
+  | { type: 'link'; label: string; href: string };
 
 export type MarkdownBlock =
-  | { readonly type: 'heading' | 'paragraph'; readonly content: MarkdownInline[] }
-  | { readonly type: 'list'; readonly items: MarkdownInline[][] };
+  | { type: 'heading' | 'paragraph'; content: MarkdownInline[] }
+  | { type: 'list'; items: MarkdownInline[][] };
 
 function safeUrl(value: string): string | null {
   try {
@@ -83,6 +83,6 @@ function renderInline(content: MarkdownInline[], keyPrefix: string): ReactNode[]
   });
 }
 
-export function MarkdownBio({ source }: { readonly source: string }): ReactNode {
+export function MarkdownBio({ source }: { source: string }): ReactNode {
   return <div className="space-y-2">{parseMarkdownBlocks(source).map((block, index) => block.type === 'heading' ? <h3 key={index} className="font-display font-bold">{renderInline(block.content, `heading-${index}`)}</h3> : block.type === 'list' ? <ul key={index} className="list-disc space-y-1 pl-5">{block.items.map((item, itemIndex) => <li key={itemIndex}>{renderInline(item, `list-${index}-${itemIndex}`)}</li>)}</ul> : <p key={index}>{renderInline(block.content, `paragraph-${index}`)}</p>)}</div>;
 }

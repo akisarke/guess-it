@@ -15,25 +15,25 @@ export const CATALOG_TARGET_DEPTH = 45;
 const CATALOG_TOPUP_BATCH = DAILY_QUESTION_COUNT;
 
 export type RejectedGeneration = {
-  readonly topic: string;
-  readonly attempt: number;
-  readonly reason: string;
-  readonly detail?: string;
+  topic: string;
+  attempt: number;
+  reason: string;
+  detail?: string;
 };
 
 export type DailyGenerationReport = {
-  readonly date: string;
-  readonly questionIds: readonly string[];
-  readonly topics: readonly string[];
-  readonly source: 'ai_daily' | 'daily-fallback';
-  readonly rejected: readonly RejectedGeneration[];
+  date: string;
+  questionIds: readonly string[];
+  topics: readonly string[];
+  source: 'ai_daily' | 'daily-fallback';
+  rejected: readonly RejectedGeneration[];
 };
 
 type GeneratedDraft = {
-  readonly prompt: string;
-  readonly unit: string;
-  readonly answer: number;
-  readonly napkinMath: string;
+  prompt: string;
+  unit: string;
+  answer: number;
+  napkinMath: string;
 };
 
 const BLOCKED_SUBSTRINGS: readonly string[] = [
@@ -255,11 +255,11 @@ export async function ensureDailyPuzzleForDate(
 }
 
 export type CatalogTopUpReport = {
-  readonly eligibleBefore: number;
-  readonly eligibleAfter: number;
-  readonly added: number;
-  readonly skipped: boolean;
-  readonly failed: number;
+  eligibleBefore: number;
+  eligibleAfter: number;
+  added: number;
+  skipped: boolean;
+  failed: number;
 };
 
 export async function ensureCatalogDepth(

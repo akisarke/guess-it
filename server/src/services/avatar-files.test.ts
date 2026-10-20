@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import sharp from 'sharp';
 import { AvatarUploadError, storeAvatarFile } from './avatar-files.js';
 
-async function upload(bytes: Buffer, root: string, limits?: Readonly<{ maxEncodedBytes: number; maxPixelsPerSide: number }>) {
+async function upload(bytes: Buffer, root: string, limits?: { maxEncodedBytes: number; maxPixelsPerSide: number }) {
   const file = Object.assign(Readable.from(bytes), { truncated: false, bytesRead: bytes.length });
   return storeAvatarFile(file, root, limits);
 }

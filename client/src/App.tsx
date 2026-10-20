@@ -26,23 +26,23 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then((module)
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then((module) => ({ default: module.ResetPassword })));
 
 const routeMetadata = [
-  { matches: (path: string) => path === '/', title: 'Guess It! — estimate, compare, improve', description: 'Guess It! is a daily estimation game for curious people. Make a guess, see how close you got, and play again tomorrow.' },
-  { matches: (path: string) => path.startsWith('/play/'), title: 'Play — Guess It!', description: 'Make an estimate, lock it in, and see how close you get.' },
-  { matches: (path: string) => path.startsWith('/reveal/'), title: 'Result — Guess It!', description: 'See your Guess It! result, score, and how close your estimate landed.' },
-  { matches: (path: string) => path === '/summary' || path.includes('/summary'), title: 'Summary — Guess It!', description: 'Review your Guess It! puzzle results and keep building your instinct.' },
-  { matches: (path: string) => path.startsWith('/profile') || path.startsWith('/u/'), title: 'Profile — Guess It!', description: 'View Guess It! streaks, badges, and generated question sets.' },
-  { matches: (path: string) => path.startsWith('/leaderboard'), title: 'Leaderboard — Guess It!', description: 'Compare Guess It! scores across daily, weekly, and all-time boards.' },
-  { matches: (path: string) => path.startsWith('/duels') || path.startsWith('/match'), title: 'Duels — Guess It!', description: 'Match with another player for a live Guess It! estimation battle.' },
-  { matches: (path: string) => path.startsWith('/generate'), title: 'Generate — Guess It!', description: 'Create a fresh Guess It! question set around a topic you choose.' },
-  { matches: (path: string) => path.startsWith('/login'), title: 'Sign in — Guess It!', description: 'Sign in to save your Guess It! progress and keep your best guesses together.' },
-  { matches: (path: string) => path.startsWith('/signup'), title: 'Create account — Guess It!', description: 'Create a Guess It! account and keep your daily estimation streak alive.' },
-  { matches: (path: string) => path.startsWith('/forgot-password'), title: 'Forgot password — Guess It!', description: 'Request a secure Guess It! password reset link.' },
-  { matches: (path: string) => path.startsWith('/reset-password'), title: 'Reset password — Guess It!', description: 'Choose a new password for your Guess It! account.' },
-  { matches: (path: string) => path.startsWith('/verify-email'), title: 'Verify email — Guess It!', description: 'Verify your Guess It! email address.' },
-  { matches: (path: string) => path === '/privacy', title: 'Privacy Policy — Guess It!', description: 'Read the Guess It! privacy policy.' },
-  { matches: (path: string) => path === '/terms', title: 'Terms of Service — Guess It!', description: 'Read the Guess It! terms of service.' },
-  { matches: (path: string) => path === '/cookies', title: 'Cookie Policy — Guess It!', description: 'Read the Guess It! cookie policy.' },
-  { matches: (path: string) => path.startsWith('/admin'), title: 'Owner tools — Guess It!', description: 'Manage Guess It! owner badge tools.' },
+  { matches: (path: string) => path === '/', title: 'Guess It! - estimate, compare, improve', description: 'Guess It! is a daily estimation game for curious people. Make a guess, see how close you got, and play again tomorrow.' },
+  { matches: (path: string) => path.startsWith('/play/'), title: 'Play - Guess It!', description: 'Make an estimate, lock it in, and see how close you get.' },
+  { matches: (path: string) => path.startsWith('/reveal/'), title: 'Result - Guess It!', description: 'See your Guess It! result, score, and how close your estimate landed.' },
+  { matches: (path: string) => path === '/summary' || path.includes('/summary'), title: 'Summary - Guess It!', description: 'Review your Guess It! puzzle results and keep building your instinct.' },
+  { matches: (path: string) => path.startsWith('/profile') || path.startsWith('/u/'), title: 'Profile - Guess It!', description: 'View Guess It! streaks, badges, and generated question sets.' },
+  { matches: (path: string) => path.startsWith('/leaderboard'), title: 'Leaderboard - Guess It!', description: 'Compare Guess It! scores across daily, weekly, and all-time boards.' },
+  { matches: (path: string) => path.startsWith('/duels') || path.startsWith('/match'), title: 'Duels - Guess It!', description: 'Match with another player for a live Guess It! estimation battle.' },
+  { matches: (path: string) => path.startsWith('/generate'), title: 'Generate - Guess It!', description: 'Create a fresh Guess It! question set around a topic you choose.' },
+  { matches: (path: string) => path.startsWith('/login'), title: 'Sign in - Guess It!', description: 'Sign in to save your Guess It! progress and keep your best guesses together.' },
+  { matches: (path: string) => path.startsWith('/signup'), title: 'Create account - Guess It!', description: 'Create a Guess It! account and keep your daily estimation streak alive.' },
+  { matches: (path: string) => path.startsWith('/forgot-password'), title: 'Forgot password - Guess It!', description: 'Request a secure Guess It! password reset link.' },
+  { matches: (path: string) => path.startsWith('/reset-password'), title: 'Reset password - Guess It!', description: 'Choose a new password for your Guess It! account.' },
+  { matches: (path: string) => path.startsWith('/verify-email'), title: 'Verify email - Guess It!', description: 'Verify your Guess It! email address.' },
+  { matches: (path: string) => path === '/privacy', title: 'Privacy Policy - Guess It!', description: 'Read the Guess It! privacy policy.' },
+  { matches: (path: string) => path === '/terms', title: 'Terms of Service - Guess It!', description: 'Read the Guess It! terms of service.' },
+  { matches: (path: string) => path === '/cookies', title: 'Cookie Policy - Guess It!', description: 'Read the Guess It! cookie policy.' },
+  { matches: (path: string) => path.startsWith('/admin'), title: 'Owner tools - Guess It!', description: 'Manage Guess It! owner badge tools.' },
 ];
 
 function PageMetadata() {
@@ -50,7 +50,7 @@ function PageMetadata() {
 
   useEffect(() => {
     const metadata = routeMetadata.find((entry) => entry.matches(pathname)) ?? {
-      title: 'Page not found — Guess It!',
+      title: 'Page not found - Guess It!',
       description: 'The Guess It! page you requested could not be found.',
     };
     document.title = metadata.title;

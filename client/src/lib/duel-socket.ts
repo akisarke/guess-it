@@ -6,10 +6,10 @@ export interface DuelConnection {
 }
 
 interface DuelSocketHandlers {
-  readonly onEvent: (event: DuelServerEvent) => void;
-  readonly onOpen?: () => void;
-  readonly onClose?: () => void;
-  readonly onError?: (error: Error) => void;
+  onEvent: (event: DuelServerEvent) => void;
+  onOpen?: () => void;
+  onClose?: () => void;
+  onError?: (error: Error) => void;
 }
 
 function isDuelServerEvent(value: unknown): value is DuelServerEvent {

@@ -14,15 +14,15 @@ import { getTodayPuzzle } from '../services/daily-puzzle.js';
 import { buildLimiterKey, semanticLimit } from '../services/rate-limit.js';
 import { AuthenticationError, AuthorizationError, ExternalServiceError, RateLimitError, ValidationError, NotFoundError } from '../errors/application-error.js';
 
-type GenerateBody = Readonly<{ readonly topic: string; readonly difficulty?: 'easy' | 'medium' | 'hard' | null }>;
+type GenerateBody = { topic: string; difficulty?: 'easy' | 'medium' | 'hard' | null };
 
-export type QuestionRouteDependencies = Readonly<{
-  readonly authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
-  readonly generateQuestionSet: (input: GenerationInput) => Promise<GeneratedQuestionBatch>;
-  readonly createGeneratedSet: typeof createGeneratedSet;
-}>;
+export type QuestionRouteDependencies = {
+  authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
+  generateQuestionSet: (input: GenerationInput) => Promise<GeneratedQuestionBatch>;
+  createGeneratedSet: typeof createGeneratedSet;
+};
 
-type RouteOptions = Readonly<{ readonly dependencies?: QuestionRouteDependencies }>;
+type RouteOptions = { dependencies?: QuestionRouteDependencies };
 
 export function buildGeneratedSetTitle(topic: string): string {
   const normalized = topic.trim();
@@ -70,7 +70,7 @@ export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, opti
     if (!topic) throw new ValidationError('Topic is required');
 
     try {
-      let dailyQuestions: readonly { readonly prompt: string }[] = [];
+      let dailyQuestions: readonly { prompt: string }[] = [];
       try {
         const today = await getTodayPuzzle(app.prisma);
         dailyQuestions = today ? await app.prisma.question.findMany({ where: { id: { in: today.questionIds } }, select: { prompt: true } }) : [];
@@ -102,7 +102,7 @@ export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, opti
     }
   });
 
-  app.get<{ Params: { readonly id: string } }>('/:id', { preHandler: [dependencies.authenticate, requireRegistered] }, async (request) => {
+  app.get<{ Params: { id: string } }>('/:id', { preHandler: [dependencies.authenticate, requireRegistered] }, async (request) => {
     const question = await app.prisma.question.findUnique({
       where: { id: request.params.id },
       select: { id: true, prompt: true, unit: true, source: true, topic: true },

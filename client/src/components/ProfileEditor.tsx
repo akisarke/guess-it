@@ -6,8 +6,8 @@ import { ProfileAvatar } from './ProfileAvatar';
 const MAX_AVATAR_BYTES = 50 * 1024 * 1024;
 
 interface AvatarSelection {
-  readonly file: File;
-  readonly previewUrl: string;
+  file: File;
+  previewUrl: string;
 }
 
 function isAcceptedAvatarType(type: string): boolean {
@@ -15,15 +15,15 @@ function isAcceptedAvatarType(type: string): boolean {
 }
 
 interface ProfileEditorProps {
-  readonly bio: string | null;
-  readonly avatarUrl: string | null;
-  readonly hackclubId: string | null;
-  readonly usernameChosen: boolean;
-  readonly canUnlinkHackClub: boolean;
-  readonly onSave: (input: ProfileUpdate) => Promise<void>;
-  readonly onUploadAvatar: (file: File) => Promise<string>;
-  readonly onLinkHackClub: () => void;
-  readonly onUnlinkHackClub: () => Promise<void>;
+  bio: string | null;
+  avatarUrl: string | null;
+  hackclubId: string | null;
+  usernameChosen: boolean;
+  canUnlinkHackClub: boolean;
+  onSave: (input: ProfileUpdate) => Promise<void>;
+  onUploadAvatar: (file: File) => Promise<string>;
+  onLinkHackClub: () => void;
+  onUnlinkHackClub: () => Promise<void>;
 }
 
 export function ProfileEditor({ bio, avatarUrl, hackclubId, usernameChosen, canUnlinkHackClub, onSave, onUploadAvatar, onLinkHackClub, onUnlinkHackClub }: ProfileEditorProps) {
@@ -131,7 +131,7 @@ export function ProfileEditor({ bio, avatarUrl, hackclubId, usernameChosen, canU
         </div>
 
         {error && <p role="alert" className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold text-ink dark:text-gray-100">{error}</p>}
-        <button type="submit" disabled={saving} className="btn-primary"><Save size={16} aria-hidden="true" />{saving ? 'Saving profile…' : 'Save profile'}</button>
+        <button type="submit" disabled={saving} className="btn-primary"><Save size={16} aria-hidden="true" />{saving ? 'Saving profile...' : 'Save profile'}</button>
       </form>
 
       <div className="mt-5 border-t border-ink/10 pt-4 dark:border-white/10">
@@ -155,7 +155,7 @@ export function ProfileEditor({ bio, avatarUrl, hackclubId, usernameChosen, canU
               <div className="rounded-2xl border-2 border-brand/30 bg-brand/10 p-4">
                 <p className="text-sm font-bold text-ink dark:text-gray-100">Unlink Hack Club from this profile?</p>
                 <p className="mt-1 text-xs leading-5 text-ink/70 dark:text-gray-300">This removes only the local connection. Your Hack Club account is unchanged.</p>
-                <div className="mt-3 flex flex-wrap gap-2"><button type="button" className="btn-secondary" onClick={() => setConfirmUnlink(false)} disabled={unlinking}>Cancel</button><button type="button" className="btn-primary" onClick={unlinkHackClub} disabled={unlinking}><Unlink size={16} aria-hidden="true" />{unlinking ? 'Unlinking…' : 'Unlink Hack Club'}</button></div>
+                <div className="mt-3 flex flex-wrap gap-2"><button type="button" className="btn-secondary" onClick={() => setConfirmUnlink(false)} disabled={unlinking}>Cancel</button><button type="button" className="btn-primary" onClick={unlinkHackClub} disabled={unlinking}><Unlink size={16} aria-hidden="true" />{unlinking ? 'Unlinking...' : 'Unlink Hack Club'}</button></div>
               </div>
             ) : canUnlinkHackClub ? (
               <button type="button" className="btn-secondary" onClick={() => setConfirmUnlink(true)}><Unlink size={16} aria-hidden="true" /> Unlink Hack Club</button>

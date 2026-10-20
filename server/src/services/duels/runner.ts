@@ -3,25 +3,25 @@ import { DuelCoordinator } from './coordinator.js';
 import { DuelRepositoryError } from './repository.js';
 
 type Timer = ReturnType<typeof setInterval> & { unref?: () => void };
-type DueFilter = { readonly roundDeadlineAt: { readonly lte: Date } } | { readonly revealEndsAt: { readonly lte: Date } };
+type DueFilter = { roundDeadlineAt: { lte: Date } } | { revealEndsAt: { lte: Date } };
 
 export interface DuelRunnerOptions {
-  readonly intervalMs?: number;
-  readonly now?: () => Date;
-  readonly setInterval?: (callback: () => void, delay: number) => Timer;
-  readonly clearInterval?: (timer: Timer) => void;
-  readonly onError?: (error: unknown) => void;
+  intervalMs?: number;
+  now?: () => Date;
+  setInterval?: (callback: () => void, delay: number) => Timer;
+  clearInterval?: (timer: Timer) => void;
+  onError?: (error: unknown) => void;
 }
 
 export interface DuelRunnerStore {
-  readonly duel: {
-    readonly findMany: (args: {
-      readonly where: {
-        readonly status: { readonly in: ('question' | 'reveal')[] };
-        readonly OR: DueFilter[];
+  duel: {
+    findMany: (args: {
+      where: {
+        status: { in: ('question' | 'reveal')[] };
+        OR: DueFilter[];
       };
-      readonly select: { readonly id: true };
-    }) => Promise<readonly { readonly id: string }[]>;
+      select: { id: true };
+    }) => Promise<readonly { id: string }[]>;
   };
 }
 

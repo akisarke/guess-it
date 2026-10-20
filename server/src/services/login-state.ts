@@ -3,7 +3,7 @@ import { Prisma, type PrismaClient } from '@prisma/client';
 const LOCKOUT_ATTEMPTS = 10;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1_000;
 
-type LoginStateRow = Readonly<{ failedLoginAttempts: number; lockedUntil: Date | null }>;
+type LoginStateRow = { failedLoginAttempts: number; lockedUntil: Date | null };
 
 function parseLoginState(row: LoginStateRow | undefined): LoginStateRow | null {
   if (!row || !Number.isInteger(row.failedLoginAttempts) || row.failedLoginAttempts < 0) return null;

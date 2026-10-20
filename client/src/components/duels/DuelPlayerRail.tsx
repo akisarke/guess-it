@@ -9,7 +9,7 @@ const STATE_LABELS: Record<string, string> = {
   timed_out: 'Timed out',
 };
 
-export function DuelPlayerRail({ players }: { readonly players: readonly [DuelPlayerView, DuelPlayerView] }) {
+export function DuelPlayerRail({ players }: { players: readonly [DuelPlayerView, DuelPlayerView] }) {
   return (
     <section
       aria-label="Duel players"

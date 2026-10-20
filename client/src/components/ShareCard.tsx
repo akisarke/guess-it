@@ -50,7 +50,7 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
 
     ctx.fillStyle = '#ede9e0';
     ctx.font = `bold 28px ${SYSTEM_FONT}`;
-     const avgText = answered.length > 0 ? `Average: ${formatScore(average).visual}` : 'Average: —';
+     const avgText = answered.length > 0 ? `Average: ${formatScore(average).visual}` : 'Average: -';
     ctx.fillText(avgText, 300, 180 + Math.max(rows, 1) * 40 + 40);
 
     ctx.fillStyle = '#8d877e';
@@ -66,7 +66,7 @@ export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
       if (score > 0) lines.push(`Q${i + 1}: ${formatScore(score).visual}`);
     });
     const answered = scores.filter((s) => s > 0).length;
-    lines.push(answered > 0 ? `Average: ${formatScore(average).visual}` : 'Average: —');
+    lines.push(answered > 0 ? `Average: ${formatScore(average).visual}` : 'Average: -');
     lines.push(SITE);
     return lines.join('\n');
   };

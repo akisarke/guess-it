@@ -1,12 +1,12 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
 import type { ServerConfig } from '../config.js';
 
-export type SessionData = Readonly<{
+export type SessionData = {
   userId: string;
   sessionVersion: number;
   issuedAt: number;
   expiresAt: number;
-}>;
+};
 
 function sessionKey(config: ServerConfig): Buffer {
   return createHash('sha256').update(config.sessionSecret).digest();

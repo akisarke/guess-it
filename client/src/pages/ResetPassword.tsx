@@ -42,7 +42,7 @@ export function ResetPassword() {
           <>
             <div>
               <label htmlFor="new-password" className="text-sm font-bold text-ink dark:text-gray-100">New password</label>
-              <p id="password-help" className="mt-1 text-xs text-ink/60 dark:text-gray-400">Use 8–128 characters. A unique passphrase is best.</p>
+              <p id="password-help" className="mt-1 text-xs text-ink/60 dark:text-gray-400">Use 8-128 characters. A unique passphrase is best.</p>
             </div>
             <span className="auth-field">
               <LockKeyhole size={18} className="auth-field-icon" aria-hidden="true" />
@@ -55,7 +55,7 @@ export function ResetPassword() {
               <input id="confirm-password" className="w-full" type={showConfirm ? 'text' : 'password'} minLength={8} maxLength={128} value={confirm} onChange={(event) => setConfirm(event.target.value)} autoComplete="new-password" aria-describedby={error ? 'reset-error' : undefined} required />
               <button type="button" className="auth-password-toggle" onClick={() => setShowConfirm((value) => !value)} aria-label={showConfirm ? 'Hide password' : 'Show password'}>{showConfirm ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button>
             </span>
-            <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Resetting…' : 'Reset password'}</button>
+            <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Resetting...' : 'Reset password'}</button>
           </>
         ) : (
           <div className="space-y-4" role="alert">

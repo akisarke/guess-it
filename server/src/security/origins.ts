@@ -1,6 +1,6 @@
 export type OriginDecision =
-  | { readonly allowed: true; readonly origin: string }
-  | { readonly allowed: false; readonly reason: 'missing' | 'malformed' | 'disallowed' };
+  | { allowed: true; origin: string }
+  | { allowed: false; reason: 'missing' | 'malformed' | 'disallowed' };
 
 export function parseExactOrigin(value: string): URL {
   const parsed = new URL(value);

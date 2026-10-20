@@ -3,14 +3,14 @@ import { readdir, unlink } from 'node:fs/promises';
 import { hashPassword } from './passwords.js';
 import { localAvatarPath } from './avatar-files.js';
 
-export type ResetConfig = Readonly<{
+export type ResetConfig = {
   displayName: string;
   email: string;
   password: string;
   createdAt: Date;
-}>;
+};
 
-export type ResetCounts = Readonly<{
+export type ResetCounts = {
   userBadges: number;
   guesses: number;
   streaks: number;
@@ -19,7 +19,7 @@ export type ResetCounts = Readonly<{
   resetTokens: number;
   users: number;
   ownerId: string;
-}>;
+};
 
 export function parseResetConfig(env: NodeJS.ProcessEnv): ResetConfig {
   if (env.RESET_USERS_CONFIRM !== 'delete-all-users') throw new Error('RESET_USERS_CONFIRM must be exactly delete-all-users.');

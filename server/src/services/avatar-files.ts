@@ -14,18 +14,18 @@ export const AVATAR_MAX_ENCODED_BYTES = 5 * 1024 * 1024;
 export const AVATAR_MAX_PIXELS_PER_SIDE = 4096;
 export const MAX_AVATAR_BYTES = AVATAR_MAX_ENCODED_BYTES;
 
-export type AvatarFormat = Readonly<{
+export type AvatarFormat = {
   extension: 'gif' | 'jpg' | 'png' | 'webp';
   mimeType: 'image/gif' | 'image/jpeg' | 'image/png' | 'image/webp';
-}>;
+};
 
-export type StoredAvatar = Readonly<{
+export type StoredAvatar = {
   avatarUrl: string;
   mimeType: typeof AVATAR_CANONICAL_MIME;
-}>;
+};
 
 export class AvatarUploadError extends ValidationError {
-  readonly statusCode: 413 | 415;
+  statusCode: 413 | 415;
 
   constructor(statusCode: 413 | 415, message: string) {
     super(message, { code: 'VALIDATION_ERROR' });
@@ -72,7 +72,7 @@ export async function removeLocalAvatar(avatarUrl: string | null, uploadDir: str
   if (path) await removeFile(path);
 }
 
-export async function storeAvatarFile(file: MultipartFile['file'], uploadDir: string, limits: Readonly<{ maxEncodedBytes: number; maxPixelsPerSide: number }> = { maxEncodedBytes: AVATAR_MAX_ENCODED_BYTES, maxPixelsPerSide: AVATAR_MAX_PIXELS_PER_SIDE }): Promise<StoredAvatar> {
+export async function storeAvatarFile(file: MultipartFile['file'], uploadDir: string, limits: { maxEncodedBytes: number; maxPixelsPerSide: number } = { maxEncodedBytes: AVATAR_MAX_ENCODED_BYTES, maxPixelsPerSide: AVATAR_MAX_PIXELS_PER_SIDE }): Promise<StoredAvatar> {
   const root = resolve(uploadDir);
   await mkdir(root, { recursive: true });
   const id = randomUUID();

@@ -1,7 +1,7 @@
 import { StateCard } from './StateCard';
 
 interface AuthUnavailableProps {
-  readonly onRetry: () => void;
+  onRetry: () => void;
 }
 
 export function AuthUnavailable({ onRetry }: AuthUnavailableProps) {

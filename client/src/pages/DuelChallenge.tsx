@@ -66,7 +66,7 @@ export function DuelChallenge() {
     description={`${challenge.opponent.displayName} challenged you to a duel. Accept to start the countdown.`}
   >
     <button type="button" className="btn-primary" disabled={accepting} onClick={accept}>
-      {accepting ? 'Accepting…' : 'Accept duel'}
+      {accepting ? 'Accepting...' : 'Accept duel'}
     </button>
     <Link to="/duels" className="btn-secondary">Decline</Link>
   </State>;

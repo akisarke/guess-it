@@ -7,7 +7,7 @@ const BLOCKED_WORDS = [
 
 const WORD_PATTERN = new RegExp(`\\b(?:${BLOCKED_WORDS.join('|')})\\b`, 'i');
 
-const LEET_MAP: Readonly<Record<string, string>> = {
+const LEET_MAP: Record<string, string> = {
   '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', $: 's', '8': 'b',
 };
 

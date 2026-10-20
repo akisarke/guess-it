@@ -1,7 +1,7 @@
 import { StateCard } from './StateCard';
 
 interface NotLoggedInProps {
-  readonly feature: string;
+  feature: string;
 }
 
 export function NotLoggedIn({ feature }: NotLoggedInProps) {

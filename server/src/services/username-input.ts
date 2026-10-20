@@ -8,8 +8,8 @@ const linkUsernameSchema = z
   .regex(/^[A-Za-z0-9](?:[A-Za-z0-9_-]*[A-Za-z0-9])?$/, 'Use letters, numbers, underscores, or hyphens.');
 
 export type UsernameResult =
-  | { readonly ok: true; readonly value: string }
-  | { readonly ok: false; readonly error: string };
+  | { ok: true; value: string }
+  | { ok: false; error: string };
 
 export function parseUsername(input: unknown): UsernameResult {
   if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Choose a username.' };

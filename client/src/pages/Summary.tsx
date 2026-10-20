@@ -32,7 +32,7 @@ export function Summary() {
       <StateScreen
         chip="Loading"
         title="Building summary"
-        description="Fetching today’s scores."
+        description="Fetching today's scores."
       >
         <div className="space-y-4 text-left">
           <div className="space-y-3">
@@ -88,7 +88,7 @@ export function Summary() {
             <p className="text-xs font-bold uppercase tracking-[0.11em] text-ink/45 dark:text-gray-400">
               Puzzle
             </p>
-            <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">—</p>
+            <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">-</p>
           </div>
         </div>
       </StateScreen>
@@ -131,7 +131,7 @@ export function Summary() {
         <div className="summary-grid">
           <section className="summary-score-panel">
             <p className="summary-label">Score</p>
-            <p className="summary-score" title={averageDisplay?.exact}>{averageDisplay?.visual ?? '—'}</p>
+            <p className="summary-score" title={averageDisplay?.exact}>{averageDisplay?.visual ?? '-'}</p>
             <span className="summary-badge">{hasAnswers ? `${answered.length}/${puzzle.questions.length} ANSWERED` : 'PLAY TO SCORE'}</span>
             <p className="summary-label summary-chart-title">How everyone did</p>
             <div className="summary-chart" role="img" aria-label="Your score compared with the three daily questions">
@@ -167,7 +167,7 @@ export function Summary() {
                       <span className="summary-question-number">Q{index + 1}</span>
                       <span>{q.prompt}</span>
                     </span>
-                    <strong className={score ? scoreBand(score) : 'text-ink/45'}>{score ? `× ${formatScore(score).visual}` : '—'}</strong>
+                    <strong className={score ? scoreBand(score) : 'text-ink/45'}>{score ? `× ${formatScore(score).visual}` : '-'}</strong>
                   </Link>
                 );
               })}

@@ -4,7 +4,7 @@ import { issueCsrfToken, verifyCsrfToken } from './csrf.js';
 describe('signed double-submit CSRF', () => {
   it('accepts a matching signed cookie and header', () => {
     let cookie = '';
-    const reply = { setCookie: (_name: string, value: string, _options: Readonly<Record<string, unknown>>) => { cookie = value; } };
+    const reply = { setCookie: (_name: string, value: string, _options: Record<string, unknown>) => { cookie = value; } };
     const token = issueCsrfToken(reply, { secure: false });
     const request = {
       cookies: { guessit_csrf: cookie },

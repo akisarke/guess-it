@@ -44,7 +44,7 @@ export async function matchmakingRoutes(app: FastifyInstance) {
         userId,
         type: 'duel_invite',
         title: 'Challenge sent',
-        message: `Challenge sent to ${target.displayName} — waiting for them to accept.`,
+        message: `Challenge sent to ${target.displayName}, waiting for them to accept.`,
         actionUrl: `/duels/challenge/${encodeURIComponent(token)}`,
         actionLabel: 'Open challenge',
       });

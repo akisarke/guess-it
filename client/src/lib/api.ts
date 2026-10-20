@@ -3,16 +3,16 @@ import type { ErrorCode, ErrorResponse, GenerateQuestionSetRequest, GenerateQues
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 export interface AuthResponse {
-  readonly user: AuthUser;
-  readonly migratedFromAnonymous?: boolean;
-  readonly pendingVerification?: boolean;
+  user: AuthUser;
+  migratedFromAnonymous?: boolean;
+  pendingVerification?: boolean;
 }
 
 export class ApiError extends Error {
-  readonly status: number;
-  readonly resetAt: string | undefined;
-  readonly code: ErrorCode | undefined;
-  readonly resetAtMs: number | undefined;
+  status: number;
+  resetAt: string | undefined;
+  code: ErrorCode | undefined;
+  resetAtMs: number | undefined;
 
   constructor(status: number, message: string, resetAt?: string, code?: ErrorCode, resetAtMs?: number) {
     super(message);
@@ -65,96 +65,96 @@ export interface AuthUser {
 }
 
 export interface PublicProfileUser {
-  readonly id: string;
-  readonly displayName: string;
-  readonly bio: string | null;
-  readonly avatarUrl: string | null;
-  readonly isDeveloper: boolean;
-  readonly createdAt: string;
+  id: string;
+  displayName: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  isDeveloper: boolean;
+  createdAt: string;
 }
 
 export interface ProfileResponse {
-  readonly user: PublicProfileUser | AuthUser | null;
-  readonly streak: {
-    readonly currentStreak: number;
-    readonly longestStreak: number;
-    readonly lastPlayedOn: string | null;
+  user: PublicProfileUser | AuthUser | null;
+  streak: {
+    currentStreak: number;
+    longestStreak: number;
+    lastPlayedOn: string | null;
   } | null;
-  readonly badges: readonly ProfileBadge[];
-  readonly pinnedBadges: readonly ProfileBadge[];
-  readonly generatedSets: readonly GeneratedQuestionSetSummary[];
+  badges: readonly ProfileBadge[];
+  pinnedBadges: readonly ProfileBadge[];
+  generatedSets: readonly GeneratedQuestionSetSummary[];
 }
 
 export interface ProfileBadge {
-  readonly badgeId: string;
-  readonly isPinned: boolean;
-  readonly grantedAt: string;
-  readonly badge: AdminBadge;
+  badgeId: string;
+  isPinned: boolean;
+  grantedAt: string;
+  badge: AdminBadge;
 }
 
 export interface ProfileUpdate {
-  readonly bio?: string | null;
-  readonly avatarUrl?: string | null;
-  readonly displayName?: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  displayName?: string;
 }
 
 export interface AvatarUploadResponse {
-  readonly avatarUrl: string;
+  avatarUrl: string;
 }
 
 export interface LeaderboardEntry {
-  readonly userId: string;
-  readonly displayName: string;
-  readonly avatarUrl: string | null;
-  readonly bio?: string | null;
-  readonly score: number;
-  readonly rank: number;
-  readonly isHackClubMember: boolean;
-  readonly pinnedBadges?: readonly { badgeId: string; badge: { name: string } }[];
+  userId: string;
+  displayName: string;
+  avatarUrl: string | null;
+  bio?: string | null;
+  score: number;
+  rank: number;
+  isHackClubMember: boolean;
+  pinnedBadges?: readonly { badgeId: string; badge: { name: string } }[];
 }
 
 export interface FriendEntry {
-  readonly requestId: string;
-  readonly user: { readonly id: string; readonly displayName: string; readonly avatarUrl: string | null };
+  requestId: string;
+  user: { id: string; displayName: string; avatarUrl: string | null };
 }
 
 export interface FriendsResponse {
-  readonly friends: FriendEntry[];
-  readonly incoming: FriendEntry[];
-  readonly outgoing: FriendEntry[];
+  friends: FriendEntry[];
+  incoming: FriendEntry[];
+  outgoing: FriendEntry[];
 }
 
 export interface DuelChallengeState {
-  readonly state: 'waiting' | 'started' | 'expired';
-  readonly duelId: string;
-  readonly you: 'A' | 'B';
-  readonly opponent: { readonly id: string; readonly displayName: string; readonly avatarUrl: string | null };
+  state: 'waiting' | 'started' | 'expired';
+  duelId: string;
+  you: 'A' | 'B';
+  opponent: { id: string; displayName: string; avatarUrl: string | null };
 }
 
 export interface QueueResult {
-  readonly status: 'idle' | 'waiting' | 'matched';
-  readonly entryId: string | null;
-  readonly match: { readonly id: string } | null;
-  readonly isNewMatch: boolean;
+  status: 'idle' | 'waiting' | 'matched';
+  entryId: string | null;
+  match: { id: string } | null;
+  isNewMatch: boolean;
 }
 
 export interface AdminBadge {
-  readonly id: string;
-  readonly name: string;
-  readonly description: string;
-  readonly isSecret: boolean;
-  readonly isManualGrant: boolean;
+  id: string;
+  name: string;
+  description: string;
+  isSecret: boolean;
+  isManualGrant: boolean;
 }
 
 export interface NotificationItem {
-  readonly id: string;
-  readonly type: 'badge_awarded' | 'duel_invite' | 'friend_request';
-  readonly title: string;
-  readonly message: string;
-  readonly actionUrl: string;
-  readonly actionLabel: string;
-  readonly readAt: string | null;
-  readonly createdAt: string;
+  id: string;
+  type: 'badge_awarded' | 'duel_invite' | 'friend_request';
+  title: string;
+  message: string;
+  actionUrl: string;
+  actionLabel: string;
+  readAt: string | null;
+  createdAt: string;
 }
 
 function notifyAuthChanged() {

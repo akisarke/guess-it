@@ -2,7 +2,7 @@ import type { DuelSnapshot } from 'shared';
 import { formatScore } from '../../lib/format-number';
 import { Link } from 'react-router-dom';
 
-export function DuelReveal({ snapshot }: { readonly snapshot: DuelSnapshot }) {
+export function DuelReveal({ snapshot }: { snapshot: DuelSnapshot }) {
   if (snapshot.phase === 'completed' || snapshot.phase === 'forfeited') {
     const winner = snapshot.players.find((player) => player.playerId === snapshot.winner);
     return (
@@ -24,7 +24,7 @@ export function DuelReveal({ snapshot }: { readonly snapshot: DuelSnapshot }) {
       <p className="text-[0.7rem] font-bold uppercase tracking-[0.08em]">Round reveal</p>
 
       <p className="mt-3 font-display text-4xl font-extrabold leading-none tabular-nums">
-        {snapshot.reveal?.answer.toLocaleString() ?? '—'}
+        {snapshot.reveal?.answer.toLocaleString() ?? '-'}
       </p>
 
       {}
@@ -41,7 +41,7 @@ export function DuelReveal({ snapshot }: { readonly snapshot: DuelSnapshot }) {
               {guess === null ? 'Timed out' : guess.toLocaleString()}
             </p>
             <p className="mt-1 text-xs font-bold uppercase tracking-wide opacity-70">
-              {snapshot.reveal?.scores[index] === null ? '—' : formatScore(snapshot.reveal?.scores[index] ?? 0).visual}
+              {snapshot.reveal?.scores[index] === null ? '-' : formatScore(snapshot.reveal?.scores[index] ?? 0).visual}
             </p>
           </div>
         ))}

@@ -96,7 +96,7 @@ export function Landing() {
 
                   className="mt-2 block font-display text-2xl font-extrabold leading-none tabular-nums sm:text-3xl"
                 >
-                  {solved ? formatScore(score).visual : '—'}
+                  {solved ? formatScore(score).visual : '-'}
                 </span>
               </li>
             );

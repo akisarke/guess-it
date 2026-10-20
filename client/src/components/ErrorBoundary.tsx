@@ -2,11 +2,11 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { StateCard } from './StateCard';
 
 interface ErrorBoundaryProps {
-  readonly children: ReactNode;
+  children: ReactNode;
 }
 
 interface ErrorBoundaryState {
-  readonly failed: boolean;
+  failed: boolean;
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {

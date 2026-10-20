@@ -44,7 +44,7 @@ export function FriendsSection() {
 
   const row = (
     entry: FriendsResponse['friends'][number],
-    actions: ReadonlyArray<{ readonly label: string; readonly primary?: boolean; readonly onClick: () => Promise<unknown> }>,
+    actions: ReadonlyArray<{ label: string; primary?: boolean; onClick: () => Promise<unknown> }>,
   ) => (
     <div key={entry.requestId} className="flex items-center gap-3 rounded-2xl border-2 border-ink/10 bg-white/70 p-3 dark:border-white/10 dark:bg-[var(--surface)]">
       <ProfileAvatar src={entry.user.avatarUrl} alt="" />

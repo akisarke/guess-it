@@ -24,7 +24,7 @@ export function ForgotPassword() {
   };
 
   return (
-    <AuthRecoveryShell title="Forgot your password?" description="Enter your account email and we’ll send a secure reset link.">
+    <AuthRecoveryShell title="Forgot your password?" description="Enter your account email and we'll send a secure reset link.">
       <form className="mt-8 space-y-4" onSubmit={submit} noValidate>
         {message ? (
           <div className="space-y-4" role="status" aria-live="polite">
@@ -38,7 +38,7 @@ export function ForgotPassword() {
               <Mail size={18} className="auth-field-icon" aria-hidden="true" />
               <input id="recovery-email" className="w-full" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" autoComplete="email" aria-describedby={error ? 'recovery-error' : undefined} required />
             </span>
-            <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Sending…' : 'Send reset link'}</button>
+            <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Sending...' : 'Send reset link'}</button>
           </>
         )}
         {error && <p id="recovery-error" className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}

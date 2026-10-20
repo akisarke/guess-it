@@ -1,9 +1,9 @@
 import type { DuelPlayerView, DuelServerEvent, DuelSnapshot } from 'shared';
 
 export interface DuelClientState {
-  readonly snapshot: DuelSnapshot | null;
-  readonly lastVersion: number;
-  readonly error: string | null;
+  snapshot: DuelSnapshot | null;
+  lastVersion: number;
+  error: string | null;
 }
 
 export const initialDuelState: DuelClientState = { snapshot: null, lastVersion: -1, error: null };

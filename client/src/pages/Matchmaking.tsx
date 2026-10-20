@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 
 interface MatchSummary {
-  readonly id: string;
+  id: string;
 }
 
 export function Matchmaking() {
@@ -24,7 +24,7 @@ export function Matchmaking() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollGenerationRef = useRef(0);
 
-  const enterMatch = useCallback((match: { readonly id: string } | null) => {
+  const enterMatch = useCallback((match: { id: string } | null) => {
     if (!match) return;
     navigate(`/duels/${encodeURIComponent(match.id)}`);
   }, [navigate]);
@@ -133,7 +133,7 @@ export function Matchmaking() {
             </p>
              {error && <p className="mb-4 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-left text-sm font-bold text-ink dark:text-gray-100" role="alert">{error.message}</p>}
              <button onClick={joinQueue} disabled={loading || authState === 'checking'} className="btn-primary">
-               {loading ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" /> Joining…</> : 'Join Queue'}
+               {loading ? <><LoaderCircle size={17} className="animate-spin" aria-hidden="true" /> Joining...</> : 'Join Queue'}
              </button>
           </>
         )}
@@ -143,12 +143,12 @@ export function Matchmaking() {
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-accent" aria-hidden="true"><Timer size={40} className="animate-pulse" /></div>
              <div className="mb-6" role="status" aria-live="polite">
                <h2 className="font-display text-xl font-bold">Searching for your opponent</h2>
-               <p className="mt-2 text-sm text-ink/60 dark:text-gray-300">You can leave this page open. We’ll take you straight into the battle when someone joins.</p>
+               <p className="mt-2 text-sm text-ink/60 dark:text-gray-300">You can leave this page open. We'll take you straight into the battle when someone joins.</p>
                {queuedAt !== null && <p className="mt-3 text-xs font-bold uppercase tracking-[0.1em] text-accent">Waiting {Math.max(0, Math.floor((now - queuedAt) / 1000))}s</p>}
              </div>
              {error && <p className="mb-4 rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-left text-sm font-bold text-ink dark:text-gray-100" role="alert">{error.message}</p>}
              <button onClick={leaveQueue} disabled={leaving} className="btn-secondary">
-               {leaving ? 'Leaving…' : 'Leave Queue'}
+               {leaving ? 'Leaving...' : 'Leave Queue'}
              </button>
           </>
         )}

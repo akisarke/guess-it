@@ -31,11 +31,11 @@ type PasswordResetTransaction = {
 };
 type PasswordResetPrisma = { $transaction: (callback: (transaction: PasswordResetTransaction) => Promise<boolean>) => Promise<boolean> };
 
-export function resetPassword(prisma: PrismaClient, input: Readonly<{ token: string; passwordHash: string; now: Date }>): Promise<boolean>;
-export function resetPassword(prisma: PasswordResetPrisma, input: Readonly<{ token: string; passwordHash: string; now: Date }>): Promise<boolean>;
+export function resetPassword(prisma: PrismaClient, input: { token: string; passwordHash: string; now: Date }): Promise<boolean>;
+export function resetPassword(prisma: PasswordResetPrisma, input: { token: string; passwordHash: string; now: Date }): Promise<boolean>;
 export async function resetPassword(
   prisma: PrismaClient | PasswordResetPrisma,
-  input: Readonly<{ token: string; passwordHash: string; now: Date }>,
+  input: { token: string; passwordHash: string; now: Date },
 ): Promise<boolean> {
   const tokenHash = hashToken(input.token);
   return prisma.$transaction(async (transaction) => {

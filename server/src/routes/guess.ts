@@ -71,7 +71,7 @@ export async function guessRoutes(app: FastifyInstance) {
     if (!userId) throw new AuthenticationError('Not authenticated');
     if (request.authProvider === 'anonymous') {
       const today = await getTodayPuzzle(prisma);
-      if (!today?.questionIds.includes(request.params.id)) throw new AuthorizationError('Anonymous players can only view today’s daily guess.');
+      if (!today?.questionIds.includes(request.params.id)) throw new AuthorizationError('Anonymous players can only view today\'s daily guess.');
     }
     const guess = await prisma.guess.findUnique({
       where: { userId_questionId: { userId, questionId: request.params.id } },

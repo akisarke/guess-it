@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { LoaderCircle, Timer } from 'lucide-react';
-import { api, ApiError } from '../lib/api';
+import { api, ApiError, needsAccount } from '../lib/api';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { useAuthGate } from '../hooks/use-auth-gate';
@@ -113,7 +113,7 @@ export function Matchmaking() {
     return () => { active = false; };
   }, [authState, enterMatch, status]);
 
-   if (authState === 'signed-out' || (error instanceof ApiError && (error.status === 401 || error.status === 403))) {
+   if (authState === 'signed-out' || needsAccount(error)) {
      return <div className="max-w-lg mx-auto py-12 px-4"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
   }
   if (authState === 'unavailable') {

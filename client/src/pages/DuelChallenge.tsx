@@ -4,7 +4,7 @@ import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 import { useAuthGate } from '../hooks/use-auth-gate';
-import { ApiError, api, type DuelChallengeState } from '../lib/api';
+import { api, needsAccount, type DuelChallengeState } from '../lib/api';
 
 export function DuelChallenge() {
   const { token } = useParams<{ token: string }>();
@@ -45,7 +45,7 @@ export function DuelChallenge() {
   if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
   if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><EmailVerificationPending /></div></div>;
   if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><AuthUnavailable onRetry={retry} /></div></div>;
-  if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+  if (needsAccount(error)) {
     return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
   }
   if (error) return <State title="Challenge unavailable" description={error.message}><Link to="/duels" className="btn-secondary">Back to Duels</Link></State>;

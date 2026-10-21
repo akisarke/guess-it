@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { api, ApiError, type ProfileResponse } from '../lib/api';
+import { api, needsAccount, type ProfileResponse } from '../lib/api';
 import { BadgeChip } from '../components/BadgeChip';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileEditor } from '../components/ProfileEditor';
@@ -121,7 +121,7 @@ export function Profile() {
     ? <EmailVerificationPending />
     : loading
     ? renderLoading()
-      : loadError instanceof ApiError && (loadError.status === 401 || loadError.status === 403) && !userId && !handle
+      : needsAccount(loadError) && !userId && !handle
       ? <NotLoggedIn feature="your profile" />
     : loadError || !profile
       ? renderError(loadError, () => setRefreshIndex((value) => value + 1))
@@ -139,7 +139,7 @@ export function Profile() {
            shareError,
          });
 
-  const isErrorState = (loadError instanceof ApiError && loadError.status === 401 && !userId && !handle) || (loadError || !profile);
+  const isErrorState = (needsAccount(loadError) && !userId && !handle) || (loadError || !profile);
   const showOuterCard = !isErrorState && searchParams.get('pendingEmail') !== '1';
 
   const notice = searchParams.get('linked') === '1' ? 'Hack Club is linked. Choose your public username below.' : searchParams.get('upgraded') === '1' ? 'Your anonymous progress is now attached to your account.' : null;

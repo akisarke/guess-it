@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { api, ApiError } from '../lib/api';
+import { api, needsAccount } from '../lib/api';
 import { ShareCard } from '../components/ShareCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { formatScore } from '../lib/format-number';
@@ -68,7 +68,7 @@ export function Summary() {
     );
   }
 
-  if (error instanceof ApiError && error.status === 401) {
+  if (needsAccount(error)) {
     return <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12"><div className="card w-full max-w-lg overflow-hidden sm:p-8"><NotLoggedIn feature="your summary" /></div></div>;
   }
 

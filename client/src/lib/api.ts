@@ -29,6 +29,14 @@ const errorCodes: readonly ErrorCode[] = [
   'RATE_LIMITED', 'GENERATION_QUOTA_EXCEEDED', 'SERVICE_UNAVAILABLE', 'CONFIGURATION_ERROR', 'INTERNAL_ERROR', 'EMAIL_VERIFICATION_REQUIRED',
 ];
 
+// signed out, or signed in without an account. an unverified email is a
+// different state, so that one keeps its own message
+export function needsAccount(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  if (error.status === 401) return true;
+  return error.status === 403 && error.code !== 'EMAIL_VERIFICATION_REQUIRED';
+}
+
 function isErrorCode(value: unknown): value is ErrorCode {
   return errorCodes.some((code) => code === value);
 }

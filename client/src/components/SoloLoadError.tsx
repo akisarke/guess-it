@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ApiError } from '../lib/api';
+import { ApiError, needsAccount } from '../lib/api';
 import { NotLoggedIn } from './NotLoggedIn';
 import { StateCard } from './StateCard';
 
 export function SoloLoadError({ error }: { error: Error }) {
-  if (error instanceof ApiError && error.status === 401) {
+  if (needsAccount(error)) {
     return <NotLoggedIn feature="generated sets" />;
   }
   const isNotFound = error instanceof ApiError && error.status === 404;

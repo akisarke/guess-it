@@ -97,13 +97,13 @@ describe('source-aware solo routes', () => {
     expect(screen.queryByLabelText('Guess in islands')).not.toBeInTheDocument();
   });
 
-  it.each([401, 403, 404, 500])('keeps generated load failure %i distinct', async (status) => {
+  it.each([401, 403, 404, 500])('answers a generated load failure of %i with the shared card or a raw error', async (status) => {
 
     vi.spyOn(api, 'getQuestionSetPlay').mockRejectedValue(new ApiError(status, `Failure ${status}`));
 
     open('/sets/set%20one/play/0');
 
-    if (status === 401) expect(await screen.findByRole('heading', { name: 'Not Logged In' })).toBeVisible();
+    if (status === 401 || status === 403) expect(await screen.findByRole('heading', { name: 'Not Logged In' })).toBeVisible();
     else expect(await screen.findByRole('alert')).toHaveTextContent(`Failure ${status}`);
     await waitFor(() => expect(api.getTodayPuzzle).not.toHaveBeenCalled());
   });

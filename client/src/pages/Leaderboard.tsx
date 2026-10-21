@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { StateCard } from '../components/StateCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
-import { ApiError, api, type LeaderboardEntry } from '../lib/api';
+import { api, needsAccount, type LeaderboardEntry } from '../lib/api';
 import { BadgeChip } from '../components/BadgeChip';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -104,7 +104,7 @@ export function Leaderboard() {
             description="Fetching current scores."
           />
         ) : error ? (
-          error instanceof ApiError && (error.status === 401 || error.status === 403) ? (
+          needsAccount(error) ? (
             <NotLoggedIn feature="the leaderboard" />
           ) : (
             <StateCard

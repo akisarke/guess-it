@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, ApiError } from '../lib/api';
+import { api, ApiError, needsAccount } from '../lib/api';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
@@ -88,7 +88,7 @@ export function Generate() {
           </div>
         </div>
 
-        {error instanceof ApiError && (error.status === 401 || error.status === 403) ? <NotLoggedIn feature="question generation" /> : error && (
+        {needsAccount(error) ? <NotLoggedIn feature="question generation" /> : error && (
           <p className="text-red-500 text-sm mb-4" role="alert">
             {error.message}
             {error instanceof ApiError && error.status === 429 && error.resetAt ? ` Try again after ${error.resetAt}.` : ''}

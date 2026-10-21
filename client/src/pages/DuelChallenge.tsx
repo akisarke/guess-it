@@ -4,14 +4,14 @@ import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 import { useAuthGate } from '../hooks/use-auth-gate';
-import { api, type DuelChallengeState } from '../lib/api';
+import { ApiError, api, type DuelChallengeState } from '../lib/api';
 
 export function DuelChallenge() {
   const { token } = useParams<{ token: string }>();
   const { state: authState, retry } = useAuthGate();
   const navigate = useNavigate();
   const [challenge, setChallenge] = useState<DuelChallengeState | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [accepting, setAccepting] = useState(false);
   const pollRef = useRef<number | undefined>(undefined);
 
@@ -21,7 +21,7 @@ export function DuelChallenge() {
       setChallenge(next);
       setError(null);
       if (next.state === 'started') navigate(`/duels/${next.duelId}`, { replace: true });
-    }).catch((e: unknown) => setError(e instanceof Error ? e.message : 'Challenge not found.'));
+    }).catch((e: unknown) => setError(e instanceof Error ? e : new Error('Challenge not found.')));
   };
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function DuelChallenge() {
     setAccepting(true);
     api.acceptChallenge(token).then(({ duelId }) => navigate(`/duels/${duelId}`, { replace: true }))
       .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : 'Unable to accept this challenge.');
+        setError(e instanceof Error ? e : new Error('Unable to accept this challenge.'));
         setAccepting(false);
       });
   };
@@ -45,7 +45,10 @@ export function DuelChallenge() {
   if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
   if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><EmailVerificationPending /></div></div>;
   if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><AuthUnavailable onRetry={retry} /></div></div>;
-  if (error) return <State title="Challenge unavailable" description={error}><Link to="/duels" className="btn-secondary">Back to Duels</Link></State>;
+  if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+    return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
+  }
+  if (error) return <State title="Challenge unavailable" description={error.message}><Link to="/duels" className="btn-secondary">Back to Duels</Link></State>;
   if (!challenge) return <State title="Private challenge" description="Loading the invitation." />;
 
   if (challenge.state === 'expired') {

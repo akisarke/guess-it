@@ -88,7 +88,7 @@ export function Generate() {
           </div>
         </div>
 
-        {error instanceof ApiError && error.status === 401 ? <NotLoggedIn feature="question generation" /> : error && (
+        {error instanceof ApiError && (error.status === 401 || error.status === 403) ? <NotLoggedIn feature="question generation" /> : error && (
           <p className="text-red-500 text-sm mb-4" role="alert">
             {error.message}
             {error instanceof ApiError && error.status === 429 && error.resetAt ? ` Try again after ${error.resetAt}.` : ''}

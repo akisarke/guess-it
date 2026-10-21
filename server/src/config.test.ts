@@ -68,6 +68,11 @@ describe('loadConfig', () => {
     expectConfigError(() => loadConfig({ ...validProductionEnvironment, HACKCLUB_CLIENT_SECRET: '' }), 'HACKCLUB_CLIENT_SECRET');
   });
 
+  it('swaps a localhost hack club redirect for the APP_URL callback in production', () => {
+    const config = loadConfig({ ...validProductionEnvironment, HACKCLUB_REDIRECT_URI: 'http://localhost:3001/api/auth/hackclub/callback' });
+    expect(config.hackClub.redirectUri).toBe('https://guessit.example.test/api/auth/hackclub/callback');
+  });
+
   it('rejects short secrets and malformed URLs', () => {
     expectConfigError(() => loadConfig({ ...validProductionEnvironment, SESSION_SECRET: 'short' }), 'SESSION_SECRET', ['short']);
     expectConfigError(() => loadConfig({ ...validProductionEnvironment, DATABASE_URL: 'not-a-url' }), 'DATABASE_URL', ['not-a-url']);

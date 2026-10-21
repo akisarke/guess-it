@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { api } from '../lib/api';
+import { ApiError, api } from '../lib/api';
 import { Leaderboard } from './Leaderboard';
 
 describe('Leaderboard', () => {
@@ -31,5 +31,19 @@ describe('Leaderboard', () => {
     expect(screen.getByText('First Guess')).toBeInTheDocument();
     expect(screen.getByTitle('1,250,000×')).toHaveTextContent('1.25M×');
     expect(screen.getByRole('img', { name: /Hack Club/i })).toBeInTheDocument();
+  });
+
+  it('shows the standard signed-out card when the board requires an account', async () => {
+    vi.spyOn(api, 'getLeaderboard').mockRejectedValue(new ApiError(401, 'Not authenticated'));
+
+    render(
+      <MemoryRouter initialEntries={['/leaderboard']}>
+        <Routes>
+          <Route path="/leaderboard" element={<Leaderboard />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Not Logged In' })).toBeInTheDocument());
   });
 });

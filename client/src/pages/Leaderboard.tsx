@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { StateCard } from '../components/StateCard';
-import { api, type LeaderboardEntry } from '../lib/api';
+import { NotLoggedIn } from '../components/NotLoggedIn';
+import { ApiError, api, type LeaderboardEntry } from '../lib/api';
 import { BadgeChip } from '../components/BadgeChip';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -15,7 +16,7 @@ export function Leaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [scope, setScope] = useState<LeaderboardScope>('daily');
   const [friends, setFriends] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshIndex, setRefreshIndex] = useState(0);
 
@@ -28,7 +29,7 @@ export function Leaderboard() {
       .then(setEntries)
       .catch((e: unknown) => {
         setEntries([]);
-        setError(e instanceof Error ? e.message : 'Unable to load the leaderboard.');
+        setError(e instanceof Error ? e : new Error('Unable to load the leaderboard.'));
       })
       .finally(() => setLoading(false));
   }, [scope, friends, refreshIndex]);
@@ -103,12 +104,16 @@ export function Leaderboard() {
             description="Fetching current scores."
           />
         ) : error ? (
-          <StateCard
-            badge="Error"
-            title="Could not load leaderboard"
-            description={error}
-            retryAction={() => setRefreshIndex((v) => v + 1)}
-          />
+          error instanceof ApiError && (error.status === 401 || error.status === 403) ? (
+            <NotLoggedIn feature="the leaderboard" />
+          ) : (
+            <StateCard
+              badge="Error"
+              title="Could not load leaderboard"
+              description={error.message}
+              retryAction={() => setRefreshIndex((v) => v + 1)}
+            />
+          )
         ) : entries.length === 0 ? (
           <StateCard
             badge="No entries"

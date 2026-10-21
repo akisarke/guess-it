@@ -6,6 +6,18 @@ import { NotLoggedIn } from '../components/NotLoggedIn';
 import { formatScore } from '../lib/format-number';
 import '../reveal.css';
 
+const LOG_SCORE_CAP = 10_000;
+
+// scores are ratios, so log them like the reveal chart. one huge miss should not flatten the rest
+function barHeight(score: number): number {
+  if (score <= 0) return 12;
+  const ratio = Math.log10(score) / Math.log10(LOG_SCORE_CAP);
+  const height = Math.round(100 - ratio * 100);
+  if (height >= 100) return 100;
+  if (height < 18) return 18;
+  return height;
+}
+
 interface TodayPuzzle {
   puzzle: { puzzleNumber: number };
   questions: { id: string; prompt: string; unit: string }[];
@@ -103,8 +115,6 @@ export function Summary() {
     : 0;
   const averageDisplay = hasAnswers ? formatScore(average) : null;
 
-  const highestScore = Math.max(...answered, 1);
-
   return (
     <div className="summary-page mx-auto w-full max-w-6xl px-4 py-5 sm:py-8">
       <div className="summary-canvas">
@@ -139,7 +149,7 @@ export function Summary() {
                 <span
                   key={puzzle.questions[index]?.id ?? index}
                   className="summary-bar"
-                  style={{ height: `${score > 0 ? Math.max(18, 100 - (score / highestScore) * 70) : 12}%` }}
+                  style={{ height: `${barHeight(score)}%` }}
                 />
               ))}
             </div>

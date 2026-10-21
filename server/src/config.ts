@@ -310,6 +310,17 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Server
   const appUrl = parseUrl(requiredValue(mode, raw.APP_URL, 'APP_URL', developmentDefaults.appUrl), 'APP_URL', ['http:', 'https:']);
   if (mode === 'production' && (new URL(appUrl).protocol !== 'https:' || isLocalOrigin(appUrl))) throw invalidConfiguration('APP_URL');
 
+  const configuredHackClubRedirect = parseUrl(
+    requiredValue(mode, raw.HACKCLUB_REDIRECT_URI, 'HACKCLUB_REDIRECT_URI', developmentDefaults.hackClubRedirectUri),
+    'HACKCLUB_REDIRECT_URI',
+    ['http:', 'https:'],
+  );
+  // hack club sends the browser back to this, so a localhost callback drops logins
+  // on a dead host. follow APP_URL instead
+  const hackClubRedirectUri = isLocalOrigin(configuredHackClubRedirect) && !isLocalOrigin(appUrl)
+    ? new URL('/api/auth/hackclub/callback', appUrl).toString()
+    : configuredHackClubRedirect;
+
   const email = parseOptionalPair(raw.RESEND_API_KEY, raw.EMAIL_FROM, 'RESEND_API_KEY', 'EMAIL_FROM');
   const geminiApiKeys = (raw.GEMINI_API_KEY?.split(',') ?? []).map((key) => key.trim()).filter(Boolean);
 
@@ -329,11 +340,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): Server
     hackClub: {
       clientId: requiredValue(mode, raw.HACKCLUB_CLIENT_ID, 'HACKCLUB_CLIENT_ID', developmentDefaults.hackClubClientId),
       clientSecret: requiredValue(mode, raw.HACKCLUB_CLIENT_SECRET, 'HACKCLUB_CLIENT_SECRET', developmentDefaults.hackClubClientSecret),
-      redirectUri: parseUrl(
-        requiredValue(mode, raw.HACKCLUB_REDIRECT_URI, 'HACKCLUB_REDIRECT_URI', developmentDefaults.hackClubRedirectUri),
-        'HACKCLUB_REDIRECT_URI',
-        ['http:', 'https:'],
-      ),
+      redirectUri: hackClubRedirectUri,
     },
     email: email ? { apiKey: email.first, from: email.second } : null,
     gemini: geminiApiKeys.length > 0 ? { apiKeys: geminiApiKeys, model: raw.GEMINI_MODEL?.trim() || 'gemini-2.5-flash' } : null,

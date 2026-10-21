@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { createHash, randomUUID } from 'node:crypto';
+import { isLocalOrigin } from '../config.js';
 import { getSessionUser } from '../middleware/auth.js';
 import { authenticate, requireRegistered } from '../middleware/auth.js';
 import { setSessionCookie, textField } from '../services/auth-helpers.js';
@@ -29,6 +30,16 @@ export function canUnlinkHackClub(user: { hackclubId: string | null; email: stri
 export function registerHackClubAuthRoutes(app: FastifyInstance): void {
   const prisma = app.prisma;
   const oauthConfig = app.config.hackClub;
+
+  // hack club comes back to this exact url, so it has to point at the host the
+  // visitor is on. the configured value is what a local run wants, and APP_URL
+  // has already been folded in, so a request host is the last source of truth
+  const callbackUrl = (request: FastifyRequest): string => {
+    const configured = oauthConfig.redirectUri;
+    if (!isLocalOrigin(configured)) return configured;
+    const origin = `${request.protocol}://${request.hostname}`;
+    return isLocalOrigin(origin) ? configured : `${origin}/api/auth/hackclub/callback`;
+  };
 
 app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
     const userId = request.userId;
@@ -79,7 +90,7 @@ app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, 
 
     const params = new URLSearchParams({
       client_id: config.clientId,
-      redirect_uri: config.redirectUri,
+      redirect_uri: callbackUrl(request),
       response_type: 'code',
       scope: 'openid profile name email',
       state,
@@ -110,7 +121,7 @@ app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, 
           client_id: config.clientId,
           client_secret: config.clientSecret,
           code,
-          redirect_uri: config.redirectUri,
+          redirect_uri: callbackUrl(request),
           grant_type: 'authorization_code',
         }).toString(),
         signal: AbortSignal.timeout(10_000),

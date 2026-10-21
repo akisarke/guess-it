@@ -182,7 +182,7 @@ const parseBoolean = (value: string | undefined, field: string): boolean => {
   throw invalidConfiguration(field);
 };
 
-const isLocalOrigin = (origin: string): boolean => {
+export const isLocalOrigin = (origin: string): boolean => {
   const parsed = new URL(origin);
   return parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
 };

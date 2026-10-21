@@ -19,7 +19,7 @@ const pendingUser = {
 };
 
 async function makeApp(foundUser: typeof pendingUser | null, validToken = false, limiterStore: LimiterStore = createDeterministicLimiterStore(), protectedRoute = false) {
-  const app = Fastify();
+  const app = Fastify({ trustProxy: true });
   const prisma = new PrismaClient();
   vi.spyOn(prisma.user, 'findUnique').mockResolvedValue(foundUser);
   vi.spyOn(prisma.user, 'update').mockResolvedValue(foundUser ?? pendingUser);
@@ -89,6 +89,16 @@ describe('email verification routes', () => {
     expect(protectedResponse.body).toContain('EMAIL_VERIFICATION_REQUIRED');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     fetchMock.mockRestore();
+  });
+
+  it('sends hack club back to the host the visitor came in on', async () => {
+    const response = await (await makeApp(null)).inject({
+      method: 'GET',
+      url: '/auth/hackclub/start',
+      headers: { host: 'guessit.example.test', 'x-forwarded-proto': 'https' },
+    });
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toContain(`redirect_uri=${encodeURIComponent('https://guessit.example.test/api/auth/hackclub/callback')}`);
   });
 
   it('blocks repeated pending email updates by account-scoped limiter', async () => {

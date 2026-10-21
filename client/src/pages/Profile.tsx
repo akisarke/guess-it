@@ -142,7 +142,11 @@ export function Profile() {
   const isErrorState = (needsAccount(loadError) && !userId && !handle) || (loadError || !profile);
   const showOuterCard = !isErrorState && searchParams.get('pendingEmail') !== '1';
 
-  const notice = searchParams.get('linked') === '1' ? 'Hack Club is linked. Choose your public username below.' : searchParams.get('upgraded') === '1' ? 'Your anonymous progress is now attached to your account.' : null;
+  const isOwnProfile = !userId && !handle;
+  const usernameChosen = isOwnProfile && profile?.user && 'usernameChosen' in profile.user ? profile.user.usernameChosen : undefined;
+  const notice = searchParams.get('linked') === '1' && isOwnProfile && usernameChosen !== true
+    ? 'Hack Club is linked. Choose your public username below.'
+    : searchParams.get('upgraded') === '1' ? 'Your anonymous progress is now attached to your account.' : null;
   return (
     <div className="mx-auto max-w-5xl px-4 py-7 sm:py-10 lg:py-12">
       {showOuterCard ? (

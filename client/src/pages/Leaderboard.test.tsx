@@ -14,7 +14,7 @@ describe('Leaderboard', () => {
         score: 1_250_000,
         rank: 1,
         isHackClubMember: true,
-        pinnedBadges: [{ badgeId: 'first', badge: { name: 'First Guess' } }],
+        pinnedBadges: [{ badgeId: 'first', badge: { name: 'First Guess', description: 'Your very first guess.' } }],
       },
     ]);
 

@@ -118,7 +118,7 @@ export interface LeaderboardEntry {
   score: number;
   rank: number;
   isHackClubMember: boolean;
-  pinnedBadges?: readonly { badgeId: string; badge: { name: string } }[];
+  pinnedBadges?: readonly { badgeId: string; badge: { name: string; description: string } }[];
 }
 
 export interface FriendEntry {

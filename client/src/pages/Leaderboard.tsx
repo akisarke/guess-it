@@ -144,7 +144,7 @@ export function Leaderboard() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {entry.pinnedBadges?.map((b) => (
-                      <BadgeChip key={b.badgeId} name={b.badge.name} isPinned />
+                      <BadgeChip key={b.badgeId} name={b.badge.name} description={b.badge.description} isPinned />
                     ))}
                   </div>
                 </div>

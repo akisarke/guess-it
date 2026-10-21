@@ -3,12 +3,13 @@ import { badgeIconForId } from '../lib/badge-icons';
 interface BadgeChipProps {
   name: string;
   badgeId?: string;
+  description?: string;
   isSecret?: boolean;
   isPinned?: boolean;
   onTogglePin?: () => void;
 }
 
-export function BadgeChip({ name, badgeId = '', isSecret, isPinned, onTogglePin }: BadgeChipProps) {
+export function BadgeChip({ name, badgeId = '', description, isSecret, isPinned, onTogglePin }: BadgeChipProps) {
 
   const handleToggle = () => {
     onTogglePin?.();
@@ -24,10 +25,10 @@ export function BadgeChip({ name, badgeId = '', isSecret, isPinned, onTogglePin 
     </>
   );
 
-  if (!onTogglePin) return <span className={className} title={isSecret ? 'Secret badge' : name}>{content}</span>;
+  if (!onTogglePin) return <span className={className} title={isSecret ? 'Secret badge' : description ?? name}>{content}</span>;
 
   return (
-    <button type="button" onClick={handleToggle} data-sound="toggle" aria-label={`${isPinned ? 'Unpin' : 'Pin'} badge ${name}`} aria-pressed={isPinned} className={className} title={isSecret ? 'Secret badge' : name}>
+    <button type="button" onClick={handleToggle} data-sound="toggle" aria-label={`${isPinned ? 'Unpin' : 'Pin'} badge ${name}`} aria-pressed={isPinned} className={className} title={isSecret ? 'Secret badge' : description ?? name}>
       {content}
     </button>
   );

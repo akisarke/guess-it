@@ -5,6 +5,7 @@ import { api, needsAccount, type LeaderboardEntry } from '../lib/api';
 import { BadgeChip } from '../components/BadgeChip';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileAvatar } from '../components/ProfileAvatar';
+import { parseInline, renderInline } from '../components/MarkdownBio';
 import { formatScore } from '../lib/format-number';
 import { Link } from 'react-router-dom';
 
@@ -41,14 +42,14 @@ export function Leaderboard() {
     : 0;
 
   return (
-    <div className="max-w-lg mx-auto py-12 px-4">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">
       <div className="card">
         <div className="mb-6 space-y-3">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-extrabold leading-none">Leaderboard</h1>
               <p className="mt-2 max-w-md text-sm text-ink/60 dark:text-gray-300">
-                Compare scores across the same playful Hack Club surface as profiles.
+                See who's been closest — today, this week, and all time.
               </p>
             </div>
             <span className="rounded-md border-2 border-ink/10 bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.11em] text-ink/55 dark:border-white/10 dark:bg-[var(--surface-2)] dark:text-gray-300">
@@ -139,7 +140,7 @@ export function Leaderboard() {
 
                 <div className="min-w-0 space-y-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <div className="min-w-0"><Link to={`/u/${encodeURIComponent(entry.displayName)}`} className="block break-words font-bold text-ink underline-offset-2 hover:underline dark:text-gray-100">{entry.displayName}</Link>{entry.bio && <p className="truncate text-xs text-ink/60 dark:text-gray-400">{entry.bio}</p>}</div>
+                <div className="min-w-0"><Link to={`/u/${encodeURIComponent(entry.displayName)}`} className="block break-words font-bold text-ink underline-offset-2 hover:underline dark:text-gray-100">{entry.displayName}</Link>{entry.bio && <p className="truncate text-xs text-ink/60 dark:text-gray-400">{renderInline(parseInline(entry.bio), `leaderboard-${entry.userId}`)}</p>}</div>
                     {entry.isHackClubMember && <HackClubFlag className="h-4 w-4 shrink-0" />}
                   </div>
                   <div className="flex flex-wrap gap-2">

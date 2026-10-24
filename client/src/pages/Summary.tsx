@@ -1,8 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { api, needsAccount } from '../lib/api';
+import { SCORE_BANDS } from 'shared';
 import { ShareCard } from '../components/ShareCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
+import { Footer } from '../components/Footer';
 import { formatScore } from '../lib/format-number';
 import '../reveal.css';
 
@@ -25,8 +27,8 @@ interface TodayPuzzle {
 }
 
 function scoreBand(score: number): string {
-  if (score <= 1.5) return 'text-green-500';
-  if (score <= 3.0) return 'text-amber-700';
+  if (score <= SCORE_BANDS.close.max) return 'text-green-500';
+  if (score <= SCORE_BANDS.medium.max) return 'text-amber-700';
   return 'text-red-500';
 }
 
@@ -69,7 +71,7 @@ export function Summary() {
   }
 
   if (needsAccount(error)) {
-    return <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12"><div className="card w-full max-w-lg overflow-hidden sm:p-8"><NotLoggedIn feature="your summary" /></div></div>;
+    return <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12"><NotLoggedIn feature="your summary" /></div>;
   }
 
   if (error || !puzzle) {
@@ -142,9 +144,9 @@ export function Summary() {
           <section className="summary-score-panel">
             <p className="summary-label">Score</p>
             <p className="summary-score" title={averageDisplay?.exact}>{averageDisplay?.visual ?? '-'}</p>
-            <span className="summary-badge">{hasAnswers ? `${answered.length}/${puzzle.questions.length} ANSWERED` : 'PLAY TO SCORE'}</span>
-            <p className="summary-label summary-chart-title">How everyone did</p>
-            <div className="summary-chart" role="img" aria-label="Your score compared with the three daily questions">
+            <span className="summary-badge">{hasAnswers ? `${answered.length}/${puzzle.questions.length} Answered` : 'Play to score'}</span>
+            <p className="summary-label summary-chart-title">Scores by question</p>
+            <div className="summary-chart" role="img" aria-label="Your score for each daily question">
               {scores.map((score, index) => (
                 <span
                   key={puzzle.questions[index]?.id ?? index}
@@ -156,7 +158,7 @@ export function Summary() {
             <div className="summary-chart-axis"><span>Q1</span><span>Q{puzzle.questions.length}</span></div>
             <div className="summary-actions">
               <ShareCard puzzleNumber={puzzle.puzzle.puzzleNumber} scores={scores} average={average} />
-              <Link to="/" className="btn-secondary w-full text-center">Back to Home</Link>
+              <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
             </div>
           </section>
 
@@ -185,6 +187,8 @@ export function Summary() {
           </section>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }

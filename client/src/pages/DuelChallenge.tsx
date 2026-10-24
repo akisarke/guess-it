@@ -42,9 +42,9 @@ export function DuelChallenge() {
   };
 
   if (authState === 'checking') return <State title="Checking your session" description="Preparing the challenge." />;
-  if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
-  if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><EmailVerificationPending /></div></div>;
-  if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><AuthUnavailable onRetry={retry} /></div></div>;
+  if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><NotLoggedIn feature="Duels" /></div>;
+  if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><EmailVerificationPending /></div>;
+  if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><AuthUnavailable onRetry={retry} /></div>;
   if (needsAccount(error)) {
     return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
   }

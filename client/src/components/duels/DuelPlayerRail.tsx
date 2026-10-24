@@ -2,6 +2,7 @@ import type { DuelPlayerView } from 'shared';
 import { formatScore } from '../../lib/format-number';
 import { Link } from 'react-router-dom';
 import { ProfileAvatar } from '../ProfileAvatar';
+import { parseInline, renderInline } from '../MarkdownBio';
 
 const STATE_LABELS: Record<string, string> = {
   waiting: 'Waiting',
@@ -31,6 +32,7 @@ export function DuelPlayerRail({ players }: { players: readonly [DuelPlayerView,
                 >
                   {player.displayName}
                 </Link>
+                {player.bio && <p className="mt-1 truncate text-xs text-ink/60 dark:text-gray-400">{renderInline(parseInline(player.bio), `duel-${player.playerId}`)}</p>}
               </div>
             </div>
 

@@ -28,3 +28,11 @@ export async function markNotificationRead(prisma: PrismaClient, userId: string,
 export async function markAllNotificationsRead(prisma: PrismaClient, userId: string) {
   return prisma.notification.updateMany({ where: { userId, readAt: null }, data: { readAt: new Date() } });
 }
+
+export async function deleteNotification(prisma: PrismaClient, userId: string, id: string) {
+  return prisma.notification.deleteMany({ where: { id, userId } });
+}
+
+export async function deleteAllNotifications(prisma: PrismaClient, userId: string) {
+  return prisma.notification.deleteMany({ where: { userId } });
+}

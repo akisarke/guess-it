@@ -21,7 +21,7 @@ export function DistributionGraph({ data, userGuess, userScoreBand }: Distributi
         <div className="flex items-end justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-ink/90 dark:text-gray-100">How everyone guessed</h3>
-            <p className="mt-1 text-xs text-ink/65 dark:text-gray-400">A snapshot of the guessing crowd</p>
+            <p className="mt-1 text-xs text-ink/65 dark:text-gray-400">See the distribution of guesses for today's question</p>
           </div>
           <span className="chip chip-idle !px-2.5 !py-1 text-xs">log scale</span>
         </div>

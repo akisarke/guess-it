@@ -30,7 +30,7 @@ export function DuelQuestionCard({ question, value, disabled, onChange, onSubmit
           className="input-field tabular-nums"
           placeholder="0"
         />
-        <button type="submit" disabled={disabled || Number(value) <= 0} className="btn-primary w-full">{disabled ? 'Waiting for reveal...' : 'Lock estimate'}</button>
+        <button type="submit" disabled={disabled || Number(value) <= 0} className="btn-primary w-full" data-enter>{disabled ? 'Waiting for reveal...' : 'Lock estimate'}</button>
       </form>
     </section>
   );

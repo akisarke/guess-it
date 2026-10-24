@@ -51,7 +51,7 @@ describe('source-aware solo routes', () => {
     expect(screen.getByText('Ocean estimates')).toBeVisible();
     expect(screen.getByText(/oceans.*medium/i)).toBeVisible();
     expect(screen.getByText(/Generated set/)).toBeVisible();
-    expect(screen.queryByText(/correct answer|napkin math|score band/i)).not.toBeInTheDocument();
+    expect(document.getElementById('main-content')).not.toHaveTextContent(/correct answer|napkin math|score band/i);
     await userEvent.click(screen.getByRole('button', { name: 'Lock it in' }));
 
     expect(submit).toHaveBeenCalledWith({ source: generated.source, questionId: 'q1', value: 50 });
@@ -66,7 +66,7 @@ describe('source-aware solo routes', () => {
     vi.spyOn(api, 'getQuestionSetSummary').mockResolvedValue({ ...generated, userGuesses: { q1: 2, q2: 1, q3: 3 }, completed: true, averageScore: 2 });
     open('/sets/set%20one/reveal/2');
 
-    await userEvent.click(await screen.findByRole('link', { name: 'See Summary' }));
+    await userEvent.click(await screen.findByRole('link', { name: 'See summary' }));
 
     expect(await screen.findByRole('heading', { name: 'Generated Summary' })).toBeVisible();
     expect(window.location.pathname).toBe('/sets/set%20one/summary');

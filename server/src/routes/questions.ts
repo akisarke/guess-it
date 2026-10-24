@@ -9,7 +9,7 @@ import {
   type GenerationInput,
   type GeneratedQuestionBatch,
 } from '../services/ai.js';
-import { createGeneratedSet, GeneratedSetQuotaError } from '../services/generated-sets.js';
+import { createGeneratedSet, GeneratedSetQuotaError, deleteGeneratedSet } from '../services/generated-sets.js';
 import { getTodayPuzzle } from '../services/daily-puzzle.js';
 import { buildLimiterKey, semanticLimit } from '../services/rate-limit.js';
 import { AuthenticationError, AuthorizationError, ExternalServiceError, RateLimitError, ValidationError, NotFoundError } from '../errors/application-error.js';
@@ -20,6 +20,7 @@ export type QuestionRouteDependencies = {
   authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<unknown>;
   generateQuestionSet: (input: GenerationInput) => Promise<GeneratedQuestionBatch>;
   createGeneratedSet: typeof createGeneratedSet;
+  deleteGeneratedSet: typeof deleteGeneratedSet;
 };
 
 type RouteOptions = { dependencies?: QuestionRouteDependencies };
@@ -43,6 +44,7 @@ function defaultDependencies(prisma: PrismaClient, config: Parameters<typeof gen
     authenticate,
     generateQuestionSet: (input) => generateQuestionSet(input, config),
     createGeneratedSet: (client, input) => createGeneratedSet(client, input),
+    deleteGeneratedSet: (client, userId, setId) => deleteGeneratedSet(client, userId, setId),
   };
 }
 
@@ -109,5 +111,12 @@ export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, opti
     });
     if (!question) throw new NotFoundError('Question not found');
     return { question };
+  });
+
+  app.delete<{ Params: { id: string } }>('/sets/:id', { preHandler: [dependencies.authenticate, requireRegistered] }, async (request) => {
+    const userId = request.userId ?? request.session?.userId;
+    if (!userId) throw new AuthenticationError('Not authenticated');
+    await dependencies.deleteGeneratedSet(app.prisma, userId, request.params.id);
+    return { success: true };
   });
 };

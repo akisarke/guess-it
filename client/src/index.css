@@ -13,6 +13,7 @@
   --brand-rgb: 201 69 31;
   --line: rgba(17, 17, 17, 0.12);
   --paper: #e9e6de;
+  --cta: #c2410c;
 
   --graph-grid: rgba(17, 17, 17, 0.08);
 
@@ -51,18 +52,27 @@ textarea {
   font-family: inherit;
 }
 
+summary::-webkit-details-marker {
+  display: none;
+}
+
 h1,
 h2,
 h3,
 .font-display {
   font-family: theme('fontFamily.display');
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 @layer components {
 
   .shell {
     @apply mx-auto w-full max-w-4xl px-4;
+  }
+
+  .shell-wide {
+    @apply mx-auto w-full max-w-5xl px-4;
   }
 
   .card {
@@ -176,6 +186,12 @@ h3,
   .dark .nav-link:hover {
     color: #ede9e0;
   }
+  .nav-link[aria-current='page'] {
+    color: var(--ink);
+  }
+  .dark .nav-link[aria-current='page'] {
+    color: #ede9e0;
+  }
   .nav-link::after {
     content: '';
     position: absolute;
@@ -184,14 +200,15 @@ h3,
     left: 0;
     height: 2px;
     border-radius: 9999px;
-    background: rgb(var(--brand-rgb));
+    background: currentColor;
     opacity: 0;
     transform: scaleX(0.35);
     transform-origin: center;
     transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease-out;
   }
   .nav-link:hover::after,
-  .nav-link:focus-visible::after {
+  .nav-link:focus-visible::after,
+  .nav-link[aria-current='page']::after {
     opacity: 1;
     transform: scaleX(1);
   }
@@ -205,22 +222,17 @@ h3,
     @apply mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:py-16;
   }
   .auth-shell {
-
     @apply grid overflow-hidden rounded-3xl border lg:grid-cols-[minmax(0,1.02fr)_minmax(24rem,0.98fr)];
     background: var(--surface);
     border-color: var(--line);
   }
   .auth-story {
-
     @apply relative isolate min-w-0 overflow-hidden px-6 py-6 sm:px-10 sm:py-8 lg:px-12 lg:py-14 dark:text-white;
-    background: var(--surface-2);
+    background: var(--surface);
     color: var(--ink);
   }
   .auth-story > * {
     @apply relative z-10;
-  }
-  .auth-brand {
-    @apply inline-flex items-center font-display text-2xl font-extrabold text-ink dark:text-white;
   }
   .auth-eyebrow {
     @apply text-[0.7rem] font-bold uppercase tracking-[0.11em] opacity-70;

@@ -2,6 +2,7 @@ import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type NotificationItem } from '../lib/api';
+import { X } from 'lucide-react';
 
 function relativeTime(value: string) {
   const seconds = Math.max(0, Math.floor((Date.now() - Date.parse(value)) / 1000));
@@ -70,8 +71,11 @@ export function NotificationBell() {
       {unread > 0 && <span className="absolute right-1 top-1 min-w-4 rounded-full bg-brand px-1 text-[10px] font-bold leading-4 text-white">{unread > 9 ? '9+' : unread}</span>}
     </button>
     {open && <div role="dialog" aria-label="Notifications" className="absolute right-0 top-12 z-30 w-80 rounded-2xl border-2 border-ink/10 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-gray-900">
-      <div className="mb-2 flex items-center justify-between"><strong>Notifications</strong>{unread > 0 && <button type="button" className="text-xs font-bold text-accent" onClick={() => void api.markAllNotificationsRead().then(refresh).catch(() => undefined)}>Mark all read</button>}</div>
-      {items.length === 0 ? <p className="py-5 text-center text-sm opacity-60">You're all caught up.</p> : <ul className="space-y-1">{items.map((item) => <li key={item.id} className={item.readAt ? 'rounded-xl p-2' : 'rounded-xl bg-accent/10 p-2'}><Link to={item.actionUrl} onClick={() => markRead(item)} className="block"><div className="flex items-center justify-between gap-2 text-sm font-bold"><span>{item.title}</span><time className="text-xs font-normal opacity-60">{relativeTime(item.createdAt)}</time></div><p className="mt-1 text-xs opacity-70">{item.message}</p><span className="mt-2 inline-block text-xs font-bold text-accent">{item.actionLabel}</span></Link></li>)}</ul>}
+      <div className="mb-2 flex items-center justify-between"><strong>Notifications</strong>{unread > 0 && <>
+        <button type="button" className="text-xs font-bold text-accent" onClick={() => void api.markAllNotificationsRead().then(refresh).catch(() => undefined)}>Mark all read</button>
+        <button type="button" className="ml-2 text-xs font-bold text-brand dark:text-brand" onClick={() => void api.deleteAllNotifications().then(refresh).catch(() => undefined)}>Clear all</button>
+      </>}</div>
+      {items.length === 0 ? <p className="py-5 text-center text-sm opacity-60">You're all caught up.</p> : <ul className="space-y-1">{items.map((item) => <li key={item.id} className={item.readAt ? 'rounded-xl p-2' : 'rounded-xl bg-accent/10 p-2'}><div className="flex items-start justify-between gap-2"><Link to={item.actionUrl} onClick={() => markRead(item)} className="block flex-1"><div className="flex items-center justify-between gap-2 text-sm font-bold"><span>{item.title}</span><time className="text-xs font-normal opacity-60">{relativeTime(item.createdAt)}</time></div><p className="mt-1 text-xs opacity-70">{item.message}</p><span className="mt-2 inline-block text-xs font-bold text-accent">{item.actionLabel}</span></Link><button type="button" aria-label={`Dismiss ${item.title}`} onClick={() => void api.deleteNotification(item.id).then(refresh).catch(() => undefined)} className="shrink-0 text-[10px] font-bold text-ink/40 hover:text-ink dark:text-gray-400 dark:hover:text-white">×</button></div></li>)}</ul>}
     </div>}
   </div>;
 }

@@ -120,7 +120,7 @@ export function Admin() {
               </button>
             ))}
              {users.length === 0 && !loading && (
-               <p className="text-center text-ink/50 dark:text-gray-400">No users found</p>
+               <p className="text-center text-ink/50 dark:text-gray-400">No players found yet. Have others started playing?</p>
              )}
           </div>
         )}

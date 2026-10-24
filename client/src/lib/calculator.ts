@@ -1,8 +1,12 @@
 type Token = { type: 'number'; value: number } | { type: 'op'; value: string } | { type: 'percent' };
 
+// Accepted operators: +, -, − (minus), ×, ÷, ^ (power), (, )
 const isDigit = (c: string) => /[0-9.]/.test(c);
 const isOp = (c: string) => ['+', '-', '−', '×', '÷', '(', ')', '^'].includes(c);
 
+// Tokenize a mathematical expression into numbers, operators, and a percent token.
+// Uses standard operator precedence: ^ > ×,÷ > +,−. Right-associative power.
+// % divides the previous number by 100 (e.g., 200×10% → 20).
 function tokenize(expr: string): Token[] {
   const tokens: Token[] = [];
   let i = 0;
@@ -20,13 +24,13 @@ function tokenize(expr: string): Token[] {
       }
       tokens.push({ type: 'number', value: parseFloat(num) });
     } else if (expr[i] === '%') {
-
       tokens.push({ type: 'percent' });
       i++;
     } else if (isOp(expr[i])) {
       tokens.push({ type: 'op', value: expr[i] });
       i++;
     } else {
+      // Skip unrecognized characters
       i++;
     }
   }
@@ -35,6 +39,8 @@ function tokenize(expr: string): Token[] {
 }
 
 function precedence(op: string): number {
+  // ^ has highest precedence (3), ×,÷ next (2), +,− lowest (1)
+  // Return 0 for unknown operators (should not occur with valid input)
   if (op === '^') return 3;
   if (op === '×' || op === '÷') return 2;
   if (op === '+' || op === '-' || op === '−') return 1;
@@ -42,6 +48,7 @@ function precedence(op: string): number {
 }
 
 function applyOp(a: number, op: string, b: number): number {
+  // Apply a binary operator to two operands
   switch (op) {
     case '+':
       return a + b;
@@ -55,11 +62,15 @@ function applyOp(a: number, op: string, b: number): number {
     case '^':
       return a ** b;
     default:
+      // Should not reach here with valid token stream
       return 0;
   }
 }
 
 export function evaluate(expr: string): number {
+  // Evaluate a mathematical expression using the Shunting-yard algorithm.
+  // Supports: +, -, ×, ÷, ^ (right-associative), parentheses, and % (percent).
+  // Returns NaN for empty expressions, division by zero, or unparseable input.
   const tokens = tokenize(expr);
   const values: number[] = [];
   const ops: string[] = [];
@@ -68,21 +79,22 @@ export function evaluate(expr: string): number {
     if (token.type === 'number') {
       values.push(token.value);
     } else if (token.type === 'percent') {
+      // Percent divides the previous value by 100 (e.g., 50% → 0.5)
       if (values.length) values[values.length - 1] /= 100;
     } else if (token.value === '(') {
       ops.push(token.value);
     } else if (token.value === ')') {
+      // Pop operators until '(' is found, applying each one
       while (ops.length && ops[ops.length - 1] !== '(') {
         const b = values.pop()!;
         const a = values.pop()!;
         const op = ops.pop()!;
         values.push(applyOp(a, op, b));
       }
-
-      if (!ops.length) return NaN;
-      ops.pop();
+      if (!ops.length) return NaN; // Mismatched parentheses
+      ops.pop(); // Discard the '('
     } else {
-
+      // Operator: pop higher-precedence (or left-associative same-precedence) operators first
       const rightAssoc = token.value === '^';
       while (
         ops.length &&
@@ -100,10 +112,10 @@ export function evaluate(expr: string): number {
     }
   }
 
+  // Apply any remaining operators
   while (ops.length) {
+    if (ops.length === 0 || ops[ops.length - 1] === '(' || values.length < 2) return NaN;
     const op = ops.pop()!;
-
-    if (op === '(' || values.length < 2) return NaN;
     const b = values.pop()!;
     const a = values.pop()!;
     values.push(applyOp(a, op, b));

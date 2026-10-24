@@ -19,7 +19,7 @@ function safeUrl(value: string): string | null {
   }
 }
 
-function parseInline(source: string): MarkdownInline[] {
+export function parseInline(source: string): MarkdownInline[] {
   const parts: MarkdownInline[] = [];
   const pattern = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|`[^`]+`|\[([^\]]+)\]\(([^)]+)\))/g;
   let cursor = 0;
@@ -72,7 +72,7 @@ export function parseMarkdownBlocks(source: string): MarkdownBlock[] {
   return blocks;
 }
 
-function renderInline(content: MarkdownInline[], keyPrefix: string): ReactNode[] {
+export function renderInline(content: MarkdownInline[], keyPrefix: string): ReactNode[] {
   return content.map((part, index) => {
     const key = `${keyPrefix}-${index}`;
     if (part.type === 'strong') return <strong key={key}>{part.value}</strong>;

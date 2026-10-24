@@ -25,7 +25,7 @@ describe('Summary', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(screen.getByText('How everyone did')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Scores by question')).toBeInTheDocument());
 
     const bars = document.querySelectorAll('.summary-bar');
     expect(bars.length).toBe(3);
@@ -52,7 +52,7 @@ describe('Summary', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(screen.getByText('PLAY TO SCORE')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Play to score')).toBeInTheDocument());
     const bars = document.querySelectorAll('.summary-bar');
     expect(bars.length).toBe(2);
     expect((bars[0] as HTMLSpanElement).style.height).toBe('12%');

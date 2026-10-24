@@ -128,6 +128,7 @@ export function Question() {
                 onClick={() => handleSubmit(guessValue)}
                 disabled={submitting || guessValue <= 0}
                 className="btn-primary w-full sm:flex-1"
+                data-enter
               >
                 {submitting ? 'Locking in...' : 'Lock it in'}
               </button>

@@ -132,10 +132,8 @@ export function Reveal() {
         ? "You're the first to lock in. Check back as more players guess."
         : `You were the ${ordinal(rank.rank)} closest of ${rank.total} players.`;
   const nextHref = idx < puzzle.questions.length - 1 ? `${prefix}/reveal/${idx + 1}${puzzleQuery}` : `${prefix}/summary`;
-  const nextLabel = idx < puzzle.questions.length - 1 ? 'Next Question' : 'See Summary';
+  const nextLabel = idx < puzzle.questions.length - 1 ? 'Next question' : 'See summary';
   const sourceLabel = 'set' in puzzle ? puzzle.set.title : `Puzzle #${puzzle.puzzle.puzzleNumber}`;
-  const guessLabel = userGuess != null ? `${formatValue(userGuess)} ${question.unit}` : '-';
-  const answerLabel = answer != null ? `${formatValue(answer)} ${question.unit}` : '-';
   const napkinMath = distData?.napkinMath?.trim() ? distData.napkinMath : '';
   const parsedNapkinMath = napkinMath ? parseNapkinMath(napkinMath) : null;
 
@@ -162,35 +160,16 @@ export function Reveal() {
                  <div className="reveal-value reveal-value--yellow" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{userGuess != null ? formatValue(userGuess) : '-'}</div>
                 <div className="reveal-unit">{question.unit}</div>
               </div>
-              <p className="reveal-copy mt-3">You locked in {guessLabel}. The app scored the guess after the answer was revealed.</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Direction</p>
-                  <p className="reveal-metric-value">{direction}</p>
-                </div>
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Score band</p>
-                  <p className="reveal-metric-value">{SCORE_BANDS[band].label}</p>
-                </div>
-              </div>
+              <p className="reveal-copy mt-3">
+                {direction === 'Exact' ? 'Right on the number.' : `You were ${direction.toLowerCase()}.`}
+              </p>
             </article>
 
             <article className="reveal-panel reveal-panel--answer">
-              <p className="reveal-kicker">Correct answer</p>
+              <p className="reveal-kicker">The answer</p>
               <div className="mt-4 flex flex-wrap items-end gap-3">
                  <div className="reveal-value reveal-value--answer" title={answer != null ? formatExactNumber(answer) : undefined}>{answer != null ? formatValue(answer) : '-'}</div>
                 <div className="reveal-unit text-ink/70 dark:text-white/70">{question.unit}</div>
-              </div>
-              <p className="reveal-copy mt-3">The estimated answer is {answerLabel}.</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Unit</p>
-                  <p className="reveal-metric-value">{question.unit}</p>
-                </div>
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Source</p>
-                  <p className="reveal-metric-value">{sourceLabel}</p>
-                </div>
               </div>
             </article>
           </section>
@@ -198,41 +177,28 @@ export function Reveal() {
           <section className="relative grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-stretch">
             <div className="reveal-divider absolute inset-y-4 left-1/2 w-px -translate-x-1/2" aria-hidden="true" />
             <article className="reveal-landed">
-              <p className="reveal-kicker">Landed</p>
+              <p className="reveal-kicker">Your score</p>
               <div className="reveal-landed-score">
                  <div className="reveal-score" title={formatScore(score).exact}>{formatScore(score).visual}</div>
                 <div className="min-w-[13rem] flex-1 pb-1">
-                  <p className="reveal-kicker">Score</p>
-                  <p className="mt-1 text-lg font-bold leading-tight text-ink dark:text-gray-100 sm:text-xl">
+                  <p className="text-lg font-bold leading-tight text-ink dark:text-gray-100 sm:text-xl">
                     {rankLine}
                   </p>
                 </div>
               </div>
-              <div className="reveal-note">
-                <span>Direction: {direction}</span>
-                <span>Band: {SCORE_BANDS[band].label}</span>
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Your guess</p>
-                   <p className="reveal-metric-value" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{guessLabel}</p>
-                </div>
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Answer</p>
-                   <p className="reveal-metric-value" title={answer != null ? formatExactNumber(answer) : undefined}>{answerLabel}</p>
-                </div>
-              </div>
             </article>
 
-            <article className="reveal-landed">
-              <DistributionGraph data={distData} userGuess={userGuess} userScoreBand={band} />
-            </article>
+            {puzzle.source?.kind !== 'generated' && (
+              <article className="reveal-landed">
+                <DistributionGraph data={distData} userGuess={userGuess} userScoreBand={band} />
+              </article>
+            )}
           </section>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <details className="reveal-napkin">
               <summary>
-                <span>Napkin Math</span>
+                <span>Napkin math</span>
                 <svg className="napkin-chevron h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
@@ -258,20 +224,6 @@ export function Reveal() {
               ) : (
                 <p className="reveal-napkin-text">No napkin math was saved for this question.</p>
               )}
-              <div className="reveal-napkin-body">
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Score</p>
-                   <p className="reveal-metric-value" title={formatScore(score).exact}>{formatScore(score).visual}</p>
-                </div>
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Rank</p>
-                  <p className="reveal-metric-value">{rank ? `${ordinal(rank.rank)} of ${rank.total}` : '-'}</p>
-                </div>
-                <div className="reveal-metric">
-                  <p className="reveal-metric-label">Direction</p>
-                  <p className="reveal-metric-value">{direction}</p>
-                </div>
-              </div>
             </details>
 
             <div className="reveal-actions lg:justify-start">
@@ -280,7 +232,7 @@ export function Reveal() {
                   Previous
                 </Link>
               )}
-              <Link to={nextHref} className="btn-primary w-full text-center sm:w-auto">{nextLabel}</Link>
+              <Link to={nextHref} className="btn-primary w-full text-center sm:w-auto" data-enter>{nextLabel}</Link>
             </div>
           </div>
         </div>

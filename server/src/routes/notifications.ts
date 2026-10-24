@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { authenticate, requireRegistered } from '../middleware/auth.js';
-import { listNotifications, markAllNotificationsRead, markNotificationRead } from '../services/notifications.js';
+import { listNotifications, markAllNotificationsRead, markNotificationRead, deleteNotification, deleteAllNotifications } from '../services/notifications.js';
 
 export async function notificationRoutes(app: FastifyInstance) {
   app.get('/', { preHandler: [authenticate, requireRegistered] }, async (request) => {
@@ -15,6 +15,16 @@ export async function notificationRoutes(app: FastifyInstance) {
 
   app.post('/:id/read', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     await markNotificationRead(app.prisma, request.userId!, (request.params as { id: string }).id);
+    return { success: true };
+  });
+
+  app.delete('/:id', { preHandler: [authenticate, requireRegistered] }, async (request) => {
+    await deleteNotification(app.prisma, request.userId!, (request.params as { id: string }).id);
+    return { success: true };
+  });
+
+  app.delete('/', { preHandler: [authenticate, requireRegistered] }, async (request) => {
+    await deleteAllNotifications(app.prisma, request.userId!);
     return { success: true };
   });
 }

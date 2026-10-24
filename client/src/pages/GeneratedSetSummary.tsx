@@ -17,7 +17,7 @@ export function GeneratedSetSummary() {
     api.getQuestionSetSummary(setId).then((summary) => {
       if (active) setState({ id: setId, summary, error: null });
     }).catch((error: unknown) => {
-      if (active) setState({ id: setId, summary: null, error: error instanceof Error ? error : new Error('Unable to load summary.') });
+      if (active) setState({ id: setId, summary: null, error: error instanceof Error ? error : new Error('Unable to load generated set summary. Try again later.') });
     });
     return () => { active = false; };
   }, [setId]);
@@ -51,8 +51,8 @@ export function GeneratedSetSummary() {
           })}
         </ol>
         <div className="flex flex-wrap gap-3">
-          {!progress.isComplete && <Link className="btn-primary" to={`${prefix}/play/${progress.firstUnansweredIndex}`}>Continue set</Link>}
-          <Link className="btn-secondary" to="/generate">Back to Generate</Link>
+          {!progress.isComplete && <Link className="btn-primary" to={`${prefix}/play/${progress.firstUnansweredIndex}`} data-enter>Continue set</Link>}
+          <Link className="btn-secondary" to="/generate" data-enter>Back to Generate</Link>
         </div>
       </div>
     </div>

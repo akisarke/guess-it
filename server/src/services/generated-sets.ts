@@ -139,3 +139,23 @@ export async function listGeneratedSets(
   });
   return sets.map((set) => toSummary(set, set.questions.length === 3 && set.questions.every(({ question }) => question.guesses.length > 0)));
 }
+
+export async function deleteGeneratedSet(prisma: PrismaClient, userId: string, setId: string): Promise<void> {
+  const set = await prisma.questionSet.findUnique({
+    where: { id: setId },
+    select: { ownerId: true },
+  });
+  if (!set || set.ownerId !== userId) {
+    throw new Error('Not found');
+  }
+  await prisma.$transaction(async (tx) => {
+    const questionIds = await tx.questionSetQuestion.findMany({
+      where: { setId },
+      select: { questionId: true },
+    });
+    await tx.questionSetQuestion.deleteMany({ where: { setId } });
+    await tx.question.deleteMany({ where: { id: { in: questionIds.map((q) => q.questionId) } } });
+    await tx.questionSet.delete({ where: { id: setId } });
+    await tx.generationAttempt.deleteMany({ where: { setId } });
+  });
+}

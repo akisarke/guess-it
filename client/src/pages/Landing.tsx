@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { AuthUnavailable } from '../components/AuthUnavailable';
+import { Faqs } from '../components/landing/Faqs';
+import { HowToPlay } from '../components/landing/HowToPlay';
 import { formatCompactNumber, formatScore } from '../lib/format-number';
 import { useLandingState } from '../hooks/use-landing-state';
+import '../reveal.css';
 
 export function Landing() {
   const { puzzle, loading, error, authState, ctaLabel, progress, handlePlay, retryAuth } = useLandingState();
@@ -12,7 +16,7 @@ export function Landing() {
 
   if (loading)
     return (
-      <LandingShell>
+      <LandingShell onPlay={handlePlay} isComplete={isComplete}>
         <div className="space-y-8 text-accent-ink">
           <div className="flex items-center justify-between">
             <div className="h-5 w-28 animate-pulse rounded-md bg-accent-ink/15" />
@@ -40,9 +44,9 @@ export function Landing() {
     );
 
   return (
-    <LandingShell>
+    <LandingShell onPlay={handlePlay} isComplete={isComplete}>
       <div className="flex items-center justify-between gap-4">
-        <span className="font-display text-lg font-extrabold tracking-tight">Guess It!</span>
+        <span className="text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-75">Daily estimate</span>
         {puzzle && (
           <span className="text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-75">
             {`No. ${String(puzzle.puzzle.puzzleNumber).padStart(3, '0')}`}
@@ -50,8 +54,8 @@ export function Landing() {
         )}
       </div>
 
-      <div className="mt-8 sm:mt-12">
-        <h1 className="font-display text-[2rem] font-extrabold leading-[0.95] sm:text-6xl">
+      <div className="mt-10 sm:mt-14">
+        <h1 className="font-display text-[2.25rem] font-extrabold leading-[0.95] sm:text-6xl">
           Make an educated guess.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-7 sm:text-lg">
@@ -116,6 +120,7 @@ export function Landing() {
           onClick={() => void handlePlay()}
           className="btn-invert w-full sm:w-auto sm:min-w-[16rem]"
           disabled={loading || authState === 'checking'}
+          data-enter
         >
           {ctaLabel}
         </button>
@@ -124,12 +129,23 @@ export function Landing() {
   );
 }
 
-function LandingShell({ children }: { children: ReactNode }) {
+function LandingShell({ children, onPlay, isComplete }: { children: ReactNode; onPlay?: () => void; isComplete?: boolean }) {
   return (
-    <div className="shell py-8 lg:py-12">
-      <article className="overflow-hidden rounded-3xl border border-transparent bg-accent text-accent-ink">
-        <div className="px-6 py-8 sm:px-8 sm:py-12 lg:px-12">{children}</div>
-      </article>
-    </div>
+    <>
+      <div className="shell py-8 lg:py-12">
+        <article className="overflow-hidden rounded-3xl border border-transparent bg-accent text-accent-ink">
+          <div className="px-6 py-8 sm:px-8 sm:py-12 lg:px-12">{children}</div>
+        </article>
+      </div>
+      <HowToPlay />
+      <Faqs />
+      {onPlay && (
+        <div className="shell-wide pb-16 text-center">
+          <button type="button" onClick={onPlay} className="btn-primary rounded-full px-8">
+            {isComplete ? 'View your results' : "Start today's puzzle"} <ArrowRight size={16} aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    </>
   );
 }

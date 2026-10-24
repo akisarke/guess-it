@@ -5,7 +5,7 @@ type LegalKind = 'privacy' | 'terms' | 'cookies';
 const content: Record<LegalKind, { title: string; intro: string; sections: readonly { heading: string; body: string }[] }> = {
   privacy: {
     title: 'Privacy Policy',
-    intro: 'Guess It! keeps the information needed to run your account and your game progress.',
+    intro: 'Guess It! is a daily estimation game. Answer three questions each day, compare your guesses, and improve your intuition.',
     sections: [
       { heading: 'What we store', body: 'Account details, guesses, scores, streaks, and profile information you choose to add. Anonymous play uses a temporary account so your daily progress can be saved.' },
       { heading: 'How we use it', body: 'We use this information to provide the game, protect accounts, calculate scores, and improve reliability. We do not sell personal information.' },
@@ -14,7 +14,7 @@ const content: Record<LegalKind, { title: string; intro: string; sections: reado
   },
   terms: {
     title: 'Terms of Service',
-    intro: 'Use Guess It! fairly and only for its intended purpose.',
+    intro: 'Play fair. Guess It! is a daily game for fun — no automation, no scraping, no spoiling the experience for others.',
     sections: [
       { heading: 'The service', body: 'Guess It! is an estimation game provided as-is. Availability, daily questions, and features may change.' },
       { heading: 'Fair play', body: 'Do not abuse the service, automate play, interfere with other players, or attempt to access data that does not belong to you.' },

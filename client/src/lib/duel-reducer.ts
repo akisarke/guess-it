@@ -35,6 +35,8 @@ export function reduceDuelState(state: DuelClientState, event: DuelServerEvent):
     case 'duel.error':
       return { ...state, lastVersion: Math.max(state.lastVersion, event.version), error: event.message };
     default:
-      return event satisfies never;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _exhaustiveCheck: never = event;
+      return state;
   }
 }

@@ -88,7 +88,18 @@ describe('Generate question sets', () => {
 
     render(<MemoryRouter><Generate /></MemoryRouter>);
 
-    await waitFor(() => expect(screen.getByText('3 attempts remaining today')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('3 attempts left')).toBeInTheDocument());
+  });
+
+  it('generates when Enter is pressed in the topic field', async () => {
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
+    const generateQuestionSet = vi.spyOn(api, 'generateQuestionSet').mockResolvedValue(generatedSetResponse);
+    render(<MemoryRouter><Generate /></MemoryRouter>);
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Generate a Question' })).toBeInTheDocument());
+
+    await userEvent.type(screen.getByLabelText('Topic'), 'space{Enter}');
+
+    await waitFor(() => expect(generateQuestionSet).toHaveBeenCalledWith({ topic: 'space', difficulty: null }));
   });
 
   it('renders three ordered answer-free previews and the remaining attempts after success', async () => {
@@ -108,7 +119,7 @@ describe('Generate question sets', () => {
     expect(screen.getByRole('heading', { name: 'Question 1' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Question 2' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Question 3' })).toBeInTheDocument();
-    expect(screen.getByText('2 attempts remaining today')).toBeInTheDocument();
+    expect(screen.getByText('2 attempts left')).toBeInTheDocument();
     expect(screen.getByText('Generated set')).toBeVisible();
     expect(screen.getByText('Space')).toBeVisible();
     expect(screen.getByText(/space · medium · 3 questions/)).toBeVisible();
@@ -142,7 +153,7 @@ describe('Generate question sets', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Generate set' }));
 
-    await waitFor(() => expect(screen.getByText('No attempts remaining today')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No attempts left today')).toBeInTheDocument());
     expect(screen.getByRole('button', { name: 'Generate set' })).toBeDisabled();
   });
 
@@ -156,7 +167,7 @@ describe('Generate question sets', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Generate set' }));
 
-    await waitFor(() => expect(screen.getByText('No attempts remaining today')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('No attempts left today')).toBeInTheDocument());
     expect(screen.getByLabelText('Topic')).toHaveValue('space');
     expect(screen.getByRole('alert')).toHaveTextContent('Quota copy changed');
   });

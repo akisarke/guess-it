@@ -56,9 +56,9 @@ export function DuelBattle() {
   }, [duel.snapshot?.roundDeadline, duel.snapshot?.phase]);
 
   if (authState === 'checking') return <DuelState title="Checking your session" description="Preparing the duel board." />;
-  if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><NotLoggedIn feature="Duels" /></div></div>;
-  if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><EmailVerificationPending /></div></div>;
-  if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><div className="card"><AuthUnavailable onRetry={retry} /></div></div>;
+  if (authState === 'signed-out') return <div className="mx-auto max-w-lg px-4 py-12"><NotLoggedIn feature="Duels" /></div>;
+  if (authState === 'verification-required') return <div className="mx-auto max-w-lg px-4 py-12"><EmailVerificationPending /></div>;
+  if (authState === 'unavailable') return <div className="mx-auto max-w-lg px-4 py-12"><AuthUnavailable onRetry={retry} /></div>;
   if (!duelId) return <DuelState title="Duel not found" description="This battle link is missing a duel ID." />;
   if (duel.error) return <DuelState title="Duel unavailable" description={duel.error}><Link to="/duels" className="btn-secondary">Back to Duels</Link></DuelState>;
   if (!duel.snapshot) return <DuelState title="Joining duel" description={connected ? 'Waiting for the current round.' : 'Opening a secure duel connection.'} />;

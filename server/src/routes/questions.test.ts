@@ -41,6 +41,7 @@ const createDependencies = (remaining = 3): QuestionRouteDependencies => ({
   },
   generateQuestionSet: async () => generatedQuestions,
   createGeneratedSet: async () => ({ set, remainingGenerations: remaining - 1 }),
+  deleteGeneratedSet: async () => {},
 });
 
 async function buildApp(dependencies: QuestionRouteDependencies) {

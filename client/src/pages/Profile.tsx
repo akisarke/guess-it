@@ -28,6 +28,7 @@ interface ProfileDashboardProps {
   onShareProfile: () => void;
   shareStatus: 'shared' | 'copied' | null;
   shareError: string | null;
+  onDeleteGeneratedSet?: (id: string) => void;
 }
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -114,6 +115,16 @@ export function Profile() {
       });
     } catch (e) {
       setMutationError(e instanceof Error ? e.message : 'Unable to update badge pin.');
+    }
+  };
+
+  const handleDeleteGeneratedSet = async (setId: string) => {
+    if (!confirm('Delete this generated set? This cannot be undone.')) return;
+    try {
+      await api.deleteGeneratedSet(setId);
+      setProfile((prev) => prev ? { ...prev, generatedSets: prev.generatedSets.filter((s) => s.id !== setId) } : prev);
+    } catch (e) {
+      setMutationError(e instanceof Error ? e.message : 'Unable to delete generated set.');
     }
   };
 
@@ -210,13 +221,13 @@ function renderError(error: Error | null, onRetry: () => void): ReactNode {
     <StateCard
       badge="Error"
       title="Could not load profile"
-      description={error?.message || 'User not found'}
+      description={error?.message || 'Unable to load profile. Try again later.'}
       retryAction={onRetry}
     />
   );
 }
 
-function renderDashboard({ profile, mutationError, onTogglePin, canManageBadges, onSaveProfile, onUploadAvatar, onLinkHackClub, onUnlinkHackClub, onShareProfile, shareStatus, shareError }: ProfileDashboardProps): ReactNode {
+function renderDashboard({ profile, mutationError, onTogglePin, canManageBadges, onSaveProfile, onUploadAvatar, onLinkHackClub, onUnlinkHackClub, onShareProfile, shareStatus, shareError, onDeleteGeneratedSet }: ProfileDashboardProps): ReactNode {
   const accountUser = profile.user && 'hackclubId' in profile.user ? profile.user : null;
   const currentStreak = profile.streak?.currentStreak ?? 0;
   const longestStreak = profile.streak?.longestStreak ?? 0;
@@ -281,7 +292,7 @@ function renderDashboard({ profile, mutationError, onTogglePin, canManageBadges,
       {canManageBadges && profile.user && 'hackclubId' in profile.user && <ProfileEditor bio={profile.user.bio} avatarUrl={profile.user.avatarUrl} hackclubId={profile.user.hackclubId} usernameChosen={profile.user.usernameChosen} canUnlinkHackClub={profile.user.authProvider === 'password' && profile.user.email !== null} onSave={onSaveProfile} onUploadAvatar={onUploadAvatar} onLinkHackClub={onLinkHackClub} onUnlinkHackClub={onUnlinkHackClub} />}
       {canManageBadges && profile.user && 'isOwner' in profile.user && profile.user.isOwner && <Link to="/admin" className="btn-secondary mt-4 w-full justify-center">Open owner badge tools</Link>}
 
-      <GeneratedSetsDisclosure sets={profile.generatedSets} />
+      <GeneratedSetsDisclosure sets={profile.generatedSets} onDelete={canManageBadges ? onDeleteGeneratedSet : undefined} />
 
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {stats.map((stat) => <div key={stat.label} className="rounded-2xl border-2 border-ink/15 bg-white/75 p-4 dark:border-white/10 dark:bg-[var(--surface)]"><p className={`font-display text-3xl font-extrabold tabular-nums ${stat.accent}`}>{stat.value}</p><p className="mt-1 text-xs font-bold uppercase tracking-[0.09em] text-ink/70 dark:text-gray-400">{stat.label}</p></div>)}

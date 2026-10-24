@@ -321,6 +321,8 @@ export const api = {
   getQuestionSetPlay: (id: string) => request<GeneratedGameSourceResponse>(`/api/question-sets/${encodeURIComponent(id)}/play`),
   getQuestionSetSummary: (id: string) => request<GeneratedGameSummaryResponse>(`/api/question-sets/${encodeURIComponent(id)}/summary`),
 
+  deleteGeneratedSet: (id: string) => request<{ success: boolean }>(`/api/questions/sets/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+
   submitGuess: async (input: GuessRequest) => {
     const response = await request<GuessResponse>('/api/guess', {
       method: 'POST',
@@ -402,6 +404,8 @@ export const api = {
   getNotifications: () => request<{ notifications: NotificationItem[]; unreadCount: number }>('/api/notifications'),
   markNotificationRead: (id: string) => request('/api/notifications/' + encodeURIComponent(id) + '/read', { method: 'POST' }),
   markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'POST' }),
+  deleteNotification: (id: string) => request('/api/notifications/' + encodeURIComponent(id), { method: 'DELETE' }),
+  deleteAllNotifications: () => request('/api/notifications', { method: 'DELETE' }),
 
   adminSearchUsers: (search: string) =>
     request<any>(`/api/admin/users?search=${encodeURIComponent(search)}`),

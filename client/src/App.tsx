@@ -8,6 +8,7 @@ import { Legal } from './pages/Legal';
 import { CookieNotice } from './components/CookieNotice';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Landing } from './pages/Landing';
+import { clickPrimaryOnEnter } from './lib/enter-to-continue';
 
 const Question = lazy(() => import('./pages/Question').then((module) => ({ default: module.Question })));
 const Reveal = lazy(() => import('./pages/Reveal').then((module) => ({ default: module.Reveal })));
@@ -77,6 +78,12 @@ function RouteFallback() {
 }
 
 function App() {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => clickPrimaryOnEnter(event);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="flex min-h-screen flex-col">

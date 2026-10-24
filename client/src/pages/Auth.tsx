@@ -66,17 +66,15 @@ export function Auth({ mode }: { mode: AuthMode }) {
   return (
     <main className="auth-page">
       <div className="auth-shell">
-        <section className="auth-story" aria-label="About Guess It!">
-          <Link to="/" className="auth-brand">Guess It!</Link>
-
-          <div className="mt-8 max-w-md sm:mt-10 lg:mt-16">
+        <section className="auth-story flex flex-col justify-center" aria-label="About Guess It!">
+          <div className="max-w-md">
             <h1 className="font-display text-4xl font-extrabold leading-[0.96] sm:text-5xl">
-              Make a guess.
+              Trust your gut.
               <br />
-              <span className="text-accent">Stay curious.</span>
+              <span className="bg-accent px-[0.12em] text-accent-ink">Check the math.</span>
             </h1>
             <p className="mt-4 max-w-sm text-base leading-7 opacity-70">
-              Three questions a day. Lock in a number, see how far off you were.
+              Three questions a day. Use the calculator or just your gut. Then see how close you got.
             </p>
           </div>
         </section>
@@ -172,7 +170,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
 
             {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6 text-ink dark:text-gray-100" role="alert">{error}</p>}
 
-            <button type="submit" className="btn-primary w-full" disabled={submitting}>
+            <button type="submit" className="btn-primary w-full gap-2" disabled={submitting}>
               {submitting ? 'Working...' : isSignup ? 'Create account' : 'Sign in'}
               {!submitting && <ArrowRight size={18} aria-hidden="true" />}
             </button>
@@ -181,15 +179,15 @@ export function Auth({ mode }: { mode: AuthMode }) {
             <div className="mt-7 space-y-5">
               <div className="auth-divider">or continue with</div>
               <HackClubLogin className="auth-oauth-button" />
-              {!isSignup && <Link to="/forgot-password" className="block text-center text-sm font-bold text-accent underline">Forgot your password?</Link>}
+              {!isSignup && <Link to="/forgot-password" className="block text-center text-sm font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 dark:text-gray-100">Forgot your password?</Link>}
               <p className="text-center text-sm opacity-70">
                 {isSignup ? 'Already have an account?' : 'New to Guess It?'}{' '}
-                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/30">
+                <Link to={isSignup ? '/login' : '/signup'} className="font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 hover:decoration-4 dark:text-gray-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/30">
                   {isSignup ? 'Sign in' : 'Create an account'}
                 </Link>
               </p>
               <p className="auth-security-copy text-center text-xs leading-5">
-                Passwords are protected with scrypt hashing. Sessions are encrypted and httpOnly.
+                No public email addresses. Other players only see your display name.
               </p>
             </div>
           </>

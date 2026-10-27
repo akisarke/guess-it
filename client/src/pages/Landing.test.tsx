@@ -237,4 +237,24 @@ describe('Landing progress rehydration', () => {
     expect(api.getTodayPuzzle).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Loading puzzle...')).not.toBeInTheDocument();
   });
+
+  it('offers the hard mode summary once a hard run is done today', async () => {
+
+    saveHardModeRun({
+      puzzleNumber: 2,
+      puzzleDate: '2026-10-26T00:00:00.000Z',
+      completedAt: new Date().toISOString(),
+      results: [{ question: { id: 'h1', prompt: 'Hard one?', unit: 'm' }, guess: 9, answer: 10, score: 1.5 }],
+    });
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
+
+    renderLanding();
+
+    await waitFor(() => expect(screen.getByText('3 of 3 solved')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
+
+    expect(screen.getByRole('button', { name: /see your summary/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /play hard mode/i })).not.toBeInTheDocument();
+  });
 });

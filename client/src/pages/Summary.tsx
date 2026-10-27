@@ -172,9 +172,6 @@ export function Summary() {
     actions: (
       <>
         <ShareCard puzzleNumber={puzzle.puzzle.puzzleNumber} scores={scores} average={average} />
-        {answered.length === puzzle.questions.length && (
-          <Link to="/hard-mode" className="btn-secondary w-full text-center">Random Hard Mode</Link>
-        )}
         <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
       </>
     ),
@@ -188,8 +185,8 @@ export function Summary() {
     rows: hardRun.results.map((result, index) => ({ key: `${result.question.id}-${index}`, prompt: result.question.prompt, score: result.score })),
     actions: (
       <>
-        <Link to="/hard-mode" className="btn-primary w-full text-center" data-enter>Play another hard mode puzzle</Link>
-        <Link to="/" className="btn-secondary w-full text-center">Back to Home</Link>
+        <ShareCard puzzleNumber={hardRun.puzzleNumber} scores={hardRun.results.map((result) => result.score)} average={hardAverage} hardMode />
+        <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
       </>
     ),
   };

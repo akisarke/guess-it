@@ -4,12 +4,12 @@ interface ShareCardProps {
   puzzleNumber: number;
   scores: number[];
   average: number;
+  hardMode?: boolean;
 }
 
-
-export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
+export function ShareCard({ puzzleNumber, scores, average, hardMode = false }: ShareCardProps) {
   const buildText = (): string => {
-    const lines = [`Guess It! #${puzzleNumber}`];
+    const lines = [`Guess It! ${hardMode ? 'hard mode ' : ''}#${puzzleNumber}`];
     scores.forEach((score, i) => {
       if (score > 0) lines.push(`Q${i + 1}: ${formatScore(score).visual}`);
     });

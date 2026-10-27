@@ -37,10 +37,13 @@ export function Landing() {
   // hard mode, and your latest hard mode run for the rest
   const dailyAllHard = Boolean(puzzle?.questions.length) && puzzle!.questions.every((question) => hardGuesses.has(question.id));
   const showHardRun = hardMode && !dailyAllHard;
-  const playLabel = hardModeComplete ? 'Play Hard Mode' : ctaLabel;
+  // once you've finished a hard mode run today, the button leads to its summary,
+  // the same way easy mode does after the daily
+  const hardDoneToday = hardRun !== null && new Date(hardRun.completedAt).toDateString() === new Date().toDateString();
+  const playLabel = hardModeComplete ? (hardDoneToday ? 'See Your Summary' : 'Play Hard Mode') : ctaLabel;
   const startPlay = () => {
     if (hardModeComplete) {
-      navigate('/hard-mode');
+      navigate(hardDoneToday ? '/summary?mode=hard' : '/hard-mode');
       return;
     }
     void handlePlay();

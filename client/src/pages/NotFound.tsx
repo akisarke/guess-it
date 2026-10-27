@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { StateCard } from '../components/StateCard';
 
 export function NotFound() {

@@ -9,7 +9,7 @@ export function DuelHeader({ snapshot, remainingMs }: { snapshot: DuelSnapshot; 
   return (
     <header className="space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-70">
+        <p className="text-[0.7rem] font-bold tracking-[0.02em] opacity-70">
           Duel &middot; Round {round} of 3
         </p>
         <p

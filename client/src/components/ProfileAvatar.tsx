@@ -4,9 +4,10 @@ import { resolveApiAssetUrl } from '../lib/api';
 interface ProfileAvatarProps {
   src: string | null;
   alt: string;
+  name?: string;
 }
 
-export function ProfileAvatar({ src, alt }: ProfileAvatarProps) {
+export function ProfileAvatar({ src, alt, name }: ProfileAvatarProps) {
   const resolvedSrc = resolveApiAssetUrl(src);
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
@@ -28,7 +29,7 @@ export function ProfileAvatar({ src, alt }: ProfileAvatarProps) {
 
   return (
     <span className="profile-avatar profile-avatar-fallback" role="img" aria-label={alt}>
-      <span aria-hidden="true">G</span>
+      <span aria-hidden="true">{name?.trim().charAt(0).toUpperCase() || '?'}</span>
     </span>
   );
 }

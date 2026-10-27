@@ -5,7 +5,7 @@ import { buildLimiterKey, semanticLimit } from '../services/rate-limit.js';
 import { AuthenticationError, ConflictError, ValidationError } from '../errors/application-error.js';
 
 export async function avatarRoutes(app: FastifyInstance) {
-app.post('/me/avatar', { preHandler: [authenticate, requireRegistered, semanticLimit('avatarIp', (request) => buildLimiterKey('avatar-ip', request.ip)), semanticLimit('avatarUser', (request) => request.userId ? buildLimiterKey('avatar-user', request.userId) : undefined)] }, async (request, reply) => {
+app.post('/me/avatar', { preHandler: [authenticate, requireRegistered, semanticLimit('avatarIp', (request) => buildLimiterKey('avatar-ip', request.ip)), semanticLimit('avatarUser', (request) => request.userId ? buildLimiterKey('avatar-user', request.userId) : undefined)] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
 

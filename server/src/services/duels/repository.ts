@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
 import { parseDuelId, parsePlayerId, type PlayerId } from 'shared';
-import { DUEL_TIMEOUT_SCORE, restoreDuelState, type DuelDomainQuestion, type DuelDomainState, type DuelSubmissionPair } from './domain.js';
+import { DUEL_TIMEOUT_SCORE, restoreDuelState, type DuelDomainState, type DuelSubmissionPair } from './domain.js';
 import { selectDuelCatalogQuestions } from '../question-catalog.js';
 
 function tuple3<T>(values: readonly T[]): readonly [T, T, T] {

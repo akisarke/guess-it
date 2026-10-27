@@ -1,7 +1,8 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { directionBetween, swipeIn, type SwipeDirection } from '../lib/motion';
 import { StateCard } from '../components/StateCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
-import { api, needsAccount, type LeaderboardEntry } from '../lib/api';
+import { errorMessage, api, needsAccount, type LeaderboardEntry } from '../lib/api';
 import { BadgeChip } from '../components/BadgeChip';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -20,6 +21,24 @@ export function Leaderboard() {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshIndex, setRefreshIndex] = useState(0);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const pendingSwipe = useRef<SwipeDirection | null>(null);
+
+  const changeScope = (next: LeaderboardScope) => {
+    if (next === scope) return;
+    pendingSwipe.current = directionBetween(LEADERBOARD_SCOPES.indexOf(scope), LEADERBOARD_SCOPES.indexOf(next));
+    setScope(next);
+  };
+
+  // swipe the new board in once its scores have arrived, from the side of the tab you picked
+  useEffect(() => {
+    if (loading || pendingSwipe.current === null) return;
+    const direction = pendingSwipe.current;
+    pendingSwipe.current = null;
+    const animations = [swipeIn(statsRef.current, direction), swipeIn(resultsRef.current, direction)];
+    return () => animations.forEach((animation) => animation?.cancel());
+  }, [loading]);
 
   useEffect(() => {
     setLoading(true);
@@ -49,12 +68,10 @@ export function Leaderboard() {
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-extrabold leading-none">Leaderboard</h1>
               <p className="mt-2 max-w-md text-sm text-ink/60 dark:text-gray-300">
-                See who's been closest — today, this week, and all time.
+                See who&apos;s been closest: today, this week, and all time.
               </p>
             </div>
-            <span className="rounded-md border-2 border-ink/10 bg-white/70 px-3 py-1 text-xs font-bold uppercase tracking-[0.11em] text-ink/55 dark:border-white/10 dark:bg-[var(--surface-2)] dark:text-gray-300">
-              live scores
-            </span>
+            <span className="chip chip-idle">Live scores</span>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -62,7 +79,8 @@ export function Leaderboard() {
               <button
                 key={s}
                 type="button"
-                onClick={() => setScope(s)}
+                onClick={() => changeScope(s)}
+                aria-pressed={scope === s}
                 className={`chip ${scope === s ? 'chip-active' : 'chip-idle'}`}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -71,7 +89,7 @@ export function Leaderboard() {
           </div>
 
           {!loading && !error && entries.length > 0 && (
-            <div className="grid gap-2 sm:grid-cols-3" aria-label="Leaderboard highlights">
+            <div ref={statsRef} className="grid gap-2 sm:grid-cols-3" aria-label="Leaderboard highlights">
               <div className="leaderboard-stat leaderboard-stat-primary">
                 <span className="leaderboard-stat-label">Current leader</span>
                 <strong className="truncate">{leader?.displayName}</strong>
@@ -98,21 +116,24 @@ export function Leaderboard() {
           </label>
         </div>
 
+        <div ref={resultsRef}>
         {loading ? (
           <StateCard
             badge="Loading"
             title="Loading leaderboard"
             description="Fetching current scores."
+            inline
           />
         ) : error ? (
           needsAccount(error) ? (
-            <NotLoggedIn feature="the leaderboard" />
+            <NotLoggedIn feature="the leaderboard" inline />
           ) : (
             <StateCard
               badge="Error"
               title="Could not load leaderboard"
-              description={error.message}
-              retryAction={() => setRefreshIndex((v) => v + 1)}
+              description={errorMessage(error, 'Scores could not be loaded. Try again in a moment.')}
+              inline
+              retryAction={handleRetry}
             />
           )
         ) : entries.length === 0 ? (
@@ -127,16 +148,16 @@ export function Leaderboard() {
             {entries.map((entry) => (
               <div
                 key={entry.userId}
-                className={`leaderboard-row leaderboard-row-${Math.min(entry.rank, 4)} grid grid-cols-[auto,auto,minmax(0,1fr),auto] items-start gap-3 rounded-2xl border-2 bg-white/70 p-3 dark:bg-[var(--surface)] sm:p-4 ${entry.rank <= 3 ? 'leaderboard-row-podium' : ''}`}
+                className={`leaderboard-row leaderboard-row-${Math.min(entry.rank, 4)} grid grid-cols-[auto,auto,minmax(0,1fr),auto] items-start gap-3 border-2 bg-white/70 p-3 dark:bg-[var(--surface)] sm:p-4 ${entry.rank <= 3 ? 'leaderboard-row-podium' : ''}`}
                 style={{ '--leaderboard-delay': `${Math.min(entry.rank - 1, 8) * 55}ms` } as CSSProperties}
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink/5 dark:bg-[var(--surface-2)]">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[var(--line-strong)] bg-ink/5 dark:bg-[var(--surface-2)]">
                   <span className="font-display text-lg font-extrabold leading-none text-ink/60 dark:text-gray-300">
                     {entry.rank}
                   </span>
                 </div>
 
-                <ProfileAvatar src={entry.avatarUrl} alt={`${entry.displayName}'s profile picture`} />
+                <ProfileAvatar src={entry.avatarUrl} alt={`${entry.displayName}'s profile picture`} name={entry.displayName} />
 
                 <div className="min-w-0 space-y-2">
                   <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -154,14 +175,15 @@ export function Leaderboard() {
                   <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-ink dark:text-gray-100 sm:text-3xl">
                     <span title={formatScore(entry.score).exact}>{formatScore(entry.score).visual}</span>
                   </span>
-                  <span className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-ink/45 dark:text-gray-400">
-                    score
+                  <span className="text-[0.7rem] font-bold tracking-[0.02em] text-ink/45 dark:text-gray-400">
+                    Score
                   </span>
                 </div>
               </div>
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

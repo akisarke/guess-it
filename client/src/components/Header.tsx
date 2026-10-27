@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut, Menu, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { cn } from '../lib/utils';
@@ -31,6 +31,8 @@ export function Header() {
   const [me, setMe] = useState<AuthUser | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const signedIn = Boolean(me && me.authProvider !== 'anonymous');
 
   useEffect(() => {
     const refreshUser = () => {
@@ -59,16 +61,17 @@ export function Header() {
   const handleLogout = async () => {
     await api.logout();
     setMe(null);
+    setMobileMenuOpen(false);
+    navigate('/', { replace: true });
     window.dispatchEvent(new Event('guessit:auth-changed'));
   };
 
   return (
     <header className="site-header sticky top-0 z-20">
       <div className="shell flex h-16 items-center gap-3 sm:gap-6">
-        <Link to="/" aria-label="Guess It! home" className="shrink-0 font-display text-xl font-extrabold tracking-tight sm:text-2xl">
+        <Link to="/" aria-label="Guess It! home" className="shrink-0 font-display text-lg font-extrabold tracking-[-0.03em] sm:text-xl">
           Guess It!
         </Link>
-
         <nav aria-label="Primary" className="hidden items-center gap-5 lg:flex">
           {navItems.map((item) => (
             <Link
@@ -86,10 +89,10 @@ export function Header() {
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
           <SoundToggle />
           <ThemeToggle />
-          {me && me.authProvider !== 'anonymous' && <NotificationBell />}
+          {me && <NotificationBell signedIn={signedIn} />}
 
-          <div className="hidden items-center gap-2 lg:flex">
-            {me ? (
+          <div className="hidden items-center gap-4 lg:flex">
+            {signedIn ? (
               <button
                 type="button"
                 onClick={() => void handleLogout()}
@@ -135,10 +138,8 @@ export function Header() {
                   data-sound="nav"
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'flex min-h-11 items-center border-b border-[var(--line)] text-sm transition-colors',
-                    active
-                      ? 'font-bold text-ink dark:text-white'
-                      : 'font-medium text-ink/60 hover:text-ink dark:text-gray-300 dark:hover:text-white',
+                    'flex min-h-11 items-center border-b border-[var(--line)] text-[0.72rem] font-bold tracking-[0.03em] transition-colors',
+                    active ? 'text-ink dark:text-white' : 'text-ink/60 hover:text-ink dark:text-gray-300 dark:hover:text-white',
                   )}
                 >
                   {item.label}
@@ -147,7 +148,7 @@ export function Header() {
             })}
           </nav>
           <div className="mt-3 grid gap-2">
-            {me ? (
+            {signedIn ? (
               <button type="button" onClick={() => void handleLogout()} className="btn-secondary w-full">
                 <LogOut size={16} aria-hidden="true" />
                 Sign out

@@ -9,10 +9,12 @@ import { CookieNotice } from './components/CookieNotice';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Landing } from './pages/Landing';
 import { clickPrimaryOnEnter } from './lib/enter-to-continue';
+import { RouteFade } from './components/RouteFade';
 
 const Question = lazy(() => import('./pages/Question').then((module) => ({ default: module.Question })));
 const Reveal = lazy(() => import('./pages/Reveal').then((module) => ({ default: module.Reveal })));
 const Summary = lazy(() => import('./pages/Summary').then((module) => ({ default: module.Summary })));
+const HardModeReplay = lazy(() => import('./pages/HardModeReplay').then((module) => ({ default: module.HardModeReplay })));
 const GeneratedSetSummary = lazy(() => import('./pages/GeneratedSetSummary').then((module) => ({ default: module.GeneratedSetSummary })));
 const Profile = lazy(() => import('./pages/Profile').then((module) => ({ default: module.Profile })));
 const Leaderboard = lazy(() => import('./pages/Leaderboard').then((module) => ({ default: module.Leaderboard })));
@@ -31,6 +33,7 @@ const routeMetadata = [
   { matches: (path: string) => path.startsWith('/play/'), title: 'Play - Guess It!', description: 'Make an estimate, lock it in, and see how close you get.' },
   { matches: (path: string) => path.startsWith('/reveal/'), title: 'Result - Guess It!', description: 'See your Guess It! result, score, and how close your estimate landed.' },
   { matches: (path: string) => path === '/summary' || path.includes('/summary'), title: 'Summary - Guess It!', description: 'Review your Guess It! puzzle results and keep building your instinct.' },
+  { matches: (path: string) => path === '/hard-mode', title: 'Hard mode - Guess It!', description: 'Play a random past Guess It! puzzle with a ten-second timer.' },
   { matches: (path: string) => path.startsWith('/profile') || path.startsWith('/u/'), title: 'Profile - Guess It!', description: 'View Guess It! streaks, badges, and generated question sets.' },
   { matches: (path: string) => path.startsWith('/leaderboard'), title: 'Leaderboard - Guess It!', description: 'Compare Guess It! scores across daily, weekly, and all-time boards.' },
   { matches: (path: string) => path.startsWith('/duels') || path.startsWith('/match'), title: 'Duels - Guess It!', description: 'Match with another player for a live Guess It! estimation battle.' },
@@ -64,15 +67,9 @@ function PageMetadata() {
 
 function RouteFallback() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-12">
-      <div className="card space-y-5 overflow-hidden text-center sm:space-y-6">
-        <span className="chip chip-idle mx-auto">Loading</span>
-        <div className="space-y-3">
-          <div className="mx-auto h-12 w-48 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)] sm:h-14 sm:w-56" />
-          <div className="mx-auto h-5 w-full max-w-lg animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-          <div className="mx-auto h-5 w-5/6 max-w-md animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-        </div>
-      </div>
+    <div className="shell py-10">
+      <p className="text-[0.68rem] font-bold tracking-[0.04em] opacity-55">Loading</p>
+      <div className="mt-3 border-t-2 border-[var(--line-strong)]" />
     </div>
   );
 }
@@ -94,12 +91,14 @@ function App() {
         <PageMetadata />
         <div id="main-content" tabIndex={-1} className="flex min-h-0 flex-1 flex-col outline-none">
           <ErrorBoundary>
+          <RouteFade>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/play/:questionIndex" element={<Question />} />
               <Route path="/reveal/:questionIndex" element={<Reveal />} />
               <Route path="/summary" element={<Summary />} />
+              <Route path="/hard-mode" element={<HardModeReplay />} />
               <Route path="/sets/:setId/play/:questionIndex" element={<Question />} />
               <Route path="/sets/:setId/reveal/:questionIndex" element={<Reveal />} />
               <Route path="/sets/:setId/summary" element={<GeneratedSetSummary />} />
@@ -124,6 +123,7 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </RouteFade>
           </ErrorBoundary>
         </div>
         <Footer />

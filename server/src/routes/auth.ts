@@ -137,7 +137,7 @@ export async function authRoutes(app: FastifyInstance) {
     return { success: true };
   });
 
-  app.get('/me', async (request, reply) => {
+  app.get('/me', async (request) => {
     const user = await getSessionUser(request);
     if (!user) throw new AuthenticationError('Not authenticated');
     return { user: privateAuthUser(user) };

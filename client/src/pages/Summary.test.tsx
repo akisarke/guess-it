@@ -1,10 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../lib/api';
+import { markHardGuess } from '../lib/hard-mode';
+import { saveHardModeRun } from '../lib/hard-mode-history';
 import { Summary } from './Summary';
 
 describe('Summary', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('renders summary bars with sensible heights for a mixed score day', async () => {
     vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
       puzzle: { id: 'p12', puzzleDate: '2026-10-21', puzzleNumber: 12, questionIds: ['q1', 'q2', 'q3'] },
@@ -57,5 +63,65 @@ describe('Summary', () => {
     expect(bars.length).toBe(2);
     expect((bars[0] as HTMLSpanElement).style.height).toBe('12%');
     expect((bars[1] as HTMLSpanElement).style.height).toBe('12%');
+  });
+
+  it('labels the daily score with the mode it was played in', async () => {
+    markHardGuess('q1');
+    markHardGuess('q2');
+    markHardGuess('q3');
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
+      puzzle: { id: 'p12', puzzleDate: '2026-10-21', puzzleNumber: 12, questionIds: ['q1', 'q2', 'q3'] },
+      source: { kind: 'daily', id: 'p12' },
+      questions: [
+        { id: 'q1', prompt: 'how many', unit: 'x' },
+        { id: 'q2', prompt: 'how much', unit: 'y' },
+        { id: 'q3', prompt: 'how far', unit: 'z' },
+      ],
+      userGuesses: { q1: 2, q2: 3, q3: 4 },
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/summary']}>
+        <Routes>
+          <Route path="/summary" element={<Summary />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Hard mode score')).toBeInTheDocument();
+  });
+
+  it('shows the latest saved hard mode practice run', async () => {
+    saveHardModeRun({
+      puzzleNumber: 43,
+      puzzleDate: '2026-10-01T00:00:00.000Z',
+      completedAt: '2026-10-27T12:00:00.000Z',
+      results: [
+        {
+          question: { id: 'hq1', prompt: 'Hard question?', unit: 'm' },
+          guess: 10,
+          answer: 20,
+          score: 2,
+        },
+      ],
+    });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
+      puzzle: { id: 'p12', puzzleDate: '2026-10-21', puzzleNumber: 12, questionIds: ['q1'] },
+      source: { kind: 'daily', id: 'p12' },
+      questions: [{ id: 'q1', prompt: 'how many', unit: 'x' }],
+      userGuesses: {},
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/summary']}>
+        <Routes>
+          <Route path="/summary" element={<Summary />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Latest hard mode practice')).toBeInTheDocument();
+    expect(screen.getByText('Puzzle #43')).toBeInTheDocument();
+    expect(screen.getByText('Hard question?')).toBeInTheDocument();
   });
 });

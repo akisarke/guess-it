@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, ApiError, needsAccount } from '../lib/api';
+import { errorMessage, api, ApiError, needsAccount } from '../lib/api';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { AuthUnavailable } from '../components/AuthUnavailable';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
@@ -65,6 +65,9 @@ export function Generate() {
         <p className="mt-2 max-w-prose text-sm leading-6 text-ink/60 dark:text-gray-300 sm:text-base">
           Pick a topic. We'll write the questions; you bring the estimate.
         </p>
+        <p className="mt-3 max-w-prose border-l-2 border-accent pl-3 text-xs font-medium leading-5 text-ink/60 dark:text-gray-400">
+          Question generation is best-effort. Not every topic will have a matching set, and the feature may be unavailable at times.
+        </p>
       </header>
 
       <div className="card">
@@ -109,9 +112,9 @@ export function Generate() {
           </div>
         </div>
 
-        {needsAccount(error) ? <NotLoggedIn feature="question generation" /> : error && (
+        {needsAccount(error) ? <NotLoggedIn feature="question generation" inline /> : error && (
           <p className="text-red-500 text-sm mb-4" role="alert">
-            {error.message}
+            {errorMessage(error, 'Question generation is unavailable right now. Try again in a moment.')}
             {error instanceof ApiError && error.status === 429 && error.resetAt ? (
               <span> Try again after {new Date(error.resetAt).toLocaleDateString()}.</span>
             ) : ''}

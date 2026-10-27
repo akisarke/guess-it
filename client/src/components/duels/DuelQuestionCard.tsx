@@ -11,8 +11,8 @@ export function DuelQuestionCard({ question, value, disabled, onChange, onSubmit
   const displayValue = /^\d+$/.test(value) ? Number(value).toLocaleString('en-US') : value;
 
   return (
-    <section className="rounded-3xl border-2 border-ink/15 bg-white/80 p-5 dark:border-white/10 dark:bg-[var(--surface)] sm:p-7">
-      <span className="text-[0.7rem] font-bold uppercase tracking-[0.08em] text-ink/50 dark:text-gray-400">Estimate in {question.unit}</span>
+    <section className="rounded-[3px] border-2 border-ink/15 bg-white/80 p-5 dark:border-white/10 dark:bg-[var(--surface)] sm:p-7">
+      <span className="text-[0.7rem] font-bold tracking-[0.02em] text-ink/50 dark:text-gray-400">Estimate in {question.unit}</span>
       {
 }
       <h1 className="mt-4 break-words font-display text-3xl font-extrabold leading-tight text-ink dark:text-white sm:text-4xl">{question.prompt}</h1>

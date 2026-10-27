@@ -34,7 +34,7 @@ export async function adminRoutes(app: FastifyInstance) {
     return { badges };
   });
 
-  app.post('/grant-badge', { preHandler: [requireOwner] }, async (request, reply) => {
+  app.post('/grant-badge', { preHandler: [requireOwner] }, async (request) => {
     const { userId, badgeId, note } = request.body as {
       userId: string;
       badgeId: string;

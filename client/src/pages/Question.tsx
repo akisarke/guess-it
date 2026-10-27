@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../lib/api';
+import { errorMessage, api } from '../lib/api';
 import { GuessInput } from '../components/GuessInput';
 import { Calculator } from '../components/Calculator';
 import { play } from '../lib/sounds';
@@ -8,6 +8,10 @@ import type { QuestionPublic } from 'shared';
 import { useSoloGame } from '../hooks/use-solo-game';
 import { GeneratedSetContext } from '../components/GeneratedSetContext';
 import { SoloLoadError } from '../components/SoloLoadError';
+import { HardModeToggle } from '../components/HardModeToggle';
+import { HardModeTimer } from '../components/HardModeTimer';
+import { animateSafe } from '../lib/anime';
+import { markHardGuess, readHardMode, writeHardMode } from '../lib/hard-mode';
 
 export function Question() {
   const navigate = useNavigate();
@@ -16,19 +20,34 @@ export function Question() {
   const [guessValue, setGuessValue] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [hardMode, setHardMode] = useState(readHardMode);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const currentQuestionId = puzzle?.questions?.[idx]?.id;
+
+  useEffect(() => {
+    const animation = animateSafe(cardRef.current, {
+      translateY: [8, 0],
+      duration: 360,
+      ease: 'outCubic',
+    });
+    return () => {
+      animation?.revert();
+    };
+  }, [currentQuestionId]);
+
+  const toggleHardMode = () => {
+    const next = !hardMode;
+    writeHardMode(next);
+    setHardMode(next);
+  };
 
   if (setId !== undefined && error) return <SoloLoadError error={error} />;
 
   if (loading)
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="card w-full max-w-md space-y-4 text-center">
-          <span className="chip chip-idle mx-auto">Loading</span>
-          <div className="space-y-3">
-            <div className="mx-auto h-8 w-40 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            <div className="mx-auto h-4 w-56 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-          </div>
-        </div>
+      <div className="mx-auto w-full max-w-2xl px-4 py-10">
+        <p className="text-[0.68rem] font-bold tracking-[0.04em] opacity-55">Loading question</p>
+        <div className="mt-3 border-t-2 border-[var(--line-strong)]" />
       </div>
     );
   if (!puzzle)
@@ -77,10 +96,11 @@ export function Question() {
     setSubmitError(null);
     try {
       await api.submitGuess({ source: puzzle.source, questionId: question.id, value });
+      if (hardMode && setId === undefined) markHardGuess(question.id);
       navigate(`${prefix}/reveal/${idx}${puzzleQuery}`);
     } catch (err) {
       play('error');
-      setSubmitError(err instanceof Error ? err.message : 'Unable to submit. Try again.');
+      setSubmitError(errorMessage(err, 'Unable to submit. Try again.'));
     } finally {
       setSubmitting(false);
     }
@@ -88,10 +108,24 @@ export function Question() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-      <div className="card overflow-hidden">
+      <div ref={cardRef} className="card overflow-hidden">
         {'set' in puzzle && <GeneratedSetContext set={puzzle.set} />}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <span className="chip chip-idle">Question {idx + 1} of {puzzle.questions?.length ?? 3}</span>
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 border-b border-[var(--line)] pb-3">
+          <span className="text-[0.66rem] font-bold tracking-[0.04em] opacity-55">Question {idx + 1} of {puzzle.questions?.length ?? 3}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            {setId === undefined && (
+              <HardModeToggle enabled={hardMode} onToggle={toggleHardMode} />
+            )}
+            {hardMode && (
+              <HardModeTimer
+                key={question.id}
+                onExpire={() => {
+                  if (!submitting) void handleSubmit(Math.max(1, guessValue));
+                }}
+              />
+            )}
+            <span className="text-[0.66rem] font-bold tracking-[0.04em] opacity-40">No Googling</span>
+          </div>
         </div>
 
         <div className="space-y-8">
@@ -102,6 +136,11 @@ export function Question() {
             <p className="max-w-prose text-sm leading-6 text-ink/60 dark:text-gray-300 sm:text-base">
               Enter your best estimate, then lock it in.
             </p>
+            {hardMode && (
+              <p className="text-xs font-bold tracking-[0.03em] text-brand">
+                10 seconds. When the clock runs out, your number locks in (blank counts as 1).
+              </p>
+            )}
           </div>
 
           <div className="space-y-4">

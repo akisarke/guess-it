@@ -5,6 +5,7 @@ import { isLocalOrigin } from '../config.js';
 import { getSessionUser } from '../middleware/auth.js';
 import { authenticate, requireRegistered } from '../middleware/auth.js';
 import { setSessionCookie, textField } from '../services/auth-helpers.js';
+import { mergeAnonymousProgress } from '../services/account-merge.js';
 import {
   AuthenticationError,
   ConflictError,
@@ -12,8 +13,6 @@ import {
   NotFoundError,
   ValidationError,
 } from '../errors/application-error.js';
-import { createEmailVerificationToken } from '../services/email-verification.js';
-import { sendEmailVerificationEmail } from '../services/email.js';
 
 export function getHackClubOAuthMode(query: unknown): 'link' | 'login' {
   return textField(query, 'mode') === 'link' ? 'link' : 'login';
@@ -41,7 +40,7 @@ export function registerHackClubAuthRoutes(app: FastifyInstance): void {
     return isLocalOrigin(origin) ? configured : `${origin}/api/auth/hackclub/callback`;
   };
 
-app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     const currentUser = await prisma.user.findUnique({ where: { id: userId } });
@@ -175,30 +174,73 @@ app.delete('/hackclub/link', { preHandler: [authenticate, requireRegistered] }, 
 
     const rawProviderEmail = textField(profile, 'email')?.trim().toLowerCase();
     const providerEmail = rawProviderEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawProviderEmail) ? rawProviderEmail : undefined;
+    const currentUser = await getSessionUser(request);
+    const migratingAnonymous = currentUser?.authProvider === 'anonymous';
+    const [linkedUser, emailOwner] = await Promise.all([
+      prisma.user.findUnique({ where: { hackclubId } }),
+      providerEmail ? prisma.user.findUnique({ where: { email: providerEmail } }) : null,
+    ]);
+    // a provider-verified email is already an identity proof, so it's stored as
+    // verified, but only onto an account when nobody else owns that address
+    const emailFreeFor = (userId: string | null) => !emailOwner || emailOwner.id === userId;
+    const verifiedEmailData = providerEmail && emailFreeFor(linkedUser?.id ?? currentUser?.id ?? null)
+      ? { email: providerEmail, emailVerifiedAt: new Date() }
+      : {};
     let user;
     try {
-      user = await prisma.user.upsert({
-        where: { hackclubId },
-        update: providerEmail ? { email: providerEmail } : {},
-        create: { displayName: buildTemporaryHackClubDisplayName(hackclubId), authProvider: 'hackclub', hackclubId, usernameChosen: false, ...(providerEmail ? { email: providerEmail } : {}) },
-      });
+      if (!linkedUser && emailOwner) {
+        // the member already signed up with this email, so log them into that
+        // account and link Hack Club to it instead of creating a duplicate
+        if (emailOwner.hackclubId) throw new ConflictError('That email is linked to a different Hack Club account.');
+        if (migratingAnonymous && currentUser && currentUser.id !== emailOwner.id) {
+          await mergeAnonymousProgress(prisma, currentUser.id, emailOwner.id);
+        }
+        user = await prisma.user.update({
+          where: { id: emailOwner.id },
+          data: {
+            hackclubId,
+            emailVerifiedAt: emailOwner.emailVerifiedAt ?? new Date(),
+            ...(emailOwner.authProvider === 'anonymous' ? { authProvider: 'hackclub' as const } : {}),
+          },
+        });
+      } else if (migratingAnonymous && currentUser) {
+        if (linkedUser) {
+          await mergeAnonymousProgress(prisma, currentUser.id, linkedUser.id);
+          user = providerEmail
+            ? await prisma.user.update({ where: { id: linkedUser.id }, data: verifiedEmailData })
+            : linkedUser;
+        } else {
+          user = await prisma.user.update({
+            where: { id: currentUser.id },
+            data: {
+              authProvider: 'hackclub',
+              hackclubId,
+              displayName: buildTemporaryHackClubDisplayName(hackclubId),
+              usernameChosen: false,
+              ...verifiedEmailData,
+            },
+          });
+        }
+      } else {
+        user = await prisma.user.upsert({
+          where: { hackclubId },
+          update: verifiedEmailData,
+          create: {
+            displayName: buildTemporaryHackClubDisplayName(hackclubId),
+            authProvider: 'hackclub',
+            hackclubId,
+            usernameChosen: false,
+            ...verifiedEmailData,
+          },
+        });
+      }
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictError('That email is already in use.', { cause: error });
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') throw new ConflictError('That Hack Club account or email is already in use.', { cause: error });
       throw error;
     }
-    if (!providerEmail) {
-      setSessionCookie(reply, user.id, user.sessionVersion, app.config);
-      return reply.redirect(`${app.config.appUrl}/profile?pendingEmail=1`);
-    }
-    if (user.emailVerifiedAt === null) {
-      const token = await createEmailVerificationToken(prisma, user.id, new Date());
-      try { await sendEmailVerificationEmail(providerEmail, token, app.config); } catch (error) {
-        request.log.error({ errorType: error instanceof Error ? error.name : 'unknown' }, 'Hack Club verification email failed');
-      }
-      return reply.redirect(`${app.config.appUrl}/profile?pendingVerification=1`);
-    }
     setSessionCookie(reply, user.id, user.sessionVersion, app.config);
-    const destination = user.usernameChosen ? '/profile?linked=1' : '/profile?setup=username';
+    if (!providerEmail) return reply.redirect(`${app.config.appUrl}/profile?pendingEmail=1`);
+    const destination = migratingAnonymous ? '/profile?upgraded=1' : user.usernameChosen ? '/profile?linked=1' : '/profile?setup=username';
     return reply.redirect(`${app.config.appUrl}${destination}`);
   });
 }

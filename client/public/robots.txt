@@ -5,10 +5,12 @@ Disallow: /profile
 Disallow: /match
 Disallow: /duels/
 Disallow: /generate
+Disallow: /sets/
+Disallow: /summary
 Disallow: /login
 Disallow: /signup
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /verify-email
 
-Sitemap: https://guessit.game/sitemap.xml
+Sitemap: https://guessit.akisarke.xyz/sitemap.xml

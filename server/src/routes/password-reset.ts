@@ -22,7 +22,7 @@ export async function passwordResetRoutes(app: FastifyInstance) {
   app.post('/forgot-password', { preHandler: [semanticLimit('forgotPasswordIp', (request) => buildLimiterKey('forgot-password-ip', request.ip)), semanticLimit('forgotPasswordAccount', (request) => {
     const email = normalizedEmail(request.body);
     return email ? buildLimiterKey('forgot-password-account', email) : undefined;
-  })] }, async (request, reply) => {
+  })] }, async (request) => {
     const email = normalizedEmail(request.body);
     if (!email) throw new ValidationError('Enter a valid email address.');
 
@@ -42,7 +42,7 @@ export async function passwordResetRoutes(app: FastifyInstance) {
   app.post('/reset-password', { preHandler: [semanticLimit('resetPasswordIp', (request) => buildLimiterKey('reset-password-ip', request.ip)), semanticLimit('resetPasswordTokenPrefix', (request) => {
     const token = textField(request.body, 'token');
     return token ? buildLimiterKey('reset-token', token) : undefined;
-  })] }, async (request, reply) => {
+  })] }, async (request) => {
     const token = textField(request.body, 'token');
     const password = textField(request.body, 'password');
     if (!token || !password) throw new ValidationError('Reset token and password are required.');

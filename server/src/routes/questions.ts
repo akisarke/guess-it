@@ -1,5 +1,4 @@
-import type { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
-import type { PrismaClient } from '@prisma/client';
+import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 import { authenticate, requireRegistered } from '../middleware/auth.js';
 import {
   AiConfigurationError,
@@ -39,7 +38,7 @@ function nextUtcReset(now: Date): string {
   return reset.toISOString();
 }
 
-function defaultDependencies(prisma: PrismaClient, config: Parameters<typeof generateQuestionSet>[1]): QuestionRouteDependencies {
+function defaultDependencies(config: Parameters<typeof generateQuestionSet>[1]): QuestionRouteDependencies {
   return {
     authenticate,
     generateQuestionSet: (input) => generateQuestionSet(input, config),
@@ -49,7 +48,7 @@ function defaultDependencies(prisma: PrismaClient, config: Parameters<typeof gen
 }
 
 export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, options) => {
-  const dependencies = options.dependencies ?? defaultDependencies(app.prisma, app.config);
+  const dependencies = options.dependencies ?? defaultDependencies(app.config);
 
   app.post<{ Body: GenerateBody }>('/generate', {
     preHandler: [dependencies.authenticate, semanticLimit('generationIp', (request) => buildLimiterKey('generation-ip', request.ip)), semanticLimit('generationUser', (request) => request.userId ? buildLimiterKey('generation-user', request.userId) : undefined)],

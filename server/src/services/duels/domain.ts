@@ -1,4 +1,4 @@
-import type { DuelPhase, DuelPlayerView, DuelReveal, DuelSnapshot, PlayerRoundState } from 'shared';
+import type { DuelPhase, DuelPlayerView, DuelReveal, DuelSnapshot } from 'shared';
 import type { DuelId, PlayerId } from 'shared';
 import { computeScore } from '../scoring.js';
 

@@ -106,7 +106,7 @@ export async function matchmakingRoutes(app: FastifyInstance) {
   app.post('/queue/join', {
     preHandler: [authenticate, requireRegistered],
     schema: { body: { type: 'object', properties: { questionId: { type: 'string' } }, additionalProperties: false } },
-  }, async (request, reply) => {
+  }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     if (request.body && typeof request.body === 'object' && 'questionId' in request.body) {
@@ -115,13 +115,13 @@ export async function matchmakingRoutes(app: FastifyInstance) {
     return joinQueue(app.prisma, userId);
   });
 
-  app.get('/queue/status', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+  app.get('/queue/status', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     return getQueueStatus(app.prisma, userId);
   });
 
-  app.post('/queue/leave', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+  app.post('/queue/leave', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     await leaveQueue(app.prisma, userId);

@@ -102,6 +102,19 @@ export interface PuzzleResponse {
   userGuesses: Record<string, number>;
 }
 
+export interface ProfileSkill {
+  questionsPlayed: number;
+  averageMiss: number | null;
+  bestMiss: number | null;
+  recentDays: { date: string; averageMiss: number }[];
+}
+
+export interface HardModePuzzleResponse {
+  puzzleNumber: number;
+  puzzleDate: string;
+  questions: QuestionPublic[];
+}
+
 export interface ArchivePuzzle {
   puzzleNumber: number;
   puzzleDate: string;

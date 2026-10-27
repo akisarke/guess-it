@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowRight, Calculator, ChevronUp, Copy, Share2, Smartphone } from 'lucide-react';
 import { DistributionGraph } from '../../components/DistributionGraph';
-import type { DistributionResponse, ScoreBand } from 'shared';
+import type { DistributionResponse } from 'shared';
 
 const MOCK_DISTRIBUTION: DistributionResponse = {
   bins: [
@@ -27,17 +27,15 @@ const MOCK_DISTRIBUTION: DistributionResponse = {
   userGuess: 1245,
   medianGuess: 4200,
   answer: 1800,
-  napkinMath: '300M US phones × ~2.5 upgrades/person = 750M\n~1.1B global phones × ~1.8 upgrades/person = ~2B',
-  sourceTitle: 'Apple press releases',
-  sourceUrl: 'https://apple.com/newsroom',
+  napkinMath: 'A resting heart beats about 72 times a minute\n72 beats × 25 minutes = 1,800',
+  sourceTitle: 'Resting heart rate',
+  sourceUrl: 'https://www.heart.org/',
 };
-
-const MOCK_SCORE_BAND: ScoreBand = 'medium';
 
 function PreviewCard({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="card">
-      <p className="text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink/50 dark:text-gray-400 mb-4">{label}</p>
+      <p className="mb-4 text-[0.66rem] font-bold tracking-[0.03em] text-ink/50 dark:text-gray-400">{label}</p>
       {children}
     </div>
   );
@@ -47,9 +45,9 @@ function GuessCard() {
   return (
     <PreviewCard label="Q1 / 3">
       <p className="mt-1 text-base font-extrabold leading-snug sm:text-lg text-ink dark:text-gray-100">
-        How many iPhones have been produced since the launch in 2007?
+        How many times does your heart beat in 25 minutes?
       </p>
-      <div className="mt-5 flex items-end justify-between gap-3 border-b border-line/50 pb-3">
+      <div className="mt-5 flex items-end justify-between gap-3 border-b-2 border-[var(--line)] pb-3">
         <label htmlFor="demo-guess" className="sr-only">Your guess</label>
         <div className="flex-1 flex items-end gap-2">
           <input
@@ -60,14 +58,14 @@ function GuessCard() {
             className="flex-1 font-mono text-xl text-ink dark:text-gray-100 bg-transparent border-0 outline-none placeholder-ink/30 dark:placeholder-gray-500"
             placeholder="your guess"
           />
-          <span className="text-sm font-medium text-ink/60 dark:text-gray-400 whitespace-nowrap">iPhones</span>
+          <span className="text-sm font-medium text-ink/60 dark:text-gray-400 whitespace-nowrap">beats</span>
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2" aria-hidden="true">
-        <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full border border-line/50 text-ink/60 hover:text-ink hover:border-ink/30 dark:text-gray-300/70 dark:hover:text-gray-100 dark:hover:border-gray-300/30" aria-label="Calculator">
+        <button type="button" className="flex h-10 w-10 items-center justify-center border border-[var(--line-strong)] text-ink/60 hover:text-ink dark:text-gray-300/70 dark:hover:text-gray-100" aria-label="Calculator">
           <Calculator size={16} />
         </button>
-        <button type="button" className="flex h-10 w-10 items-center justify-center rounded-full border border-line/50 text-ink/60 hover:text-ink hover:border-ink/30 dark:text-gray-300/70 dark:hover:text-gray-100 dark:hover:border-gray-300/30" aria-label="Phone">
+        <button type="button" className="flex h-10 w-10 items-center justify-center border border-[var(--line-strong)] text-ink/60 hover:text-ink dark:text-gray-300/70 dark:hover:text-gray-100" aria-label="Phone">
           <Smartphone size={16} />
         </button>
       </div>
@@ -75,9 +73,9 @@ function GuessCard() {
         Lock it in <ArrowRight size={13} aria-hidden="true" />
       </button>
       <div className="mt-4 flex justify-center gap-1.5" aria-hidden="true" role="tablist" aria-label="Question progress">
-        <span className="h-1.5 w-6 rounded-full bg-accent" role="tab" aria-selected="true" aria-label="Question 1" />
-        <span className="h-1.5 w-6 rounded-full bg-ink/15 dark:bg-gray-600/30" role="tab" aria-selected="false" aria-label="Question 2" />
-        <span className="h-1.5 w-6 rounded-full bg-ink/15 dark:bg-gray-600/30" role="tab" aria-selected="false" aria-label="Question 3" />
+        <span className="h-1.5 w-6 bg-accent" role="tab" aria-selected="true" aria-label="Question 1" />
+        <span className="h-1.5 w-6 bg-ink/15 dark:bg-gray-600/30" role="tab" aria-selected="false" aria-label="Question 2" />
+        <span className="h-1.5 w-6 bg-ink/15 dark:bg-gray-600/30" role="tab" aria-selected="false" aria-label="Question 3" />
       </div>
     </PreviewCard>
   );
@@ -86,31 +84,31 @@ function GuessCard() {
 function RevealCard() {
   return (
     <PreviewCard label="Q1 / 3">
-      <p className="mt-1 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink/50 dark:text-gray-400">You guessed</p>
+      <p className="mt-1 text-[0.66rem] font-bold tracking-[0.03em] text-ink/50 dark:text-gray-400">You guessed</p>
       <p className="mt-1 font-display text-3xl font-extrabold leading-none sm:text-4xl text-ink dark:text-gray-100">1,245</p>
 
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-accent px-4 py-3 text-accent-ink">
-        <span className="text-[0.66rem] font-bold uppercase tracking-[0.12em]">Answer</span>
+      <div className="mt-4 flex items-center justify-between gap-3 border border-ink bg-accent px-4 py-3 text-accent-ink">
+        <span className="text-[0.66rem] font-bold tracking-[0.03em]">Answer</span>
         <span className="font-display text-xl font-extrabold">1,800</span>
-        <span className="text-[0.66rem] font-bold uppercase tracking-[0.12em]">Oreos</span>
+        <span className="text-[0.66rem] font-bold tracking-[0.03em]">beats</span>
       </div>
 
-      <p className="mt-4 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink/50 dark:text-gray-400">You landed</p>
+      <p className="mt-4 text-[0.66rem] font-bold tracking-[0.03em] text-ink/50 dark:text-gray-400">You landed</p>
       <p className="mt-1 font-display text-xl font-extrabold text-ink dark:text-gray-100">1.45× Too Low</p>
       <p className="mt-1 text-sm text-ink/60 dark:text-gray-400">closer than 62% of players</p>
 
       <div className="mt-5">
-        <DistributionGraph data={MOCK_DISTRIBUTION} userGuess={1245} userScoreBand={MOCK_SCORE_BAND} />
+        <DistributionGraph data={MOCK_DISTRIBUTION} userGuess={1245} />
       </div>
 
       <details className="mt-5 group">
-        <summary className="flex items-center justify-between cursor-pointer list-none border-t border-line/50 pt-3">
-          <span className="text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink dark:text-gray-100">Napkin math</span>
+        <summary className="flex items-center justify-between cursor-pointer list-none border-t border-[var(--line)] pt-3">
+          <span className="text-[0.66rem] font-bold tracking-[0.03em] text-ink dark:text-gray-100">Napkin math</span>
           <ChevronUp size={14} className="shrink-0 transition-transform duration-200 group-open:rotate-180 text-ink/50 dark:text-gray-400" aria-hidden="true" />
         </summary>
-        <div className="mt-3 p-3 rounded-lg bg-surface-2 border border-line/50 text-sm text-ink/80 dark:text-gray-200 space-y-2 font-mono">
-          <p><span className="font-semibold">300M</span> US phones × <span className="font-semibold">~2.5</span> upgrades/person = <span className="font-semibold">750M</span></p>
-          <p><span className="font-semibold">~1.1B</span> global phones × <span className="font-semibold">~1.8</span> upgrades/person = <span className="font-semibold">~2B</span></p>
+        <div className="mt-3 p-3 border border-[var(--line)] bg-surface-2 text-sm text-ink/80 dark:text-gray-200 space-y-2 font-mono">
+          <p>A resting heart beats about <span className="font-semibold">72</span> times a minute.</p>
+          <p><span className="font-semibold">72</span> beats × <span className="font-semibold">25</span> minutes = <span className="font-semibold">1,800</span></p>
         </div>
       </details>
 
@@ -130,14 +128,14 @@ function SummaryCard() {
 
   return (
     <PreviewCard label="Questions">
-      <div className="flex items-center justify-between gap-3 text-[0.66rem] font-bold uppercase tracking-[0.12em] text-ink/50 dark:text-gray-400">
+      <div className="flex items-center justify-between gap-3 text-[0.66rem] font-bold tracking-[0.03em] text-ink/50 dark:text-gray-400">
         <span>1×</span>
         <span>10×</span>
         <span>100×</span>
         <span>1,000×</span>
       </div>
       <div className="mt-2 h-px bg-ink/10 dark:bg-gray-600/30" />
-      <ul className="mt-3 space-y-1 divide-y divide-line/50">
+      <ul className="mt-3 divide-y divide-[var(--line)]">
         {rows.map(([question, score]) => (
           <li key={question} className="flex items-center justify-between gap-3 py-3">
             <span className="text-sm font-medium leading-5 text-ink/90 dark:text-gray-100">{question}</span>
@@ -157,14 +155,14 @@ function SummaryCard() {
   );
 }
 
-function Step({ title, children, card, reverse }: { title: ReactNode; children: ReactNode; card: ReactNode; reverse?: boolean }) {
+function Step({ title, children, card }: { title: string; children: ReactNode; card: ReactNode }) {
   return (
-    <li className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-      <div className={reverse ? 'lg:order-2' : ''}>
-        <h3 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl text-ink dark:text-gray-100">{title}</h3>
+    <li className="grid grid-cols-[minmax(0,1fr)] gap-6 border-t border-[var(--line)] pt-8 first:border-t-0 first:pt-0 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14 lg:pt-10">
+      <div className="lg:sticky lg:top-24 lg:self-start">
+        <h3 className="font-display text-2xl font-extrabold leading-tight text-ink dark:text-gray-100 sm:text-3xl">{title}</h3>
         <p className="mt-4 max-w-md text-base leading-7 text-ink/70 dark:text-gray-300">{children}</p>
       </div>
-      <div className={reverse ? 'lg:order-1' : ''}>{card}</div>
+      <div>{card}</div>
     </li>
   );
 }
@@ -172,43 +170,21 @@ function Step({ title, children, card, reverse }: { title: ReactNode; children: 
 export function HowToPlay() {
   return (
     <section aria-labelledby="how-to-play" className="shell-wide py-16 sm:py-24">
-      <h2 id="how-to-play" className="text-center font-display text-3xl font-extrabold sm:text-5xl text-ink dark:text-gray-100">
-        How to <strong className="text-accent">Play</strong>
+      <h2 id="how-to-play" className="border-b-2 border-[var(--line-strong)] pb-3 font-display text-2xl font-extrabold tracking-tight text-ink dark:text-gray-100 sm:text-3xl">
+        How a round works
       </h2>
 
-      <ol className="mt-14 space-y-16 sm:mt-20 sm:space-y-24">
-        <Step
-          title={
-            <>
-              <span className="text-accent">01.</span> Make your best <strong className="text-accent">guess</strong>
-            </>
-          }
-          card={<GuessCard />}
-        >
+      <ol className="mt-10 space-y-10 sm:mt-12 sm:space-y-12">
+        <Step title="Make your best guess" card={<GuessCard />}>
           No Googling. Just napkin math, gut instinct, and a built-in calculator when you need it.
         </Step>
 
-        <Step
-          title={
-            <>
-              <span className="text-accent">02.</span> See how close you <strong className="text-accent">were</strong>
-            </>
-          }
-          card={<RevealCard />}
-          reverse
-        >
-          We reveal the answer and score you based on how far off you are, as a multiple of the real answer. We also
-          give you some example math you could have used.
+        <Step title="See how close you were" card={<RevealCard />}>
+          We reveal the answer and score you on how far off you are, as a multiple of the real answer. You also get the
+          maths you could have used.
         </Step>
 
-        <Step
-          title={
-            <>
-              <span className="text-accent">03.</span> Compare with <strong className="text-accent">friends</strong>
-            </>
-          }
-          card={<SummaryCard />}
-        >
+        <Step title="Compare with friends" card={<SummaryCard />}>
           Get your daily score, see how you compared to the rest of the players, and share your result with friends.
         </Step>
       </ol>

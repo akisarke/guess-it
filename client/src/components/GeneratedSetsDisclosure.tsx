@@ -1,42 +1,40 @@
 import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import type { GeneratedQuestionSetSummary } from 'shared';
+import { SectionHeading } from './SectionHeading';
 
-export function GeneratedSetsDisclosure({ sets, onDelete }: { sets: readonly GeneratedQuestionSetSummary[]; onDelete?: (id: string) => void }) {
+// ownerName is set when someone else is looking at the profile
+export function GeneratedSetsDisclosure({ sets, onDelete, ownerName }: { sets: readonly GeneratedQuestionSetSummary[]; onDelete?: (id: string) => void; ownerName?: string }) {
+  if (ownerName && sets.length === 0) return null;
   return (
-    <section className="mt-6 space-y-3 rounded-3xl border-2 border-ink/15 bg-white/75 p-5 dark:border-white/10 dark:bg-[var(--surface)]" aria-labelledby="generated-sets-heading">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <span className="chip chip-idle">Generated sets</span>
-          <h2 id="generated-sets-heading" className="mt-2 font-display text-xl font-bold text-ink dark:text-gray-100">Question sets you made</h2>
-          <p className="mt-1 text-sm leading-6 text-ink/70 dark:text-gray-300">Private answer keys stay protected while the set metadata remains visible here.</p>
-        </div>
-        <span className="chip chip-idle shrink-0">{sets.length} total</span>
-      </div>
+    <section className="mt-12" aria-labelledby="generated-sets-heading">
+      <SectionHeading id="generated-sets-heading" title={ownerName ? `Question sets ${ownerName} made` : 'Question sets you made'} aside={`${sets.length} total`} />
+      {!ownerName && <p className="mt-3 text-sm leading-6 text-ink/70 dark:text-gray-300">Answers stay hidden from everyone else. Only the title and topic show here.</p>}
       {sets.length === 0 ? (
-        <p className="rounded-2xl border-2 border-dashed border-ink/10 bg-white/60 px-4 py-5 text-sm leading-6 text-ink/70 dark:border-white/10 dark:bg-[var(--surface)] dark:text-gray-300">No generated sets yet. Create a three-question round from the Generate page.</p>
+        <p className="mt-4 text-sm leading-6 text-ink/70 dark:text-gray-300">
+          No generated sets yet. Create a three-question round from the <Link to="/generate" className="font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 dark:text-gray-100">Generate page</Link>.
+        </p>
       ) : (
-        <div className="space-y-2">
+        <ul className="mt-3">
           {sets.map((set) => (
-            <div key={set.id} className="group flex items-center gap-3 rounded-2xl border-2 border-ink/10 bg-white/75 p-3 text-left transition hover:-translate-y-0.5 hover:border-accent/40 dark:border-white/10 dark:bg-[var(--surface)] dark:hover:border-accent/50">
-              <Link to={`/sets/${encodeURIComponent(set.id)}/summary`} className="min-w-0 flex-1">
-                <span className="block break-words font-bold text-ink dark:text-gray-100">{set.title}</span>
-                <span className="mt-1 block text-xs font-bold uppercase tracking-[0.09em] text-ink/55 dark:text-gray-400">{set.topic} · {set.difficulty ?? 'Any difficulty'} · {set.completed ? 'Completed' : 'In progress'}</span>
+            <li key={set.id} className="group flex items-center gap-3 border-b border-[var(--line)] py-3">
+              <Link to={`/sets/${encodeURIComponent(set.id)}/summary`} className="min-w-0 flex-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40">
+                <span className="block break-words font-bold text-ink underline decoration-transparent decoration-2 underline-offset-4 transition-colors group-hover:decoration-accent dark:text-gray-100">{set.title}</span>
+                <span className="mt-1 block text-xs font-bold tracking-[0.02em] text-ink/55 dark:text-gray-400">{set.topic} · {set.difficulty ?? 'Any difficulty'} · {set.completed ? 'Completed' : 'In progress'}</span>
               </Link>
-              <span className="shrink-0 text-sm font-bold text-accent dark:text-accent">Open</span>
               {onDelete && (
                 <button
                   type="button"
                   onClick={() => onDelete(set.id)}
-                  className="shrink-0 btn-secondary px-3 py-1.5 text-xs gap-1"
-                  title="Delete this set"
+                  className="btn-secondary shrink-0 gap-1 px-3 py-1.5 text-xs"
+                  aria-label={`Delete ${set.title}`}
                 >
                   <Trash2 size={12} aria-hidden="true" /> Delete
                 </button>
               )}
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

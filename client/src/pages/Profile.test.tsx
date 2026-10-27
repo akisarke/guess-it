@@ -147,4 +147,39 @@ describe('Profile', () => {
     expect(screen.queryByRole('heading', { name: 'Not Logged In' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
+
+  it('leads with guessing skill and offers a visitor the add-friend action', async () => {
+    vi.spyOn(api, 'getProfileByHandle').mockResolvedValue({
+      user: { id: 'grace', displayName: 'Grace', bio: null, avatarUrl: null, isDeveloper: false, createdAt: '2026-01-01T00:00:00.000Z' },
+      streak: { currentStreak: 0, longestStreak: 5, lastPlayedOn: '2026-10-20T00:00:00.000Z' },
+      skill: { questionsPlayed: 9, averageMiss: 1.84, bestMiss: 1.02, recentDays: [{ date: '2026-10-20T00:00:00.000Z', averageMiss: 1.5 }] },
+      badges: [{ badgeId: 'bullseye', isPinned: true, grantedAt: '2026-10-01T00:00:00.000Z', badge: { id: 'bullseye', name: 'Bullseye', description: 'Land within 1.05x', isSecret: false } }],
+      pinnedBadges: [],
+      generatedSets: [],
+    } as never);
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: { id: 'me' } } as never);
+    vi.spyOn(api, 'getFriends').mockResolvedValue({ friends: [], incoming: [], outgoing: [] });
+    const sendFriendRequest = vi.spyOn(api, 'sendFriendRequest').mockResolvedValue({ success: true });
+
+    render(
+      <MemoryRouter initialEntries={['/u/Grace']}>
+        <Routes>
+          <Route path="/u/:handle" element={<Profile />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('1.84×')).toBeInTheDocument();
+    expect(screen.getByText('1.02×')).toBeInTheDocument();
+    expect(screen.getByText('Best streak')).toBeInTheDocument();
+    expect(screen.queryByText(/Play today/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /Question sets/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'About badge Bullseye' }));
+    expect(screen.getByText(/Land within 1.05x/)).toBeInTheDocument();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add friend' }));
+    await waitFor(() => expect(sendFriendRequest).toHaveBeenCalledWith('Grace'));
+    expect(await screen.findByRole('button', { name: 'Friend request sent' })).toBeDisabled();
+  });
 });

@@ -11,12 +11,18 @@
   --accent-ink: #1a1f2b;
   --accent-rgb: 244 213 59;
   --brand-rgb: 201 69 31;
-  --line: rgba(17, 17, 17, 0.12);
+  --line: rgba(17, 17, 17, 0.16);
+  --line-strong: rgba(18, 17, 15, 0.55);
+  --shadow: rgba(18, 17, 15, 0.1);
   --paper: #e9e6de;
   --cta: #c2410c;
+  --grid-line: rgba(18, 17, 15, 0.035);
+  --shadow-sheet: 0 1px 0 var(--line), 0 22px 40px -28px var(--shadow), 0 6px 14px -10px var(--shadow);
+  --shadow-lift: 0 8px 16px -10px var(--shadow);
 
   --graph-grid: rgba(17, 17, 17, 0.08);
 
+  /* Motion timings */
   --motion-graph-rise: 640ms;
   --motion-graph-marker: 480ms;
   --motion-graph-label: 340ms;
@@ -30,14 +36,27 @@
   --surface-2: #2f2d28;
   --ink: #ede9e0;
   --brand-rgb: 236 55 80;
-  --line: rgba(237, 233, 224, 0.13);
+  --line: rgba(237, 233, 224, 0.2);
+  --line-strong: rgba(237, 233, 224, 0.38);
+  --shadow: rgba(0, 0, 0, 0.4);
+  --grid-line: rgba(237, 233, 224, 0.03);
   --graph-grid: rgba(237, 233, 224, 0.08);
+}
+
+.hard-mode {
+  --accent: #c9451f;
+  --accent-rgb: 201 69 31;
+  --accent-ink: #fff8f4;
 }
 
 body {
   @apply text-ink dark:text-gray-100;
   font-family: theme('fontFamily.sans');
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
   color: var(--ink);
   overflow-x: clip;
 
@@ -45,11 +64,26 @@ body {
   line-height: 1.5;
 }
 
+html {
+  accent-color: rgb(var(--accent-rgb));
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+::selection {
+  background: rgb(var(--accent-rgb) / 0.85);
+  color: var(--accent-ink);
+}
+
 button,
 input,
 select,
 textarea {
   font-family: inherit;
+}
+
+input,
+textarea {
+  caret-color: rgb(var(--brand-rgb));
 }
 
 summary::-webkit-details-marker {
@@ -76,9 +110,37 @@ h3,
   }
 
   .card {
-    @apply relative rounded-3xl border p-6 sm:p-8;
+    @apply relative border p-6 sm:p-8;
+    border-radius: 3px;
+    border-width: 1.5px;
     background: var(--surface);
-    border-color: var(--line);
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-sheet);
+  }
+
+  .front-page {
+    @apply relative overflow-hidden border;
+    border-radius: 3px;
+    border-width: 1.5px;
+    background: var(--surface);
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-sheet);
+    padding-top: 6px;
+  }
+  .front-page::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    background: var(--accent);
+  }
+
+  .mark {
+    background: linear-gradient(var(--accent), var(--accent)) no-repeat left / 100% 100%;
+    color: var(--accent-ink);
+    padding: 0 0.12em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   }
 
   .tactile-control {
@@ -96,26 +158,38 @@ h3,
   }
 
   .btn {
-    @apply inline-flex min-h-11 items-center justify-center rounded-lg font-bold px-6 py-3 transition-colors border select-none whitespace-nowrap focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50;
+    @apply inline-flex min-h-11 items-center justify-center font-bold px-5 py-3 border select-none whitespace-nowrap focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50;
+    border-radius: 2px;
+    border-width: 1.5px;
+    transition: transform 130ms ease, box-shadow 130ms ease, background-color 160ms ease, color 160ms ease;
+  }
+  .btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-lift);
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 
   .btn-primary {
-    @apply btn text-accent-ink;
+    @apply btn;
     background: var(--accent);
-    border-color: transparent;
+    border-color: var(--ink);
+    color: var(--accent-ink);
   }
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.05);
-  }
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    filter: brightness(1.03);
   }
 
   .btn-secondary {
     @apply btn border;
     background: var(--surface-2);
-    border-color: var(--line);
+    border-color: var(--line-strong);
     color: var(--ink);
   }
   .dark .btn-secondary {
@@ -124,38 +198,39 @@ h3,
 
   .btn-invert {
     @apply btn border;
-    background: var(--accent-ink);
-    border-color: transparent;
-    color: var(--accent);
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
   }
 
   .btn-invert:hover:not(:disabled) {
-    background: #2b313d;
-  }
-  .btn-invert:active:not(:disabled) {
-    background: #10131a;
-  }
-  .btn-invert:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: color-mix(in srgb, var(--ink) 86%, var(--bg));
   }
 
   .input-field {
-    @apply w-full text-center text-4xl font-mono py-4 px-6 rounded-lg border bg-transparent focus:outline-none focus:ring-4 focus:ring-accent/40;
-    border-color: var(--line);
+    @apply w-full text-left text-4xl font-mono py-3 px-0 bg-transparent focus:outline-none;
+    border: 0;
+    border-bottom: 2px solid var(--ink);
+    border-radius: 0;
+  }
+  .input-field:focus {
+    border-color: var(--ink);
+    box-shadow: inset 0 -4px 0 rgb(var(--accent-rgb) / 0.55);
   }
 
   .chip {
-    @apply inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-[0.09em] transition-colors whitespace-nowrap;
+    @apply inline-flex items-center gap-1.5 px-2 py-1 text-[0.66rem] font-bold tracking-[0.03em] transition-colors whitespace-nowrap;
+    border-radius: 2px;
+    border-width: 1.5px;
   }
   .chip-active {
     @apply text-accent-ink;
     background: var(--accent);
+    border-color: var(--ink);
   }
   .chip-idle {
-    @apply border;
-    background: var(--surface-2);
-    border-color: var(--line);
+    background: transparent;
+    border-color: var(--line-strong);
     color: var(--ink);
   }
   .dark .chip-idle {
@@ -174,57 +249,44 @@ h3,
   }
 
   .nav-link {
-    @apply relative inline-flex min-h-11 items-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50 rounded-sm;
-    color: color-mix(in srgb, var(--ink) 70%, transparent);
+    @apply relative inline-flex min-h-11 items-center text-sm font-semibold tracking-normal transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/50;
+    color: color-mix(in srgb, var(--ink) 65%, transparent);
+    text-underline-offset: 0.4rem;
+    text-decoration-thickness: 2px;
   }
   .dark .nav-link {
-    color: rgba(237, 233, 224, 0.7);
+    color: rgba(237, 233, 224, 0.65);
   }
   .nav-link:hover {
     color: var(--ink);
+    text-decoration: underline;
   }
   .dark .nav-link:hover {
     color: #ede9e0;
   }
   .nav-link[aria-current='page'] {
     color: var(--ink);
+    text-decoration: underline;
   }
   .dark .nav-link[aria-current='page'] {
     color: #ede9e0;
   }
-  .nav-link::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: -0.35rem;
-    left: 0;
-    height: 2px;
-    border-radius: 9999px;
-    background: currentColor;
-    opacity: 0;
-    transform: scaleX(0.35);
-    transform-origin: center;
-    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease-out;
-  }
-  .nav-link:hover::after,
-  .nav-link:focus-visible::after,
-  .nav-link[aria-current='page']::after {
-    opacity: 1;
-    transform: scaleX(1);
-  }
 
   .site-header {
     background: var(--bg);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 2px solid var(--line-strong);
   }
 
   .auth-page {
     @apply mx-auto w-full max-w-6xl px-4 py-8 sm:py-12 lg:py-16;
   }
   .auth-shell {
-    @apply grid overflow-hidden rounded-3xl border lg:grid-cols-[minmax(0,1.02fr)_minmax(24rem,0.98fr)];
+    @apply grid overflow-hidden border lg:grid-cols-[minmax(0,1.02fr)_minmax(24rem,0.98fr)];
+    border-radius: 3px;
+    border-width: 1.5px;
     background: var(--surface);
-    border-color: var(--line);
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-sheet);
   }
   .auth-story {
     @apply relative isolate min-w-0 overflow-hidden px-6 py-6 sm:px-10 sm:py-8 lg:px-12 lg:py-14 dark:text-white;
@@ -234,14 +296,13 @@ h3,
   .auth-story > * {
     @apply relative z-10;
   }
-  .auth-eyebrow {
-    @apply text-[0.7rem] font-bold uppercase tracking-[0.11em] opacity-70;
-  }
   .auth-lede {
     @apply mt-3 text-sm leading-6 opacity-70;
   }
   .auth-input {
-    @apply w-full rounded-lg border px-4 py-3 text-base outline-none transition-colors;
+    @apply w-full border px-4 py-3 text-base outline-none transition-colors;
+    border-radius: 2px;
+    border-width: 1.5px;
     background: var(--surface);
     border-color: var(--line);
     color: inherit;
@@ -255,7 +316,9 @@ h3,
   }
 
   .auth-field {
-    @apply flex items-center gap-3 rounded-lg border px-4 transition-colors;
+    @apply flex items-center gap-3 border px-4 transition-colors;
+    border-radius: 2px;
+    border-width: 1.5px;
     border-color: var(--line);
   }
   .auth-field:focus-within {
@@ -295,7 +358,7 @@ h3,
     border-color: transparent;
   }
   .auth-divider {
-    @apply flex items-center gap-3 text-xs font-bold uppercase tracking-[0.11em];
+    @apply flex items-center gap-3 text-xs font-bold tracking-[0.03em];
     opacity: 0.5;
   }
   .auth-divider::before,
@@ -309,33 +372,37 @@ h3,
   }
 
   .leaderboard-stat {
-    @apply flex min-h-20 flex-col justify-between rounded-lg border px-4 py-3;
+    @apply flex min-h-20 flex-col justify-between px-4 py-3;
+    border-radius: 2px;
+    border: 1.5px solid var(--line-strong);
     background: var(--surface-2);
-    border-color: var(--line);
     color: var(--ink);
   }
   .dark .leaderboard-stat {
     color: #ede9e0;
   }
-  .leaderboard-stat-primary {
-    background: rgb(var(--accent-rgb) / 0.12);
-    border-color: rgb(var(--accent-rgb) / 0.4);
+  /* doubled class so it beats the dark-mode text colour above */
+  .leaderboard-stat.leaderboard-stat-primary {
+    background: var(--accent);
+    border-color: var(--ink);
+    color: var(--accent-ink);
   }
   .leaderboard-stat-label {
-    @apply text-[0.7rem] font-bold uppercase tracking-[0.1em];
-    opacity: 0.55;
+    @apply text-xs font-bold tracking-[0.02em];
+    opacity: 0.75;
   }
   .leaderboard-row {
     animation: leaderboard-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--leaderboard-delay, 0ms);
+    border-radius: 2px;
     transition: border-color 180ms ease, background-color 180ms ease;
   }
   .leaderboard-row:hover {
-    border-color: rgb(var(--accent-rgb) / 0.45);
+    border-color: rgb(var(--accent-rgb) / 0.65);
   }
   .leaderboard-row-1 {
     background: rgb(var(--accent-rgb) / 0.1);
-    border-color: rgb(var(--accent-rgb) / 0.45);
+    border-color: rgb(var(--accent-rgb) / 0.65);
   }
   .leaderboard-row-2,
   .leaderboard-row-3 {
@@ -343,18 +410,41 @@ h3,
   }
 
   .state-card {
-    @apply relative isolate max-w-md mx-auto rounded-3xl border px-6 py-8 sm:px-8 sm:py-10;
+    @apply relative isolate max-w-md mx-auto border px-6 py-8 sm:px-8 sm:py-10;
+    border-radius: 3px;
+    border-width: 1.5px;
     background: var(--surface);
-    border-color: var(--line);
-    animation: state-card-enter 300ms ease-out;
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-sheet);
+  }
+  .profile-editor-dialog {
+    @apply w-[min(40rem,calc(100vw-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto border-[1.5px] p-5 text-ink sm:p-7 dark:text-gray-100;
+    border-radius: 3px;
+    border-color: var(--line-strong);
+    background: var(--surface);
+    box-shadow: var(--shadow-sheet);
+  }
+  .profile-editor-dialog::backdrop {
+    background: rgb(18 17 15 / 0.55);
+  }
+  .profile-editor-dialog code {
+    @apply rounded-[2px] bg-[var(--surface-2)] px-1 py-px text-[0.7rem] text-ink dark:text-gray-100;
+  }
+  .state-card--inline {
+    @apply max-w-none border-0 px-0 py-6 sm:px-0 sm:py-8;
+    background: transparent;
+    box-shadow: none;
   }
   .state-badge {
-    @apply inline-flex items-center mx-auto rounded-md px-3 py-1 text-[0.7rem] font-extrabold uppercase tracking-[0.11em];
-    background: rgb(var(--brand-rgb) / 0.14);
-    color: rgb(var(--brand-rgb));
+    @apply inline-flex items-center mx-auto px-3 py-1 text-[0.68rem] font-extrabold tracking-[0.03em];
+    border-radius: 2px;
+    border: 1.5px solid var(--ink);
+    background: var(--accent);
+    color: var(--accent-ink);
   }
   .state-title {
     @apply mt-6 font-display text-3xl font-extrabold leading-none text-center sm:text-4xl;
+    letter-spacing: -0.04em;
   }
   .state-description {
     @apply mt-3 text-center text-sm leading-6 sm:text-base;
@@ -382,18 +472,70 @@ h3,
   }
 }
 
-@keyframes state-card-enter {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.hard-mode-toggle__track {
+  position: relative;
+  display: block;
+  width: 1.5rem;
+  height: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+}
+
+.hard-mode-toggle__thumb {
+  position: absolute;
+  top: calc(50% - 3px);
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+/* the headline words rise in one after another... */
+.hero-word {
+  display: inline-block;
+  animation: hero-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(0.35em); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ...then the highlighter is drawn on like a real marker: a highlighted copy
+   of the word is uncovered left to right over the plain one, so the letters
+   stay readable at every moment of the stroke */
+.marker-sweep {
+  position: relative;
+  display: inline-block;
+}
+.marker-sweep__base {
+  padding: 0 0.12em;
+}
+.marker-sweep__ink {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 100% 0 0);
+  animation: marker-uncover 760ms cubic-bezier(0.65, 0, 0.35, 1) 520ms both;
+}
+@keyframes marker-uncover {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+.bar-draw {
+  transform-origin: left;
+  animation: bar-draw 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes bar-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+  .hard-mode-toggle[aria-pressed='true'] .hard-mode-toggle__thumb {
+    transform: translateX(10px);
+  }
 
   *,
   *::before,

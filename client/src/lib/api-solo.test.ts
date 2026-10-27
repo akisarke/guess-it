@@ -18,16 +18,22 @@ describe('solo API', () => {
     expect(result.questions[0]).not.toHaveProperty('answer');
   });
 
-  it.each([401, 403, 404, 500])('preserves HTTP %i on generated summary failures', async (status) => {
+  it.each([401, 403, 404, 500])('turns HTTP %i into friendly copy on generated summary failures', async (status) => {
 
     const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({ error: 'Unavailable' }, { status }));
 
     const code = status === 401 ? 'AUTHENTICATION_REQUIRED' : status === 403 ? 'FORBIDDEN' : status === 404 ? 'NOT_FOUND' : undefined;
-    await expect(api.getQuestionSetSummary('set one')).rejects.toEqual(new ApiError(status, 'Unavailable', undefined, code));
+    const message = {
+      401: 'Sign in to keep going.',
+      403: "You don't have access to that.",
+      404: "We couldn't find that. It may have moved or been deleted.",
+      500: 'Something went wrong on our side. Try again in a moment.',
+    }[status];
+    await expect(api.getQuestionSetSummary('set one')).rejects.toEqual(new ApiError(status, message!, undefined, code));
     expect(fetcher).toHaveBeenCalledWith(expect.stringContaining('/set%20one/summary'), expect.anything());
   });
 
-  it('parses typed error metadata without changing the message', async () => {
+  it('parses typed error metadata and swaps in player-facing copy', async () => {
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({
       error: 'Quota copy',
@@ -38,7 +44,7 @@ describe('solo API', () => {
 
     const failure = api.getQuestionSetSummary('set one');
 
-    await expect(failure).rejects.toEqual(new ApiError(429, 'Quota copy', 'tomorrow', 'GENERATION_QUOTA_EXCEEDED', 1234));
+    await expect(failure).rejects.toEqual(new ApiError(429, "You've used today's question generations. More unlock tomorrow.", 'tomorrow', 'GENERATION_QUOTA_EXCEEDED', 1234));
   });
 
   it('keeps legacy errors safe when code is absent', async () => {
@@ -51,9 +57,9 @@ describe('solo API', () => {
   });
 
   it.each([
-    ['malformed JSON', { json: () => Promise.reject(new SyntaxError('bad json')) }, 'Request failed'],
-    ['non-object JSON', { json: () => Promise.resolve(['not an error']) }, 'HTTP 500'],
-    ['missing error', { json: () => Promise.resolve({ code: 'INTERNAL_ERROR' }) }, 'HTTP 500'],
+    ['malformed JSON', { json: () => Promise.reject(new SyntaxError('bad json')) }, 'Something went wrong on our side. Try again in a moment.'],
+    ['non-object JSON', { json: () => Promise.resolve(['not an error']) }, 'Something went wrong on our side. Try again in a moment.'],
+    ['missing error', { json: () => Promise.resolve({ code: 'INTERNAL_ERROR' }) }, 'Something went wrong on our side. Try again in a moment.'],
   ])('uses safe fallback for %s', async (_label, response, message) => {
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 500 }));
@@ -110,7 +116,23 @@ describe('solo API', () => {
     Object.defineProperty(window, 'location', { configurable: true, value: { origin: 'http://localhost:5173', assign } });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 302, headers: { Location: location } }));
 
-    await expect(api.verifyEmail('secret-token')).rejects.toEqual(new ApiError(302, 'Request failed'));
+    await expect(api.verifyEmail('secret-token')).rejects.toEqual(new ApiError(302, 'Something went wrong on our side. Try again in a moment.'));
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  it('shows a connection message instead of the browser error when the network is down', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(api.getQuestionSetSummary('set one')).rejects.toEqual(
+      new ApiError(0, "Can't reach Guess It! right now. Check your connection and try again.", undefined, 'SERVICE_UNAVAILABLE'),
+    );
+  });
+
+  it('hides the generic schema-validation text', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({ error: 'Request validation failed', code: 'VALIDATION_ERROR' }, { status: 400 }));
+
+    await expect(api.getQuestionSetSummary('set one')).rejects.toEqual(
+      new ApiError(400, "Something in that doesn't look right. Check it and try again.", undefined, 'VALIDATION_ERROR'),
+    );
   });
 });

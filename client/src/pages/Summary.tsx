@@ -1,11 +1,13 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { api, needsAccount } from '../lib/api';
+import { errorMessage, api, needsAccount } from '../lib/api';
 import { SCORE_BANDS } from 'shared';
 import { ShareCard } from '../components/ShareCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
-import { Footer } from '../components/Footer';
 import { formatScore } from '../lib/format-number';
+import { animateSafe } from '../lib/anime';
+import { readHardGuesses } from '../lib/hard-mode';
+import { readLatestHardModeRun } from '../lib/hard-mode-history';
 import '../reveal.css';
 
 const LOG_SCORE_CAP = 10_000;
@@ -36,10 +38,23 @@ export function Summary() {
   const [puzzle, setPuzzle] = useState<TodayPuzzle | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.getTodayPuzzle().then(setPuzzle).catch((e: unknown) => setError(e instanceof Error ? e : new Error('Unable to load summary.'))).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!puzzle) return;
+    const animation = animateSafe(canvasRef.current, {
+      translateY: [10, 0],
+      duration: 420,
+      ease: 'outCubic',
+    });
+    return () => {
+      animation?.revert();
+    };
+  }, [puzzle]);
 
   if (loading) {
     return (
@@ -48,24 +63,7 @@ export function Summary() {
         title="Building summary"
         description="Fetching today's scores."
       >
-        <div className="space-y-4 text-left">
-          <div className="space-y-3">
-            <div className="h-12 w-44 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            <div className="h-5 w-full max-w-md animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            <div className="h-5 w-5/6 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border-2 border-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-[var(--surface)]">
-              <div className="h-3 w-16 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-              <div className="mt-3 h-6 w-28 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            </div>
-            <div className="rounded-2xl border-2 border-ink/10 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-[var(--surface)]">
-              <div className="h-3 w-20 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-              <div className="mt-3 h-6 w-24 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            </div>
-          </div>
-        </div>
+        <div className="border-t-2 border-[var(--line-strong)]" />
       </StateScreen>
     );
   }
@@ -81,7 +79,7 @@ export function Summary() {
         chip={isError ? 'Could not load' : 'No puzzle'}
         title={isError ? 'Summary unavailable' : 'No puzzle available'}
         description={
-          error?.message || 'There is no summary to show yet. Check back when the puzzle is live.'
+          error ? errorMessage(error, 'Your summary could not be loaded. Try again.') : 'There is no summary to show yet. Check back when the puzzle is live.'
         }
         action={
           <Link to="/" className="btn-secondary w-full sm:w-auto">
@@ -90,16 +88,16 @@ export function Summary() {
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
-            <p className="text-xs font-bold uppercase tracking-[0.11em] text-ink/45 dark:text-gray-400">
+          <div className="rounded-[3px] border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
+            <p className="text-xs font-bold tracking-[0.03em] text-ink/45 dark:text-gray-400">
               Status
             </p>
             <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">
               {isError ? 'Retry later' : 'Waiting on results'}
             </p>
           </div>
-          <div className="rounded-2xl border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
-            <p className="text-xs font-bold uppercase tracking-[0.11em] text-ink/45 dark:text-gray-400">
+          <div className="rounded-[3px] border-2 border-ink/10 bg-white/75 px-4 py-3 text-left dark:border-white/10 dark:bg-[var(--surface)]">
+            <p className="text-xs font-bold tracking-[0.03em] text-ink/45 dark:text-gray-400">
               Puzzle
             </p>
             <p className="mt-1 text-base font-bold text-ink dark:text-gray-100">-</p>
@@ -116,10 +114,21 @@ export function Summary() {
     ? answered.reduce((a, b) => a + b, 0) / answered.length
     : 0;
   const averageDisplay = hasAnswers ? formatScore(average) : null;
+  const hardRun = readLatestHardModeRun();
+  const hardAverage = hardRun
+    ? hardRun.results.reduce((sum, result) => sum + result.score, 0) / Math.max(1, hardRun.results.length)
+    : 0;
+  const hardGuessIds = readHardGuesses();
+  const hardDailyCount = puzzle.questions.filter((question) => hardGuessIds.has(question.id)).length;
+  const dailyMode = hardDailyCount === 0
+    ? 'Easy mode'
+    : hardDailyCount === puzzle.questions.length
+      ? 'Hard mode'
+      : 'Mixed mode';
 
   return (
     <div className="summary-page mx-auto w-full max-w-6xl px-4 py-5 sm:py-8">
-      <div className="summary-canvas">
+      <div ref={canvasRef} className="summary-canvas">
         <header className="summary-header">
           <Link to="/" className="font-display text-xl font-extrabold tracking-tight">Guess It!</Link>
           <div className="summary-rounds" aria-label={`Puzzle ${puzzle.puzzle.puzzleNumber}`}>
@@ -142,7 +151,7 @@ export function Summary() {
 
         <div className="summary-grid">
           <section className="summary-score-panel">
-            <p className="summary-label">Score</p>
+            <p className="summary-label">{dailyMode} score</p>
             <p className="summary-score" title={averageDisplay?.exact}>{averageDisplay?.visual ?? '-'}</p>
             <span className="summary-badge">{hasAnswers ? `${answered.length}/${puzzle.questions.length} Answered` : 'Play to score'}</span>
             <p className="summary-label summary-chart-title">Scores by question</p>
@@ -158,6 +167,9 @@ export function Summary() {
             <div className="summary-chart-axis"><span>Q1</span><span>Q{puzzle.questions.length}</span></div>
             <div className="summary-actions">
               <ShareCard puzzleNumber={puzzle.puzzle.puzzleNumber} scores={scores} average={average} />
+              {answered.length === puzzle.questions.length && (
+                <Link to="/hard-mode" className="btn-secondary w-full text-center">Random Hard Mode</Link>
+              )}
               <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
             </div>
           </section>
@@ -186,9 +198,39 @@ export function Summary() {
             </div>
           </section>
         </div>
-      </div>
 
-      <Footer />
+        {hardRun && (
+          <section className="mt-8 border-t-2 pt-6" style={{ borderColor: 'var(--line-strong)' }}>
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <div>
+                <p className="summary-label">Latest hard mode practice</p>
+                <p className="mt-2 font-display text-3xl font-extrabold">
+                  {formatScore(hardAverage).visual} average
+                </p>
+              </div>
+              <span className="text-[0.66rem] font-bold tracking-[0.04em] opacity-55">
+                Puzzle #{hardRun.puzzleNumber}
+              </span>
+            </div>
+            <div className="mt-4 divide-y divide-[var(--line)] border-y border-[var(--line)]">
+              {hardRun.results.map((result, index) => (
+                <div key={`${result.question.id}-${index}`} className="flex items-center justify-between gap-4 py-3">
+                  <span className="min-w-0 text-sm font-bold">
+                    <span className="mr-2 text-[0.66rem] opacity-60">Q{index + 1}</span>
+                    {result.question.prompt}
+                  </span>
+                  <strong className="shrink-0 font-display text-lg font-extrabold">
+                    {formatScore(result.score).visual}
+                  </strong>
+                </div>
+              ))}
+            </div>
+            <Link to="/hard-mode" className="btn-primary mt-4 w-full text-center sm:w-auto">
+              Play another hard mode puzzle
+            </Link>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

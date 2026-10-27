@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AuthRecoveryShell } from '../components/AuthRecoveryShell';
-import { api } from '../lib/api';
+import { errorMessage, api } from '../lib/api';
 
 export function ResetPassword() {
   const [params] = useSearchParams();
@@ -24,7 +24,7 @@ export function ResetPassword() {
       const response = await api.resetPassword(token, password);
       setMessage(response.message);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'We could not reset your password.');
+      setError(errorMessage(submitError, 'We could not reset your password.'));
     } finally {
       setSubmitting(false);
     }
@@ -35,7 +35,7 @@ export function ResetPassword() {
       <form className="mt-8 space-y-4" onSubmit={submit} noValidate>
         {message ? (
           <div className="space-y-4" role="status" aria-live="polite">
-            <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6">{message}</p>
+            <p className="rounded-[3px] border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6">{message}</p>
             <Link to="/login" className="btn-primary inline-flex w-full justify-center">Back to sign in</Link>
           </div>
         ) : token ? (
@@ -59,11 +59,11 @@ export function ResetPassword() {
           </>
         ) : (
           <div className="space-y-4" role="alert">
-            <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6">This reset link is missing or expired. Request a new one to continue.</p>
+            <p className="rounded-[3px] border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6">This reset link is missing or expired. Request a new one to continue.</p>
             <Link to="/forgot-password" className="btn-secondary inline-flex w-full justify-center">Request a new link</Link>
           </div>
         )}
-        {error && token && <p id="reset-error" className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}
+        {error && token && <p id="reset-error" className="rounded-[3px] border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}
       </form>
     </AuthRecoveryShell>
   );

@@ -14,6 +14,7 @@ import { PrismaClient } from '@prisma/client';
 import { authRoutes } from './routes/auth.js';
 import { puzzleRoutes } from './routes/puzzle.js';
 import { guessRoutes } from './routes/guess.js';
+import { hardModeRoutes } from './routes/hard-mode.js';
 import { questionRoutes } from './routes/questions.js';
 import { questionSetRoutes } from './routes/question-sets.js';
 import { leaderboardRoutes } from './routes/leaderboard.js';
@@ -148,6 +149,7 @@ export async function buildApp(options: BuildAppOptions): Promise<FastifyInstanc
   await app.register(passwordResetRoutes, { prefix: '/api/auth' });
   await app.register(puzzleRoutes, { prefix: '/api/puzzle' });
   await app.register(guessRoutes, { prefix: '/api' });
+  await app.register(hardModeRoutes, { prefix: '/api/hard-mode' });
   await app.register(questionRoutes, { prefix: '/api/questions' });
   await app.register(questionSetRoutes, { prefix: '/api/question-sets' });
   await app.register(leaderboardRoutes, { prefix: '/api/leaderboard' });

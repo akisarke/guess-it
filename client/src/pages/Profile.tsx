@@ -1,7 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { api, needsAccount, type ProfileResponse } from '../lib/api';
-import { BadgeChip } from '../components/BadgeChip';
+import { errorMessage, api, needsAccount, type ProfileResponse } from '../lib/api';
+import { getScoreBand, type ScoreBand } from 'shared';
+import { BadgeShelf } from '../components/BadgeShelf';
+import { VisitorActions } from '../components/VisitorActions';
+import { formatScore } from '../lib/format-number';
 import { HackClubFlag } from '../components/HackClubFlag';
 import { ProfileEditor } from '../components/ProfileEditor';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -12,6 +15,7 @@ import { StateCard } from '../components/StateCard';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 import { GeneratedSetsDisclosure } from '../components/GeneratedSetsDisclosure';
 import { FriendsSection } from '../components/FriendsSection';
+import { SectionHeading } from '../components/SectionHeading';
 import { ProfileShareError, shareProfile } from '../lib/profile-share';
 
 type TogglePin = (badgeId: string, currentlyPinned: boolean) => void;
@@ -29,6 +33,8 @@ interface ProfileDashboardProps {
   shareStatus: 'shared' | 'copied' | null;
   shareError: string | null;
   onDeleteGeneratedSet?: (id: string) => void;
+  editing: boolean;
+  onToggleEdit: () => void;
 }
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -36,6 +42,19 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 
 function formatDate(value: string | null | undefined) {
   if (!value) return 'Not yet';
   return dateFormatter.format(new Date(value));
+}
+
+const monthDayFormatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+
+function formatShortDate(value: string | null | undefined) {
+  return value ? monthDayFormatter.format(new Date(value)) : 'Not yet';
+}
+
+// the year only earns a line when it isn't this year
+function lastPlayedYear(value: string | null | undefined) {
+  if (!value) return '';
+  const year = new Date(value).getFullYear();
+  return year === new Date().getFullYear() ? '' : String(year);
 }
 
 export function Profile() {
@@ -48,6 +67,7 @@ export function Profile() {
   const [refreshIndex, setRefreshIndex] = useState(0);
   const [shareStatus, setShareStatus] = useState<'shared' | 'copied' | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -114,7 +134,7 @@ export function Profile() {
         return { ...prev, badges, pinnedBadges };
       });
     } catch (e) {
-      setMutationError(e instanceof Error ? e.message : 'Unable to update badge pin.');
+      setMutationError(errorMessage(e, 'Unable to update badge pin.'));
     }
   };
 
@@ -124,7 +144,7 @@ export function Profile() {
       await api.deleteGeneratedSet(setId);
       setProfile((prev) => prev ? { ...prev, generatedSets: prev.generatedSets.filter((s) => s.id !== setId) } : prev);
     } catch (e) {
-      setMutationError(e instanceof Error ? e.message : 'Unable to delete generated set.');
+      setMutationError(errorMessage(e, 'Unable to delete generated set.'));
     }
   };
 
@@ -148,29 +168,23 @@ export function Profile() {
            onShareProfile: () => void handleShareProfileClick(),
            shareStatus,
            shareError,
+           onDeleteGeneratedSet: (setId) => void handleDeleteGeneratedSet(setId),
+           editing,
+           onToggleEdit: () => setEditing((value) => !value),
          });
-
-  const isErrorState = (needsAccount(loadError) && !userId && !handle) || (loadError || !profile);
-  const showOuterCard = !isErrorState && searchParams.get('pendingEmail') !== '1';
 
   const isOwnProfile = !userId && !handle;
   const usernameChosen = isOwnProfile && profile?.user && 'usernameChosen' in profile.user ? profile.user.usernameChosen : undefined;
-  const notice = searchParams.get('linked') === '1' && isOwnProfile && usernameChosen !== true
+  const needsUsername = isOwnProfile && usernameChosen === false;
+  const notice = searchParams.get('linked') === '1' && needsUsername
     ? 'Hack Club is linked. Choose your public username below.'
-    : searchParams.get('upgraded') === '1' ? 'Your anonymous progress is now attached to your account.' : null;
+    : searchParams.get('upgraded') === '1'
+      ? `Your anonymous progress is now attached to your account.${needsUsername ? ' Choose your public username below.' : ''}`
+      : null;
   return (
     <div className="mx-auto max-w-5xl px-4 py-7 sm:py-10 lg:py-12">
-      {showOuterCard ? (
-        <div className="card overflow-hidden">
-          {notice && <p className="mb-5 rounded-2xl border-2 border-accent/40 bg-accent/15 px-4 py-3 text-sm font-bold text-ink dark:text-gray-100" role="status">{notice}</p>}
-          {content}
-        </div>
-      ) : (
-        <>
-          {notice && <p className="mb-5 rounded-2xl border-2 border-accent/40 bg-accent/15 px-4 py-3 text-sm font-bold text-ink dark:text-gray-100" role="status">{notice}</p>}
-          {content}
-        </>
-      )}
+      {notice && <p className="mb-6 border-[1.5px] border-[var(--line-strong)] bg-accent/15 px-4 py-3 text-sm font-bold text-ink dark:text-gray-100" role="status">{notice}</p>}
+      {content}
     </div>
   );
 }
@@ -178,40 +192,9 @@ export function Profile() {
 function renderLoading(): ReactNode {
 
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.72fr)] lg:items-stretch">
-        <section className="rounded-3xl border-2 border-ink/15 bg-white/80 p-5 dark:border-white/10 dark:bg-[var(--surface)] sm:p-7">
-          <div className="flex flex-wrap items-start gap-4">
-            <div className="h-16 w-16 shrink-0 animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="h-8 w-44 animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-              <div className="h-4 w-full max-w-sm animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-              <div className="flex gap-2 pt-1">
-                <div className="h-6 w-24 animate-pulse rounded-md bg-ink/10 dark:bg-[var(--surface-2)]" />
-                <div className="h-6 w-32 animate-pulse rounded-md bg-ink/10 dark:bg-[var(--surface-2)]" />
-              </div>
-            </div>
-            <div className="ml-auto w-full shrink-0 sm:w-auto">
-              <div className="h-11 w-full animate-pulse rounded-lg bg-ink/10 dark:bg-[var(--surface-2)] sm:w-40" />
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border-2 border-ink/10 bg-white/80 p-5 dark:border-white/10 dark:bg-[var(--surface)] sm:p-7">
-          <div className="h-3 w-28 animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-          <div className="mt-4 h-14 w-20 animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-          <div className="mt-5 h-2 w-full animate-pulse rounded-full bg-ink/10 dark:bg-[var(--surface-2)]" />
-        </section>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className="rounded-2xl border-2 border-ink/15 bg-white/75 p-4 dark:border-white/10 dark:bg-[var(--surface-2)]">
-            <div className="h-8 w-14 animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-            <div className="mt-2 h-3 w-20 animate-pulse rounded bg-ink/10 dark:bg-[var(--surface-2)]" />
-          </div>
-        ))}
-      </div>
+    <div className="py-2">
+      <p className="text-[0.68rem] font-bold tracking-[0.04em] opacity-55">Loading profile</p>
+      <div className="mt-3 border-t-2 border-[var(--line-strong)]" />
     </div>
   );
 }
@@ -221,96 +204,153 @@ function renderError(error: Error | null, onRetry: () => void): ReactNode {
     <StateCard
       badge="Error"
       title="Could not load profile"
-      description={error?.message || 'Unable to load profile. Try again later.'}
+      description={errorMessage(error, 'Unable to load profile. Try again later.')}
       retryAction={onRetry}
     />
   );
 }
 
-function renderDashboard({ profile, mutationError, onTogglePin, canManageBadges, onSaveProfile, onUploadAvatar, onLinkHackClub, onUnlinkHackClub, onShareProfile, shareStatus, shareError, onDeleteGeneratedSet }: ProfileDashboardProps): ReactNode {
+const bandBar: Record<ScoreBand, string> = {
+  close: 'bg-accent',
+  medium: 'bg-[var(--line-strong)]',
+  far: 'bg-brand',
+};
+
+const shortDate = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+
+function RecentDays({ days }: { days: NonNullable<ProfileResponse['skill']>['recentDays'] }) {
+  if (days.length === 0) return null;
+  return (
+    <div className="mt-6">
+      <p className="text-xs font-bold text-ink/70 dark:text-gray-400">Last {days.length === 1 ? 'day' : `${days.length} days`} played · average miss</p>
+      <ol className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-7">
+        {days.map((day, index) => (
+          <li key={day.date} className="min-w-0">
+            <span className={`bar-draw block h-1.5 ${bandBar[getScoreBand(day.averageMiss)]}`} style={{ animationDelay: `${120 + index * 60}ms` }} aria-hidden="true" />
+            <span className="mt-1.5 block font-display text-base font-extrabold tabular-nums text-ink dark:text-gray-100">{formatScore(day.averageMiss).visual}</span>
+            <span className="block text-xs font-bold text-ink/70 dark:text-gray-400">{shortDate.format(new Date(day.date))}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+function renderDashboard({ profile, mutationError, onTogglePin, canManageBadges, onSaveProfile, onUploadAvatar, onLinkHackClub, onUnlinkHackClub, onShareProfile, shareStatus, shareError, onDeleteGeneratedSet, editing, onToggleEdit }: ProfileDashboardProps): ReactNode {
   const accountUser = profile.user && 'hackclubId' in profile.user ? profile.user : null;
+  const displayName = profile.user?.displayName ?? 'Player';
+  const isOwner = canManageBadges && profile.user !== null && 'isOwner' in profile.user && profile.user.isOwner;
   const currentStreak = profile.streak?.currentStreak ?? 0;
   const longestStreak = profile.streak?.longestStreak ?? 0;
-  const progress = Math.min(100, Math.max(0, (currentStreak / Math.max(longestStreak, 1)) * 100));
-  const stats = [
-    { label: 'Badges earned', value: profile.badges.length, accent: 'text-brand' },
-    { label: 'Pinned favorites', value: profile.pinnedBadges.length, accent: 'text-accent' },
-    { label: 'Best streak', value: longestStreak, accent: 'text-accent' },
+  const skill = profile.skill;
+  const days = (count: number) => (count === 1 ? 'day' : 'days');
+  const stats: Array<{ label: string; value: string | number; unit: string; hint?: ReactNode }> = [
+    {
+      label: 'Average miss',
+      value: skill?.averageMiss != null ? formatScore(skill.averageMiss).visual : '—',
+      unit: skill?.questionsPlayed ? `${skill.questionsPlayed} ${skill.questionsPlayed === 1 ? 'question' : 'questions'}` : 'no daily guesses yet',
+    },
+    {
+      label: 'Best guess',
+      value: skill?.bestMiss != null ? formatScore(skill.bestMiss).visual : '—',
+      unit: skill?.bestMiss != null ? 'closest so far' : '',
+    },
+    currentStreak > 0
+      ? { label: 'Streak', value: currentStreak, unit: days(currentStreak), hint: `Best ${longestStreak}` }
+      : {
+          label: 'Best streak',
+          value: longestStreak,
+          unit: days(longestStreak),
+          hint: canManageBadges ? <Link to="/" className="underline decoration-accent decoration-2 underline-offset-4">play today</Link> : undefined,
+        },
+    { label: 'Last played', value: formatShortDate(profile.streak?.lastPlayedOn), unit: lastPlayedYear(profile.streak?.lastPlayedOn) },
   ];
+  // pinned badges lead the shelf; sort is stable, so the rest keep their order
+  const shelf = [...profile.badges].sort((a, b) => Number(b.isPinned) - Number(a.isPinned));
+  const showEditor = canManageBadges && accountUser !== null && (editing || !accountUser.usernameChosen);
 
   return (
     <>
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.72fr)] lg:items-stretch">
-        <section className="relative overflow-hidden rounded-3xl border-2 border-ink/15 bg-white/80 p-5 dark:border-white/10 dark:bg-[var(--surface)] sm:p-7">
-
-          <div className="relative flex flex-wrap items-start gap-4">
-            <ProfileAvatar src={profile.user?.avatarUrl ?? null} alt={`${profile.user?.displayName ?? 'User'}'s profile picture`} />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                <h1 title={profile.user?.displayName} className="min-w-0 max-w-full truncate font-display text-3xl font-extrabold leading-none text-ink dark:text-gray-100 sm:max-w-none sm:text-4xl">{profile.user?.displayName}</h1>
+      <article className="front-page">
+        <div className="px-5 py-7 sm:px-8 sm:py-9">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+            <ProfileAvatar src={profile.user?.avatarUrl ?? null} alt={`${displayName}'s profile picture`} name={displayName} />
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-center gap-2">
+                <h1 title={displayName} className="min-w-0 truncate font-display text-4xl font-extrabold leading-none text-ink dark:text-gray-100 sm:text-5xl">{displayName}</h1>
                 {accountUser?.hackclubId && <HackClubFlag className="h-5 w-5 shrink-0" />}
               </div>
-               <div className="max-w-xl text-sm leading-6 text-ink/70 dark:text-gray-300">{profile.user?.bio ? <MarkdownBio source={profile.user.bio} /> : 'Guess, learn, and keep your streak alive. Your best moments are collected here.'}</div>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {profile.user?.isDeveloper && <span className="chip chip-active">Developer</span>}
-                <span className="chip chip-idle">Joined {formatDate(profile.user?.createdAt)}</span>
-              </div>
+              {profile.user?.bio && (
+                <div className="mt-3 max-w-prose text-sm leading-6 text-ink/80 dark:text-gray-300">
+                  <MarkdownBio source={profile.user.bio} />
+                </div>
+              )}
+              <p className="mt-3 text-xs font-bold text-ink/70 dark:text-gray-400">
+                Joined {formatDate(profile.user?.createdAt)}
+                {profile.user?.isDeveloper && ' · Developer'}
+                {isOwner && <> · <Link to="/admin" className="underline decoration-accent decoration-2 underline-offset-4 hover:text-ink dark:hover:text-white">Badge tools</Link></>}
+              </p>
             </div>
-            <div className="ml-auto flex w-full shrink-0 items-center gap-3 sm:w-auto">
+            <div className="flex shrink-0 flex-wrap gap-2 sm:max-w-[13rem] sm:flex-col sm:items-stretch">
+              {canManageBadges ? (
+                accountUser && (
+                  <button type="button" className="btn-secondary" aria-haspopup="dialog" onClick={onToggleEdit}>
+                    Edit profile
+                  </button>
+                )
+              ) : (
+                profile.user && <VisitorActions userId={profile.user.id} displayName={displayName} />
+              )}
               <button type="button" className="btn-secondary" onClick={() => void onShareProfile()}>
                 Share profile
               </button>
             </div>
           </div>
 
-          {
-
-}
           {(shareStatus || shareError) && (
-            <p className="relative mt-3 text-sm font-bold text-ink/70 dark:text-gray-300" role="status" aria-live="polite">
+            <p className="mt-4 text-sm font-bold text-ink/80 dark:text-gray-300" role="status" aria-live="polite">
               {shareError ?? (shareStatus === 'copied' ? 'Profile link copied.' : 'Profile shared.')}
             </p>
           )}
-        </section>
 
-        <section className="rounded-3xl border-2 border-ink/10 bg-white/80 p-5 text-ink dark:border-white/10 dark:bg-[var(--surface)] dark:text-white sm:p-7">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-[0.08em] text-ink/70 dark:text-white/55">Streak signal</p>
-            <span className="rounded-md border border-ink/15 px-2 py-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-ink/70 dark:border-white/15 dark:text-accent">{currentStreak ? 'On a roll' : 'Start here'}</span>
-          </div>
-          <div className="mt-3 flex items-end justify-between gap-3">
-            <div><p className="font-display text-5xl font-extrabold leading-none tabular-nums text-accent dark:text-accent">{currentStreak}</p><p className="mt-2 text-sm font-bold text-ink/70 dark:text-white/70">day streak</p></div>
-            <div className="text-right text-sm text-ink/70 dark:text-white/65"><p>Best: <span className="font-bold text-ink dark:text-white">{longestStreak}</span></p><p className="mt-1">Last played {formatDate(profile.streak?.lastPlayedOn)}</p></div>
-          </div>
-          <div className="mt-5 h-2 overflow-hidden rounded-full bg-ink/10 dark:bg-white/15" role="progressbar" aria-label="Current streak compared with best streak" aria-valuemin={0} aria-valuemax={Math.max(longestStreak, 1)} aria-valuenow={currentStreak} aria-valuetext={`${currentStreak} day streak; best ${longestStreak}`}><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>
-          <div className="mt-4 grid grid-cols-7 gap-1.5" role="img" aria-label={`${Math.min(currentStreak, 7)} of 7 streak days shown active; current streak ${currentStreak} days`}>
-            {Array.from({ length: 7 }, (_, index) => <span key={index} className={`h-1.5 rounded-full ${index < Math.min(currentStreak, 7) ? 'bg-accent' : 'bg-ink/10 dark:bg-white/15'}`} />)}
-          </div>
-        </section>
-      </div>
+          <dl className="mt-8 grid grid-cols-2 gap-px border-y-2 border-[var(--line-strong)] bg-[var(--line)] sm:grid-cols-4">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col bg-[var(--surface)] py-4 pl-4 pr-3 [&:nth-child(odd)]:pl-0 sm:[&:nth-child(odd)]:pl-4 sm:first:!pl-0">
+                <dt className="text-xs font-bold text-ink/70 dark:text-gray-400">{stat.label}</dt>
+                <dd className="mt-2 font-display text-2xl font-extrabold leading-none tabular-nums text-ink dark:text-gray-100 sm:text-3xl">{stat.value}</dd>
+                {(stat.unit || stat.hint) && (
+                  <dd className="mt-1.5 text-xs font-bold text-ink/70 dark:text-gray-400">
+                    {stat.unit}
+                    {stat.unit && stat.hint && ' · '}
+                    {stat.hint}
+                  </dd>
+                )}
+              </div>
+            ))}
+          </dl>
 
-      {canManageBadges && profile.user && 'hackclubId' in profile.user && <ProfileEditor bio={profile.user.bio} avatarUrl={profile.user.avatarUrl} hackclubId={profile.user.hackclubId} usernameChosen={profile.user.usernameChosen} canUnlinkHackClub={profile.user.authProvider === 'password' && profile.user.email !== null} onSave={onSaveProfile} onUploadAvatar={onUploadAvatar} onLinkHackClub={onLinkHackClub} onUnlinkHackClub={onUnlinkHackClub} />}
-      {canManageBadges && profile.user && 'isOwner' in profile.user && profile.user.isOwner && <Link to="/admin" className="btn-secondary mt-4 w-full justify-center">Open owner badge tools</Link>}
+          {skill && <RecentDays days={skill.recentDays} />}
+        </div>
+      </article>
 
-      <GeneratedSetsDisclosure sets={profile.generatedSets} onDelete={canManageBadges ? onDeleteGeneratedSet : undefined} />
+      {showEditor && accountUser && <ProfileEditor bio={accountUser.bio} avatarUrl={accountUser.avatarUrl} displayName={accountUser.displayName} hackclubId={accountUser.hackclubId} usernameChosen={accountUser.usernameChosen} canUnlinkHackClub={accountUser.authProvider === 'password' && accountUser.email !== null} onSave={onSaveProfile} onUploadAvatar={onUploadAvatar} onLinkHackClub={onLinkHackClub} onUnlinkHackClub={onUnlinkHackClub} onClose={accountUser.usernameChosen ? onToggleEdit : undefined} />}
 
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {stats.map((stat) => <div key={stat.label} className="rounded-2xl border-2 border-ink/15 bg-white/75 p-4 dark:border-white/10 dark:bg-[var(--surface)]"><p className={`font-display text-3xl font-extrabold tabular-nums ${stat.accent}`}>{stat.value}</p><p className="mt-1 text-xs font-bold uppercase tracking-[0.09em] text-ink/70 dark:text-gray-400">{stat.label}</p></div>)}
-      </div>
+      <section aria-labelledby="badges-heading" className="mt-12">
+        <SectionHeading id="badges-heading" title="Badges" aside={`${profile.badges.length} earned · ${profile.pinnedBadges.length} pinned`} />
+        {canManageBadges && profile.badges.length > 0 && (
+          <p className="mt-3 text-sm leading-6 text-ink/75 dark:text-gray-300">Tap a badge to pin it. Pinned badges show first when people visit your profile.</p>
+        )}
+        {mutationError && <p className="mt-3 text-sm font-bold text-brand" role="alert">Couldn&apos;t update that. {mutationError}</p>}
+        {shelf.length === 0 ? (
+          <p className="mt-4 text-sm leading-6 text-ink/75 dark:text-gray-300">
+            {canManageBadges ? 'No badges yet. Keep playing to fill the shelf.' : `${displayName} hasn't earned any badges yet.`}
+          </p>
+        ) : (
+          <BadgeShelf badges={shelf} onTogglePin={canManageBadges ? onTogglePin : undefined} />
+        )}
+      </section>
 
-      {mutationError && <div className="mt-5 rounded-2xl border-2 border-dashed border-ink/10 bg-white/75 p-4 dark:border-white/10 dark:bg-[var(--surface)]" role="alert" aria-live="polite"><p className="font-bold text-ink dark:text-gray-100">Badge pin update failed</p><p className="mt-1 text-sm text-ink/70 dark:text-gray-300">{mutationError}</p></div>}
-
-      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <section className="space-y-3 rounded-3xl border-2 border-ink/15 bg-white/75 p-5 dark:border-white/10 dark:bg-[var(--surface)]">
-          <div className="flex items-center justify-between gap-3"><h2 className="font-display text-lg font-bold text-ink dark:text-gray-100">Pinned badges</h2><span className="text-xs font-bold uppercase tracking-[0.11em] text-ink/70 dark:text-gray-400">{profile.pinnedBadges.length}</span></div>
-           {profile.pinnedBadges.length > 0 ? <div className="flex flex-wrap gap-2">{profile.pinnedBadges.map((badge) => <BadgeChip key={badge.badgeId} badgeId={badge.badgeId} name={badge.badge.name} description={badge.badge.description} isPinned />)}</div> : <p className="rounded-2xl border-2 border-dashed border-ink/10 px-4 py-5 text-sm leading-6 text-ink/70 dark:border-white/10 dark:text-gray-300">Pin the badges you want people to notice first.</p>}
-        </section>
-
-        <section className="space-y-3 rounded-3xl border-2 border-ink/15 bg-white/75 p-5 dark:border-white/10 dark:bg-[var(--surface)]">
-          <div className="flex items-center justify-between gap-3"><div><h2 className="font-display text-lg font-bold text-ink dark:text-gray-100">Badge shelf</h2><p className="mt-1 text-sm text-ink/70 dark:text-gray-300">Tap a badge to pin or unpin it.</p></div><span className="chip chip-idle shrink-0">{profile.badges.length} total</span></div>
-           {profile.badges.length === 0 ? <div className="rounded-2xl border-2 border-dashed border-ink/10 p-4 text-sm text-ink/70 dark:text-gray-300">No badges yet. Keep playing to fill your shelf.</div> : <div className="flex flex-wrap gap-2">{profile.badges.map((badge) => <BadgeChip key={badge.badgeId} badgeId={badge.badgeId} name={badge.badge.name} description={badge.badge.description} isSecret={badge.badge.isSecret} isPinned={badge.isPinned} onTogglePin={canManageBadges ? () => onTogglePin(badge.badgeId, badge.isPinned) : undefined} />)}</div>}
-        </section>
-      </div>
+      <GeneratedSetsDisclosure sets={profile.generatedSets} onDelete={canManageBadges ? onDeleteGeneratedSet : undefined} ownerName={canManageBadges ? undefined : displayName} />
 
       {canManageBadges && <FriendsSection />}
     </>

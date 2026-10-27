@@ -12,7 +12,7 @@ const MIN_ANSWER = 0.01;
 const MAX_ANSWER = 1e15;
 
 export const CATALOG_TARGET_DEPTH = 45;
-const CATALOG_TOPUP_BATCH = DAILY_QUESTION_COUNT;
+
 
 export type RejectedGeneration = {
   topic: string;

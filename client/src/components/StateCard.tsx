@@ -14,6 +14,8 @@ export interface StateCardProps {
   secondaryAction?: StateCardAction;
   retryAction?: () => void;
   role?: 'alert' | 'status';
+  // drop the card chrome when the state already sits inside a card
+  inline?: boolean;
 }
 
 export function StateCard({
@@ -24,12 +26,13 @@ export function StateCard({
   secondaryAction,
   retryAction,
   role,
+  inline = false,
 }: StateCardProps) {
   const resolvedRole = role ?? (retryAction ? 'alert' : 'status');
   return (
-    <div className="state-card" role={resolvedRole}>
+    <div className={inline ? 'state-card state-card--inline' : 'state-card'} role={resolvedRole}>
       <span className="state-badge">{badge}</span>
-      <h1 className="state-title">{title}</h1>
+      {inline ? <h2 className="state-title">{title}</h2> : <h1 className="state-title">{title}</h1>}
       <p className="state-description">{description}</p>
       {(primaryAction || secondaryAction || retryAction) && (
         <div className="state-actions">

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { Header } from './Header';
 import { api } from '../lib/api';
@@ -27,7 +27,7 @@ describe('Header mobile navigation', () => {
     expect(screen.getByRole('region', { name: 'Mobile navigation' })).toHaveTextContent('Leaderboard');
   });
 
-  it('does not request registered-user notifications for anonymous sessions', async () => {
+  it('shows the notification bell with a sign-in prompt for anonymous sessions', async () => {
     vi.spyOn(api, 'getMe').mockResolvedValue({
       user: {
         id: 'anonymous-user',
@@ -43,6 +43,8 @@ describe('Header mobile navigation', () => {
         createdAt: new Date().toISOString(),
       },
     });
+    const getNotifications = vi.spyOn(api, 'getNotifications');
+    const user = userEvent.setup();
 
     render(
       <MemoryRouter>
@@ -50,8 +52,39 @@ describe('Header mobile navigation', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('Guess It!')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /notifications/i })).not.toBeInTheDocument();
+    const bell = await screen.findByRole('button', { name: /notifications/i });
+    expect(getNotifications).not.toHaveBeenCalled();
+
+    await user.click(bell);
+
+    expect(screen.getByRole('dialog', { name: 'Notifications' })).toHaveTextContent('Sign in to get');
+  });
+
+  it('shows the notification button for a signed-in Hack Club member', async () => {
+    vi.spyOn(api, 'getMe').mockResolvedValue({
+      user: {
+        id: 'hackclub-user',
+        displayName: 'hackclub-abc12345',
+        email: 'member@example.com',
+        authProvider: 'hackclub',
+        hackclubId: 'hc-1',
+        bio: null,
+        avatarUrl: null,
+        usernameChosen: false,
+        isDeveloper: false,
+        isOwner: false,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    vi.spyOn(api, 'getNotifications').mockResolvedValue({ notifications: [], unreadCount: 0 });
+
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
   });
 
   it('never shows the anon account name as the profile label', async () => {
@@ -80,5 +113,24 @@ describe('Header mobile navigation', () => {
     await screen.findByText('Guess It!');
     expect(container.textContent).not.toContain('anon-');
     expect(screen.getAllByText('Profile').length).toBeGreaterThan(0);
+  });
+
+  it('sends you to the landing page after logging out', async () => {
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: { id: 'u1', displayName: 'Ada', authProvider: 'password' } } as never);
+    vi.spyOn(api, 'logout').mockResolvedValue(undefined as never);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={['/profile']}>
+        <Header />
+        <Routes>
+          <Route path="/" element={<p>Landing page</p>} />
+          <Route path="/profile" element={<p>Profile page</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await user.click((await screen.findAllByRole('button', { name: /log out/i }))[0]!);
+    expect(await screen.findByText('Landing page')).toBeInTheDocument();
   });
 });

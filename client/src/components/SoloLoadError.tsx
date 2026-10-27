@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { ApiError, needsAccount } from '../lib/api';
+import { errorMessage, ApiError, needsAccount } from '../lib/api';
 import { NotLoggedIn } from './NotLoggedIn';
 import { StateCard } from './StateCard';
 
@@ -13,7 +12,7 @@ export function SoloLoadError({ error }: { error: Error }) {
       role="alert"
       badge="Error"
       title={isNotFound ? 'Set not found' : 'Set unavailable'}
-      description={error.message}
+      description={errorMessage(error, 'This question set could not be loaded. Try again.')}
       primaryAction={{ label: 'Back to Generate', href: '/generate' }}
     />
   );

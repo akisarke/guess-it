@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { PuzzleResponse } from 'shared';
-import { ApiError, api } from '../lib/api';
+import { errorMessage, ApiError, api } from '../lib/api';
 import { derivePuzzleProgress } from '../lib/puzzle-progress';
 
 type LandingAuthState = 'checking' | 'authenticated' | 'signed-out' | 'anonymous' | 'unavailable';
@@ -47,7 +47,7 @@ export function useLandingState() {
           setAuthState('signed-out');
         } else {
           setAuthState(authenticated ? 'authenticated' : 'unavailable');
-          setError(requestError instanceof Error ? requestError.message : 'Unable to restore puzzle progress.');
+          setError(errorMessage(requestError, 'Unable to restore puzzle progress.'));
         }
       } finally {
         if (activeController === controller) activeController = null;
@@ -84,7 +84,7 @@ export function useLandingState() {
       navigate(nextQuestion === -1 ? '/summary' : `/play/${nextQuestion}`);
     } catch (requestError: unknown) {
       if (generationRef.current !== playGeneration || !mountedRef.current) return;
-      setError(requestError instanceof Error ? requestError.message : 'We could not start the puzzle.');
+      setError(errorMessage(requestError, 'We could not start the puzzle.'));
     } finally {
       activePlayRef.current = false;
       if (mountedRef.current) setLoading(false);

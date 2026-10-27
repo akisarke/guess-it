@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { HackClubLogin } from '../components/HackClubLogin';
-import { api } from '../lib/api';
+import { errorMessage, api } from '../lib/api';
 import { EmailVerificationPending } from '../components/EmailVerificationPending';
 
 type AuthMode = 'login' | 'signup';
@@ -57,7 +57,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
           else navigate('/');
        }
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'We could not complete that request.');
+      setError(errorMessage(submitError, 'We could not complete that request.'));
     } finally {
       setSubmitting(false);
     }
@@ -83,12 +83,16 @@ export function Auth({ mode }: { mode: AuthMode }) {
           {pendingVerification ? (
             <div className="mt-8">
               <EmailVerificationPending email={form.email.trim()} />
+              <div className="mt-4">
+                <Link to={isSignup ? '/login' : '/signup'} className="text-center text-sm font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 dark:text-gray-100">
+                  {isSignup ? 'Back to login' : 'Back to signup'}
+                </Link>
+              </div>
             </div>
           ) : (
             <>
               <div className="max-w-md">
-                <p className="auth-eyebrow">Guess It! account</p>
-                <h2 className="mt-3 font-display text-3xl font-extrabold leading-tight sm:text-4xl">
+                <h2 className="font-display text-3xl font-extrabold leading-tight sm:text-4xl">
                   {isSignup ? 'Create your account' : 'Welcome back.'}
                 </h2>
                 <p className="auth-lede">
@@ -168,7 +172,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
               </div>
             )}
 
-            {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6 text-ink dark:text-gray-100" role="alert">{error}</p>}
+            {error && <p className="border border-brand/40 bg-brand/10 px-4 py-3 text-sm font-bold leading-6 text-ink dark:text-gray-100" role="alert">{error}</p>}
 
             <button type="submit" className="btn-primary w-full gap-2" disabled={submitting}>
               {submitting ? 'Working...' : isSignup ? 'Create account' : 'Sign in'}
@@ -176,7 +180,7 @@ export function Auth({ mode }: { mode: AuthMode }) {
             </button>
             </form>
 
-            <div className="mt-7 space-y-5">
+            <div className="mt-7 max-w-md space-y-5">
               <div className="auth-divider">or continue with</div>
               <HackClubLogin className="auth-oauth-button" />
               {!isSignup && <Link to="/forgot-password" className="block text-center text-sm font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 dark:text-gray-100">Forgot your password?</Link>}

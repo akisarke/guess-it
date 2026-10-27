@@ -87,7 +87,7 @@ export function Calculator({ onUseResult, onClose }: CalculatorProps) {
         aria-modal="true"
         aria-labelledby="calculator-title"
         onKeyDown={handleKeyDown}
-        className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)]"
+        className="w-full max-w-2xl overflow-hidden rounded-[3px] border-[1.5px] border-[var(--line-strong)] bg-[var(--surface)]"
       >
         <h2 id="calculator-title" className="sr-only">
           Calculator and scratch pad
@@ -102,7 +102,7 @@ export function Calculator({ onUseResult, onClose }: CalculatorProps) {
               readOnly
               value={expression || '0'}
               aria-label="Expression"
-              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-right text-3xl font-mono text-ink outline-none dark:text-gray-100"
+              className="w-full rounded-[2px] border border-[var(--line)] bg-[var(--surface-2)] px-4 py-3 text-right text-3xl font-mono text-ink outline-none dark:text-gray-100"
             />
 
             <p
@@ -118,7 +118,7 @@ export function Calculator({ onUseResult, onClose }: CalculatorProps) {
                   key={btn}
                   type="button"
                   onClick={() => press(btn)}
-                  className="flex items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--surface-2)] py-3.5 font-bold text-ink transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 active:scale-[0.97] dark:text-gray-100"
+                  className="flex items-center justify-center rounded-[2px] border border-[var(--line)] bg-[var(--surface-2)] py-3.5 font-bold text-ink transition-colors hover:bg-[var(--surface)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/40 active:scale-[0.97] dark:text-gray-100"
                 >
                   {
 }
@@ -144,7 +144,7 @@ export function Calculator({ onUseResult, onClose }: CalculatorProps) {
 
           <section className="order-2 flex min-h-[16rem] flex-col border-t border-[var(--line)] sm:order-1 sm:border-r sm:border-t-0">
             <div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3">
-              <span className="text-xs font-bold uppercase tracking-[0.11em] text-ink/60 dark:text-gray-400">
+              <span className="text-xs font-bold tracking-[0.03em] text-ink/60 dark:text-gray-400">
                 Scratch pad
               </span>
               <button

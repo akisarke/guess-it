@@ -1,6 +1,8 @@
-import type { ErrorCode, ErrorResponse, GenerateQuestionSetRequest, GenerateQuestionSetResponse, PuzzleResponse, GeneratedGameSourceResponse, GeneratedGameSummaryResponse, GuessRequest, GuessResponse, DistributionResponse, GeneratedQuestionSetSummary } from 'shared';
+import type { ErrorCode, GenerateQuestionSetRequest, GenerateQuestionSetResponse, PuzzleResponse, HardModePuzzleResponse, ProfileSkill, GeneratedGameSourceResponse, GeneratedGameSummaryResponse, GuessRequest, GuessResponse, DistributionResponse, GeneratedQuestionSetSummary } from 'shared';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
+const HARD_MODE_EXCLUDE_PUZZLES = 500;
+const HARD_MODE_EXCLUDE_QUESTIONS = 150;
 
 export interface AuthResponse {
   user: AuthUser;
@@ -35,6 +37,41 @@ export function needsAccount(error: unknown): boolean {
   if (!(error instanceof ApiError)) return false;
   if (error.status === 401) return true;
   return error.status === 403 && error.code !== 'EMAIL_VERIFICATION_REQUIRED';
+}
+
+const GENERIC_ERROR = 'Something went wrong on our side. Try again in a moment.';
+const OFFLINE_ERROR = "Can't reach Guess It! right now. Check your connection and try again.";
+
+// Only validation and conflict messages are written for players ("That email
+// is already in use"); everything else gets fixed wording so nothing technical
+// ever reaches the screen.
+function friendlyMessage(code: ErrorCode | undefined, serverMessage: string | undefined): string {
+  switch (code) {
+    case 'VALIDATION_ERROR':
+      return serverMessage && serverMessage !== 'Request validation failed' ? serverMessage : "Something in that doesn't look right. Check it and try again.";
+    case 'CONFLICT':
+      return serverMessage ?? 'That clashes with something that already exists. Try a different value.';
+    case 'AUTHENTICATION_REQUIRED':
+      return 'Sign in to keep going.';
+    case 'EMAIL_VERIFICATION_REQUIRED':
+      return 'Verify your email to keep going.';
+    case 'FORBIDDEN':
+      return "You don't have access to that.";
+    case 'NOT_FOUND':
+      return "We couldn't find that. It may have moved or been deleted.";
+    case 'RATE_LIMITED':
+      return "You're going a little fast. Wait a moment and try again.";
+    case 'GENERATION_QUOTA_EXCEEDED':
+      return "You've used today's question generations. More unlock tomorrow.";
+    default:
+      return GENERIC_ERROR;
+  }
+}
+
+// What to show for any caught error: API errors already carry friendly text,
+// anything else (a thrown bug, a parse failure) gets the caller's placeholder.
+export function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError ? error.message : fallback;
 }
 
 function isErrorCode(value: unknown): value is ErrorCode {
@@ -88,6 +125,7 @@ export interface ProfileResponse {
     longestStreak: number;
     lastPlayedOn: string | null;
   } | null;
+  skill?: ProfileSkill;
   badges: readonly ProfileBadge[];
   pinnedBadges: readonly ProfileBadge[];
   generatedSets: readonly GeneratedQuestionSetSummary[];
@@ -205,11 +243,17 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     requestHeaders['x-csrf-token'] = await acquireCsrfToken();
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: requestHeaders,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      credentials: 'include',
+      headers: requestHeaders,
+    });
+  } catch (networkError) {
+    if (networkError instanceof DOMException && networkError.name === 'AbortError') throw networkError;
+    throw new ApiError(0, OFFLINE_ERROR, undefined, 'SERVICE_UNAVAILABLE');
+  }
 
   if (options?.redirect === 'manual' && res.type === 'opaqueredirect') {
     window.location.assign('/verify-email?verified=1');
@@ -227,7 +271,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         }
       }
     } catch {}
-    throw new ApiError(res.status, 'Request failed');
+    throw new ApiError(res.status, GENERIC_ERROR);
   }
 
   if (!res.ok) {
@@ -235,11 +279,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     try {
       body = await res.json();
     } catch {
-      throw new ApiError(res.status, 'Request failed');
+      const code = errorCodeForStatus(res.status);
+      throw new ApiError(res.status, friendlyMessage(code, undefined), undefined, code);
     }
     const record = recordFromBody(body);
-    const message = typeof record?.error === 'string' && record.error.length > 0 ? record.error : `HTTP ${res.status}`;
+    const serverMessage = typeof record?.error === 'string' && record.error.length > 0 ? record.error : undefined;
     const code = isErrorCode(record?.code) ? record.code : errorCodeForStatus(res.status);
+    const message = friendlyMessage(code, serverMessage);
     const resetAt = typeof record?.resetAt === 'string' ? record.resetAt : undefined;
     const resetAtMs = typeof record?.resetAtMs === 'number' ? record.resetAtMs : undefined;
     throw new ApiError(res.status, message, resetAt, code, resetAtMs);
@@ -317,6 +363,22 @@ export const api = {
 
   getTodayPuzzle: (signal?: AbortSignal) => request<PuzzleResponse>('/api/puzzle/today', signal ? { signal } : undefined),
   getPuzzle: (num: number) => request<PuzzleResponse>(`/api/puzzle/${num}`),
+  getHardModePuzzle: (exclude: readonly number[] = [], excludeQuestions: readonly string[] = []) => {
+    // keep only the most recent history so the query string stays under the
+    // server's header size limit after many runs
+    const recentPuzzles = exclude.slice(-HARD_MODE_EXCLUDE_PUZZLES);
+    const recentQuestions = excludeQuestions.slice(-HARD_MODE_EXCLUDE_QUESTIONS);
+    const params = new URLSearchParams();
+    if (recentPuzzles.length > 0) params.set('exclude', recentPuzzles.join(','));
+    if (recentQuestions.length > 0) params.set('excludeQuestions', recentQuestions.join(','));
+    const query = params.toString();
+    return request<HardModePuzzleResponse>(`/api/hard-mode/puzzle${query ? `?${query}` : ''}`);
+  },
+  submitHardModeGuess: (input: { questionId: string; value: number }) =>
+    request<GuessResponse & { distribution: DistributionResponse }>('/api/hard-mode/guess', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
   getDistribution: (id: string) => request<DistributionResponse>(`/api/puzzle/${encodeURIComponent(id)}/distribution`),
   getQuestionSetPlay: (id: string) => request<GeneratedGameSourceResponse>(`/api/question-sets/${encodeURIComponent(id)}/play`),
   getQuestionSetSummary: (id: string) => request<GeneratedGameSummaryResponse>(`/api/question-sets/${encodeURIComponent(id)}/summary`),

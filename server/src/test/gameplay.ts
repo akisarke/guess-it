@@ -12,7 +12,7 @@ export const owner: User = {
 };
 export const questions: Question[] = ['q3', 'q1', 'q2'].map((id) => ({
   id, prompt: `Estimate ${id}`, unit: 'items', answer: new Prisma.Decimal(100),
-  napkinMath: 'private explanation', sourceTitle: 'Guess It! test fixture', sourceUrl: 'https://guessit.game/', source: 'ai_generated', createdBy: owner.id,
+  napkinMath: 'private explanation', sourceTitle: 'Guess It! test fixture', sourceUrl: 'https://guessit.akisarke.xyz/', source: 'ai_generated', createdBy: owner.id,
   topic: 'scale', createdAt: new Date('2026-09-12'),
 }));
 export const puzzle = {

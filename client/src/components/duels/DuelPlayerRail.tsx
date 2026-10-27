@@ -47,7 +47,7 @@ export function DuelPlayerRail({ players }: { players: readonly [DuelPlayerView,
               {score.visual}
             </p>
 
-            <p className="mt-2 text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-60">
+            <p className="mt-2 text-[0.7rem] font-bold tracking-[0.02em] opacity-60">
               {STATE_LABELS[player.state] ?? player.state.replace(/_/g, ' ')}
             </p>
           </article>

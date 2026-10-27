@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
@@ -14,6 +14,7 @@ function open(path: string) {
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(daily);
   vi.spyOn(api, 'getPuzzle').mockResolvedValue(daily);
 });
@@ -37,6 +38,23 @@ describe('source-aware solo routes', () => {
 
     await userEvent.type(await screen.findByLabelText('Guess in fish'), '50');
     await userEvent.click(screen.getByRole('button', { name: 'Lock it in' }));
+
+    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50 });
+  });
+
+  it('locks in the current guess when hard mode runs out', async () => {
+    const submit = vi.spyOn(api, 'submitGuess').mockRejectedValue(new ApiError(500, 'Try again'));
+
+    open('/play/0');
+    await screen.findByLabelText('Guess in fish');
+    fireEvent.change(screen.getByLabelText('Guess in fish'), { target: { value: '50' } });
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole('button', { name: /hard mode/i }));
+
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+    vi.useRealTimers();
 
     expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50 });
   });

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Mail } from 'lucide-react';
-import { api } from '../lib/api';
+import { errorMessage, api } from '../lib/api';
 
 export function EmailVerificationPending({ email }: { email?: string | null }) {
   const [address, setAddress] = useState(email ?? '');
@@ -17,7 +17,7 @@ export function EmailVerificationPending({ email }: { email?: string | null }) {
       if (email) setMessage((await api.resendVerification(address.trim())).message);
       else { await api.updateVerificationEmail(address.trim()); setMessage('If an account is eligible, a verification email is on its way.'); }
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'We could not send that request.');
+      setError(errorMessage(submitError, 'We could not send that request.'));
     } finally {
       setLoading(false);
     }
@@ -28,8 +28,8 @@ export function EmailVerificationPending({ email }: { email?: string | null }) {
     <form className="space-y-3 text-left" onSubmit={submit} noValidate>
       <label htmlFor="verification-email" className="text-sm font-bold text-ink dark:text-gray-100">Email address</label>
       <span className="auth-field"><Mail size={18} className="auth-field-icon" aria-hidden="true" /><input id="verification-email" className="w-full" type="email" value={address} onChange={(event) => setAddress(event.target.value)} autoComplete="email" required /></span>
-      {message && <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6" role="status">{message}</p>}
-      {error && <p className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p>}
+      {message && <p className="rounded-[3px] border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6" role="status">{message}</p>}
+      {error && <p className="rounded-[3px] border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold leading-6" role="alert">{error}</p>}
       <button className="btn-primary w-full" type="submit" disabled={loading || !address.trim()}>{loading ? 'Sending...' : 'Resend verification email'}</button>
     </form>
   </div>;

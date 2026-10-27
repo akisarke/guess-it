@@ -32,7 +32,7 @@ export function DuelBattle() {
       },
        onEvent: (event) => { lastVersionRef.current = event.version; dispatch(event); },
        onClose: () => setConnected(false),
-       onError: (error) => dispatch({ type: 'duel.error', duelId: id, version: lastVersionRef.current, code: 'CONNECTION_ERROR', message: error.message }),
+       onError: () => dispatch({ type: 'duel.error', duelId: id, version: lastVersionRef.current, code: 'CONNECTION_ERROR', message: 'Lost connection to the duel. Trying to reconnect...' }),
     });
     connectionRef.current = connection;
     return () => {
@@ -85,7 +85,7 @@ export function DuelBattle() {
       )}
       {snapshot.phase !== 'question' && <DuelReveal snapshot={snapshot} />}
       <p
-        className="text-center text-[0.7rem] font-bold uppercase tracking-[0.08em] opacity-60"
+        className="text-center text-[0.7rem] font-bold tracking-[0.02em] opacity-60"
         role="status"
       >
         {connected ? 'Live connection' : 'Reconnecting'}

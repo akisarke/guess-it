@@ -78,7 +78,7 @@ export function renderInline(content: MarkdownInline[], keyPrefix: string): Reac
     if (part.type === 'strong') return <strong key={key}>{part.value}</strong>;
     if (part.type === 'emphasis') return <em key={key}>{part.value}</em>;
     if (part.type === 'code') return <code key={key} className="rounded bg-ink/10 px-1.5 py-0.5 text-[0.9em] dark:bg-[var(--surface-2)]">{part.value}</code>;
-    if (part.type === 'link') return <a key={key} href={part.href} target="_blank" rel="noreferrer" className="font-bold text-accent underline decoration-accent/40 underline-offset-2 dark:text-accent">{part.label}<ExternalLink size={12} className="ml-1 inline" aria-hidden="true" /></a>;
+    if (part.type === 'link') return <a key={key} href={part.href} target="_blank" rel="noreferrer" className="font-bold text-ink underline decoration-accent decoration-2 underline-offset-4 dark:text-accent dark:decoration-accent/40">{part.label}<ExternalLink size={12} className="ml-1 inline" aria-hidden="true" /></a>;
     return <span key={key}>{part.value.split('\n').map((line, lineIndex) => <span key={`${key}-${lineIndex}`}>{lineIndex > 0 && <br />}{line}</span>)}</span>;
   });
 }

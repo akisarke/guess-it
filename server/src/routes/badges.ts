@@ -20,7 +20,7 @@ export async function badgeRoutes(app: FastifyInstance) {
       }));
   });
 
-app.post('/:badgeId/pin', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+app.post('/:badgeId/pin', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const { badgeId } = request.params as { badgeId: string };
     const { pin } = request.body as { pin: boolean };
 

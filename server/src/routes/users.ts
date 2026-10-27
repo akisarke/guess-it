@@ -3,8 +3,9 @@ import { authenticate, requireRegistered } from '../middleware/auth.js';
 import { utcDayRange } from '../services/daily-puzzle.js';
 import { parseProfileUpdate } from '../services/profile-input.js';
 import { listGeneratedSets } from '../services/generated-sets.js';
+import { getProfileSkill } from '../services/profile-skill.js';
 import { parseUsername } from '../services/username-input.js';
-import { AuthenticationError, AuthorizationError, NotFoundError, ValidationError } from '../errors/application-error.js';
+import { AuthenticationError, NotFoundError, ValidationError } from '../errors/application-error.js';
 
 const publicProfileUserSelect = {
   id: true,
@@ -72,8 +73,9 @@ async function publicProfile(
   });
   const pinnedBadges = badges.filter(b => b.isPinned);
   const generatedSets = await listGeneratedSets(prisma, user.id, user.id);
+  const skill = await getProfileSkill(prisma, user.id);
 
-  return { user: publicUser, streak: presentStreak(streak), badges, pinnedBadges, generatedSets };
+  return { user: publicUser, streak: presentStreak(streak), skill, badges, pinnedBadges, generatedSets };
 }
 
 export async function userRoutes(app: FastifyInstance) {
@@ -90,11 +92,12 @@ app.get('/me/profile', { preHandler: [authenticate, requireRegistered] }, async 
     });
     const pinnedBadges = badges.filter(b => b.isPinned);
     const generatedSets = await listGeneratedSets(prisma, userId, userId);
+    const skill = await getProfileSkill(prisma, userId);
 
-    return { user, streak: presentStreak(streak), badges, pinnedBadges, generatedSets };
+    return { user, streak: presentStreak(streak), skill, badges, pinnedBadges, generatedSets };
   });
 
-  app.get<{ Params: { handle: string } }>('/handle/:handle/profile', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+  app.get<{ Params: { handle: string } }>('/handle/:handle/profile', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const parsed = parseUsername(request.params.handle);
     if (!parsed.ok) throw new ValidationError(parsed.error);
 
@@ -103,14 +106,14 @@ app.get('/me/profile', { preHandler: [authenticate, requireRegistered] }, async 
     return publicProfile(prisma, user);
   });
 
-  app.get<{ Params: { id: string } }>('/:id/profile', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+  app.get<{ Params: { id: string } }>('/:id/profile', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const { id } = request.params;
     const user = await prisma.user.findUnique({ where: { id }, select: publicProfileUserSelect });
     if (!user) throw new NotFoundError('User not found');
     return publicProfile(prisma, user);
   });
 
-app.patch('/me/profile', { preHandler: [authenticate, requireRegistered] }, async (request, reply) => {
+app.patch('/me/profile', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const parsed = parseProfileUpdate(request.body);
     if (!parsed.ok) throw new ValidationError(parsed.error);
 

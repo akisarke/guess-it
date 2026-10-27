@@ -2,13 +2,13 @@ function Chalkboard() {
   return (
     <svg viewBox="0 0 260 190" className="w-full" role="img" aria-label="Chalkboard sketch of Fermi estimation formulas">
       <rect width="260" height="190" rx="10" fill="#1a1f2b" />
-      <g fill="none" stroke="#f4d53b" strokeWidth="1.4" strokeLinecap="round">
+      <g fill="none" stroke="var(--accent)" strokeWidth="1.4" strokeLinecap="round">
         <path d="M158 44 L158 126" />
         <path d="M126 126 L190 126" />
         <path d="M158 44 L126 126" />
         <path d="M158 44 L190 126" />
       </g>
-      <g fill="#f4d53b" fontFamily="Georgia, serif" fontStyle="italic" fontSize="12">
+      <g fill="var(--accent)" fontFamily="Georgia, serif" fontStyle="italic" fontSize="12">
         <text x="162" y="60">ℓ</text>
         <text x="194" y="90">d</text>
         <text x="112" y="142">A</text>

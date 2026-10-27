@@ -1,0 +1,159 @@
+import type { ReactNode } from 'react';
+import { SCORE_BANDS, getScoreBand, type DistributionResponse, type ScoreBand, type ScoreDirection } from 'shared';
+import { DistributionGraph } from './DistributionGraph';
+import { formatCompactNumber, formatExactNumber, formatScore } from '../lib/format-number';
+import { parseNapkinMath } from '../napkin-math';
+import '../reveal.css';
+
+function computeDirection(userGuess: number | null, answer: number | null): ScoreDirection {
+  if (userGuess == null || answer == null) return 'Exact';
+  if (userGuess < answer) return 'Too Low';
+  if (userGuess > answer) return 'Too High';
+  return 'Exact';
+}
+
+function computeRank(data: DistributionResponse | null, userGuess: number | null): { rank: number; total: number } | null {
+  if (!data || data.bins.length === 0 || userGuess == null || userGuess <= 0) return null;
+  const total = data.bins.reduce((sum, b) => sum + b.count, 0);
+  if (total <= 0) return null;
+  const logAnswer = Math.log10(data.answer > 0 ? data.answer : 1);
+  const userDistance = Math.abs(Math.log10(userGuess) - logAnswer);
+  let closer = 0;
+  for (const bin of data.bins) {
+    const mid = (bin.low + bin.high) / 2;
+    if (mid <= 0 || bin.count <= 0) continue;
+    if (Math.abs(Math.log10(mid) - logAnswer) < userDistance - 1e-9) closer += bin.count;
+  }
+  return { rank: Math.min(closer + 1, total), total };
+}
+
+function ordinal(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
+}
+
+interface RevealViewProps {
+  unit: string;
+  score: number;
+  userGuess: number | null;
+  answer: number | null;
+  distribution: DistributionResponse | null;
+  showDistribution: boolean;
+  // chips shown before the score band, e.g. "Question 1 of 3", "Puzzle #3"
+  chips: ReactNode;
+  context?: ReactNode;
+  actions: ReactNode;
+  // in practice runs the guess isn't counted, so ranking reads as "would have been"
+  practice?: boolean;
+}
+
+export function RevealView({ unit, score, userGuess, answer, distribution, showDistribution, chips, context, actions, practice }: RevealViewProps) {
+  const direction = computeDirection(userGuess, answer);
+  const band: ScoreBand = getScoreBand(score);
+  const bandColor = SCORE_BANDS[band].color;
+  const rank = computeRank(distribution, userGuess);
+  const rankLine =
+    rank == null
+      ? practice ? 'No one else has guessed this one yet.' : 'Rank is still being counted.'
+      : rank.total <= 1
+        ? practice ? 'Only one other player has guessed this one.' : "You're the first to lock in. Check back as more players guess."
+        : practice
+          ? `You would have been the ${ordinal(rank.rank)} closest of ${rank.total} players.`
+          : `You were the ${ordinal(rank.rank)} closest of ${rank.total} players.`;
+  const napkinMath = distribution?.napkinMath?.trim() ? distribution.napkinMath : '';
+  const parsedNapkinMath = napkinMath ? parseNapkinMath(napkinMath) : null;
+
+  return (
+    <div className={`reveal-canvas${answer != null ? ' reveal-canvas--landed' : ''}`}>
+      {context}
+      <div className="reveal-topbar">
+        {chips}
+        <span className="reveal-chip reveal-chip--muted" style={{ borderColor: bandColor, color: bandColor }}>
+          {SCORE_BANDS[band].label} band
+        </span>
+      </div>
+
+      <div className="mt-5 space-y-4 lg:space-y-5">
+        <section className="reveal-grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch">
+          <article className="reveal-panel reveal-panel--guess">
+            <p className="reveal-kicker">Your guess</p>
+            <div className="mt-4 flex flex-wrap items-end gap-3">
+              <div className="reveal-value reveal-value--yellow" title={userGuess != null ? formatExactNumber(userGuess) : undefined}>{userGuess != null ? formatCompactNumber(userGuess) : '-'}</div>
+              <div className="reveal-unit">{unit}</div>
+            </div>
+            <p className="reveal-copy mt-3">
+              {direction === 'Exact' ? 'Right on the number.' : `You were ${direction.toLowerCase()}.`}
+            </p>
+          </article>
+
+          <article className="reveal-panel reveal-panel--answer">
+            <p className="reveal-kicker">The answer</p>
+            <div className="mt-4 flex flex-wrap items-end gap-3">
+              <div className="reveal-value reveal-value--answer" title={answer != null ? formatExactNumber(answer) : undefined}>{answer != null ? formatCompactNumber(answer) : '-'}</div>
+              <div className="reveal-unit text-accent-ink/70">{unit}</div>
+            </div>
+          </article>
+        </section>
+
+        <section className="relative grid gap-4 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:items-stretch">
+          <div className="reveal-divider absolute inset-y-4 left-1/2 w-px -translate-x-1/2" aria-hidden="true" />
+          <article className="reveal-landed">
+            <p className="reveal-kicker">Your score</p>
+            <div className="reveal-landed-score">
+              <div className="reveal-score" title={formatScore(score).exact}>{formatScore(score).visual}</div>
+              <div className="min-w-[13rem] flex-1 pb-1">
+                <p className="text-lg font-bold leading-tight text-ink dark:text-gray-100 sm:text-xl">{rankLine}</p>
+              </div>
+            </div>
+          </article>
+
+          {showDistribution && (
+            <article className="reveal-landed">
+              <DistributionGraph data={distribution} userGuess={userGuess} />
+            </article>
+          )}
+        </section>
+
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <details className="reveal-napkin">
+            <summary>
+              <span>Napkin math</span>
+              <svg className="napkin-chevron h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            {parsedNapkinMath ? (
+              <div className="reveal-napkin-rows" aria-label="Napkin math breakdown">
+                {parsedNapkinMath.rows.map((row) => (
+                  <div className="reveal-napkin-row" key={`${row.label}-${row.value}`}>
+                    <span>{row.label}</span>
+                    <span>{row.value}</span>
+                  </div>
+                ))}
+                {parsedNapkinMath.equation && (
+                  <div className="reveal-napkin-equation">
+                    <span>{parsedNapkinMath.equation.split('≈')[0].trim()}</span>
+                    <span>≈ {parsedNapkinMath.equation.split('≈').slice(1).join('≈').trim()}</span>
+                  </div>
+                )}
+                {parsedNapkinMath.fallback && <p className="reveal-napkin-text">{parsedNapkinMath.fallback}</p>}
+              </div>
+            ) : napkinMath ? (
+              <p className="reveal-napkin-text">{napkinMath}</p>
+            ) : (
+              <p className="reveal-napkin-text">No napkin math was saved for this question.</p>
+            )}
+          </details>
+
+          <div className="reveal-actions lg:justify-start">{actions}</div>
+        </div>
+      </div>
+    </div>
+  );
+}

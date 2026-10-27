@@ -27,12 +27,3 @@ export function decideWebSocketOrigin(origin: string | undefined, allowedOrigins
   return decideOrigin(origin, allowedOrigins).allowed;
 }
 
-function safeOrigin(value: string): string | null {
-  try {
-    const parsed = new URL(value);
-    if (parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash) return null;
-    return parsed.origin === value ? parsed.origin : null;
-  } catch {
-    return null;
-  }
-}

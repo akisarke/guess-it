@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Mail } from 'lucide-react';
 import { AuthRecoveryShell } from '../components/AuthRecoveryShell';
-import { api } from '../lib/api';
+import { errorMessage, api } from '../lib/api';
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -17,7 +17,7 @@ export function ForgotPassword() {
       const response = await api.requestPasswordReset(email.trim());
       setMessage(response.message);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'We could not send that request.');
+      setError(errorMessage(submitError, 'We could not send that request.'));
     } finally {
       setSubmitting(false);
     }
@@ -28,7 +28,7 @@ export function ForgotPassword() {
       <form className="mt-8 space-y-4" onSubmit={submit} noValidate>
         {message ? (
           <div className="space-y-4" role="status" aria-live="polite">
-            <p className="rounded-2xl border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6">{message}</p>
+            <p className="rounded-[3px] border-2 border-accent/40 bg-accent/20 px-4 py-3 text-sm font-bold leading-6">{message}</p>
             <button type="button" className="btn-secondary w-full" onClick={() => { setMessage(null); setEmail(''); }}>Send another request</button>
           </div>
         ) : (
@@ -41,7 +41,7 @@ export function ForgotPassword() {
             <button className="btn-primary w-full" type="submit" disabled={submitting}>{submitting ? 'Sending...' : 'Send reset link'}</button>
           </>
         )}
-        {error && <p id="recovery-error" className="rounded-2xl border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}
+        {error && <p id="recovery-error" className="rounded-[3px] border-2 border-brand/30 bg-brand/10 px-4 py-3 text-sm font-bold" role="alert" aria-live="assertive">{error}</p>}
       </form>
     </AuthRecoveryShell>
   );

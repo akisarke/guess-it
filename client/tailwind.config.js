@@ -11,13 +11,13 @@ export default {
       },
 
       borderRadius: {
-        sm: '3px',
-        DEFAULT: '4px',
-        md: '6px',
-        lg: '8px',
-        xl: '8px',
-        '2xl': '8px',
-        '3xl': '12px',
+        sm: '1px',
+        DEFAULT: '2px',
+        md: '3px',
+        lg: '4px',
+        xl: '5px',
+        '2xl': '5px',
+        '3xl': '6px',
       },
 
       colors: {

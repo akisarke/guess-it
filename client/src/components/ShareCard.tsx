@@ -1,4 +1,3 @@
-import { SCORE_BANDS } from 'shared';
 import { formatScore } from '../lib/format-number';
 
 interface ShareCardProps {
@@ -7,11 +6,6 @@ interface ShareCardProps {
   average: number;
 }
 
-function band(score: number): string {
-  if (score <= SCORE_BANDS.close.max) return SCORE_BANDS.close.color;
-  if (score <= SCORE_BANDS.medium.max) return SCORE_BANDS.medium.color;
-  return SCORE_BANDS.far.color;
-}
 
 export function ShareCard({ puzzleNumber, scores, average }: ShareCardProps) {
   const buildText = (): string => {

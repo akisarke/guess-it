@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PuzzleResponse } from 'shared';
 import { Landing } from './Landing';
 import { ApiError, api } from '../lib/api';
@@ -45,6 +45,7 @@ function renderLanding() {
   return render(
     <MemoryRouter>
       <Landing />
+      <LocationProbe />
     </MemoryRouter>,
   );
 }
@@ -64,6 +65,10 @@ function deferred<T>() {
 }
 
 describe('Landing progress rehydration', () => {
+  afterEach(() => {
+    localStorage.clear();
+    document.documentElement.classList.remove('hard-mode');
+  });
   it('keeps fresh visitor state after an unauthenticated mount without creating a session', async () => {
 
     const getMe = vi.spyOn(api, 'getMe').mockRejectedValue(new ApiError(401, 'Not authenticated'));
@@ -101,6 +106,41 @@ describe('Landing progress rehydration', () => {
 
     await waitFor(() => expect(screen.getByText('3 of 3 solved')).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /see your summary/i })).toBeInTheDocument();
+  });
+
+  it('hides easy-mode results while hard mode is active', async () => {
+
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
+
+    renderLanding();
+
+    await waitFor(() => expect(screen.getByText('3 of 3 solved')).toBeInTheDocument());
+    expect(screen.getByLabelText('Puzzle 1: off by 2 times')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
+
+    expect(screen.getByLabelText('Puzzle 1: result hidden')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Puzzle 1: off by 2 times')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
+
+    expect(screen.getByLabelText('Puzzle 1: off by 2 times')).toBeInTheDocument();
+  });
+
+  it('opens hard mode instead of the easy summary after the daily is complete', async () => {
+
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
+
+    renderLanding();
+
+    await waitFor(() => expect(screen.getByText('3 of 3 solved')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Play Hard Mode' }));
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/hard-mode');
   });
 
   it('keeps an authenticated session after puzzle rehydration fails', async () => {

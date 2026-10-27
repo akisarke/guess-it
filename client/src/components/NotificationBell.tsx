@@ -2,7 +2,6 @@ import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type NotificationItem } from '../lib/api';
-import { X } from 'lucide-react';
 
 function relativeTime(value: string) {
   const seconds = Math.max(0, Math.floor((Date.now() - Date.parse(value)) / 1000));
@@ -12,7 +11,7 @@ function relativeTime(value: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-export function NotificationBell() {
+export function NotificationBell({ signedIn = true }: { signedIn?: boolean }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
@@ -39,6 +38,12 @@ export function NotificationBell() {
   }).catch(() => undefined);
 
   useEffect(() => {
+    if (!signedIn) {
+      setItems([]);
+      setUnread(0);
+      knownIds.current = null;
+      return;
+    }
     refresh();
     const timer = window.setInterval(refresh, 60_000);
     window.addEventListener('guessit:notifications-changed', refresh);
@@ -47,7 +52,7 @@ export function NotificationBell() {
       window.removeEventListener('guessit:notifications-changed', refresh);
       if (toastTimer.current !== undefined) window.clearTimeout(toastTimer.current);
     };
-  }, []);
+  }, [signedIn]);
 
   const markRead = (item: NotificationItem) => {
     if (!item.readAt) {
@@ -56,7 +61,7 @@ export function NotificationBell() {
   };
 
   return <div className="relative">
-    {toast && <div role="status" aria-live="polite" className="fixed right-4 top-20 z-40 w-[min(24rem,calc(100vw-2rem))] rounded-2xl border-2 border-accent/70 bg-white p-4 shadow-xl dark:border-accent/50 dark:bg-gray-900">
+    {toast && <div role="status" aria-live="polite" className="fixed right-4 top-20 z-40 w-[min(24rem,calc(100vw-2rem))] rounded-[3px] border-2 border-accent/70 bg-white p-4 shadow-xl dark:border-accent/50 dark:bg-gray-900">
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-ink dark:text-gray-100">{toast.title}</p>
@@ -70,12 +75,25 @@ export function NotificationBell() {
       <Bell size={19} aria-hidden="true" />
       {unread > 0 && <span className="absolute right-1 top-1 min-w-4 rounded-full bg-brand px-1 text-[10px] font-bold leading-4 text-white">{unread > 9 ? '9+' : unread}</span>}
     </button>
-    {open && <div role="dialog" aria-label="Notifications" className="absolute right-0 top-12 z-30 w-80 rounded-2xl border-2 border-ink/10 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-gray-900">
-      <div className="mb-2 flex items-center justify-between"><strong>Notifications</strong>{unread > 0 && <>
-        <button type="button" className="text-xs font-bold text-accent" onClick={() => void api.markAllNotificationsRead().then(refresh).catch(() => undefined)}>Mark all read</button>
-        <button type="button" className="ml-2 text-xs font-bold text-brand dark:text-brand" onClick={() => void api.deleteAllNotifications().then(refresh).catch(() => undefined)}>Clear all</button>
-      </>}</div>
-      {items.length === 0 ? <p className="py-5 text-center text-sm opacity-60">You're all caught up.</p> : <ul className="space-y-1">{items.map((item) => <li key={item.id} className={item.readAt ? 'rounded-xl p-2' : 'rounded-xl bg-accent/10 p-2'}><div className="flex items-start justify-between gap-2"><Link to={item.actionUrl} onClick={() => markRead(item)} className="block flex-1"><div className="flex items-center justify-between gap-2 text-sm font-bold"><span>{item.title}</span><time className="text-xs font-normal opacity-60">{relativeTime(item.createdAt)}</time></div><p className="mt-1 text-xs opacity-70">{item.message}</p><span className="mt-2 inline-block text-xs font-bold text-accent">{item.actionLabel}</span></Link><button type="button" aria-label={`Dismiss ${item.title}`} onClick={() => void api.deleteNotification(item.id).then(refresh).catch(() => undefined)} className="shrink-0 text-[10px] font-bold text-ink/40 hover:text-ink dark:text-gray-400 dark:hover:text-white">×</button></div></li>)}</ul>}
+    {open && <div role="dialog" aria-label="Notifications" className="absolute right-0 top-12 z-30 w-[min(20rem,calc(100vw-2rem))] rounded-[3px] border-2 border-ink/10 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-gray-900">
+      {!signedIn ? (
+        <div className="space-y-3">
+          <strong>Notifications</strong>
+          <p className="text-xs leading-5 opacity-70">Sign in to get result, badge, and friend notifications.</p>
+          <div className="grid gap-2">
+            <Link to="/login" onClick={() => setOpen(false)} className="btn-secondary w-full text-center">Sign in</Link>
+            <Link to="/signup" onClick={() => setOpen(false)} className="btn-primary w-full text-center">Create account</Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="mb-2 flex items-center justify-between"><strong>Notifications</strong>{unread > 0 && <>
+            <button type="button" className="text-xs font-bold text-accent" onClick={() => void api.markAllNotificationsRead().then(refresh).catch(() => undefined)}>Mark all read</button>
+            <button type="button" className="ml-2 text-xs font-bold text-brand dark:text-brand" onClick={() => void api.deleteAllNotifications().then(refresh).catch(() => undefined)}>Clear all</button>
+          </>}</div>
+          {items.length === 0 ? <p className="py-5 text-center text-sm opacity-60">You're all caught up.</p> : <ul className="space-y-1">{items.map((item) => <li key={item.id} className={item.readAt ? 'rounded-xl p-2' : 'rounded-xl bg-accent/10 p-2'}><div className="flex items-start justify-between gap-2"><Link to={item.actionUrl} onClick={() => markRead(item)} className="block flex-1"><div className="flex items-center justify-between gap-2 text-sm font-bold"><span>{item.title}</span><time className="text-xs font-normal opacity-60">{relativeTime(item.createdAt)}</time></div><p className="mt-1 text-xs opacity-70">{item.message}</p><span className="mt-2 inline-block text-xs font-bold text-accent">{item.actionLabel}</span></Link><button type="button" aria-label={`Dismiss ${item.title}`} onClick={() => void api.deleteNotification(item.id).then(refresh).catch(() => undefined)} className="shrink-0 text-[10px] font-bold text-ink/40 hover:text-ink dark:text-gray-400 dark:hover:text-white">×</button></div></li>)}</ul>}
+        </>
+      )}
     </div>}
   </div>;
 }

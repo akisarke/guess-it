@@ -257,4 +257,24 @@ describe('Landing progress rehydration', () => {
     expect(screen.getByRole('button', { name: /see your summary/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /play hard mode/i })).not.toBeInTheDocument();
   });
+
+  it('offers the hard mode summary when there is no new hard mode puzzle left', async () => {
+
+    saveHardModeRun({
+      puzzleNumber: 2,
+      puzzleDate: '2026-10-26T00:00:00.000Z',
+      completedAt: '2026-10-20T12:00:00.000Z',
+      results: [{ question: { id: 'h1', prompt: 'Hard one?', unit: 'm' }, guess: 9, answer: 10, score: 1.5 }],
+    });
+    vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
+    vi.spyOn(api, 'getHardModePuzzle').mockRejectedValue(new ApiError(404, 'none left', undefined, 'NOT_FOUND'));
+
+    renderLanding();
+
+    await waitFor(() => expect(screen.getByText('3 of 3 solved')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
+
+    expect(await screen.findByRole('button', { name: /see your summary/i })).toBeInTheDocument();
+  });
 });

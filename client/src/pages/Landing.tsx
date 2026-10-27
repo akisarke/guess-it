@@ -8,7 +8,8 @@ import { HardModeToggle } from '../components/HardModeToggle';
 import { formatCompactNumber, formatScore } from '../lib/format-number';
 import { animateSafe, stagger } from '../lib/anime';
 import { readHardGuesses, readHardMode, writeHardMode } from '../lib/hard-mode';
-import { readLatestHardModeRun } from '../lib/hard-mode-history';
+import { readLatestHardModeRun, readSeenHardModePuzzles, readSeenHardModeQuestions } from '../lib/hard-mode-history';
+import { api, ApiError } from '../lib/api';
 import { useLandingState } from '../hooks/use-landing-state';
 import '../reveal.css';
 
@@ -33,17 +34,29 @@ export function Landing() {
   };
 
   const hardModeComplete = hardMode && isComplete;
+  const [hardPuzzleWaiting, setHardPuzzleWaiting] = useState<boolean | null>(null);
+
+  // ask the server whether a fresh hard mode puzzle exists; only a clear
+  // "none left" counts, anything else keeps the play button
+  useEffect(() => {
+    if (!hardModeComplete) return;
+    let active = true;
+    api.getHardModePuzzle([...readSeenHardModePuzzles()], [...readSeenHardModeQuestions()])
+      .then(() => { if (active) setHardPuzzleWaiting(true); })
+      .catch((error: unknown) => { if (active) setHardPuzzleWaiting(!(error instanceof ApiError && error.status === 404)); });
+    return () => { active = false; };
+  }, [hardModeComplete]);
   // in hard mode the board shows hard scores: today's questions you played in
   // hard mode, and your latest hard mode run for the rest
   const dailyAllHard = Boolean(puzzle?.questions.length) && puzzle!.questions.every((question) => hardGuesses.has(question.id));
   const showHardRun = hardMode && !dailyAllHard;
-  // once you've finished a hard mode run today, the button leads to its summary,
-  // the same way easy mode does after the daily
-  const hardDoneToday = hardRun !== null && new Date(hardRun.completedAt).toDateString() === new Date().toDateString();
-  const playLabel = hardModeComplete ? (hardDoneToday ? 'See Your Summary' : 'Play Hard Mode') : ctaLabel;
+  // like easy mode after the daily: once you've played hard mode and there's no
+  // new past puzzle waiting, the button leads to your hard mode summary
+  const hardDone = hardRun !== null && (hardPuzzleWaiting === false || new Date(hardRun.completedAt).toDateString() === new Date().toDateString());
+  const playLabel = hardModeComplete ? (hardDone ? 'See Your Summary' : 'Play Hard Mode') : ctaLabel;
   const startPlay = () => {
     if (hardModeComplete) {
-      navigate(hardDoneToday ? '/summary?mode=hard' : '/hard-mode');
+      navigate(hardDone ? '/summary?mode=hard' : '/hard-mode');
       return;
     }
     void handlePlay();

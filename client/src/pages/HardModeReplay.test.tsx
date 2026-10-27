@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { HardModePuzzleResponse } from 'shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import { readLatestHardModeRun } from '../lib/hard-mode-history';
 import { HardModeReplay } from './HardModeReplay';
 
@@ -91,5 +91,15 @@ describe('HardModeReplay', () => {
     expect(getPuzzle.mock.calls[0]?.[1]).toEqual([]);
     expect(getPuzzle.mock.calls[1]?.[0]).toEqual([43]);
     expect(getPuzzle.mock.calls[1]?.[1]).toEqual(['q1']);
+  });
+
+  it('shows an all-caught-up screen instead of an error when every past puzzle is played', async () => {
+    vi.spyOn(api, 'getHardModePuzzle').mockRejectedValue(new ApiError(404, "You've played every past puzzle.", undefined, 'NOT_FOUND'));
+
+    renderReplay();
+
+    expect(await screen.findByText("You've played every past puzzle")).toBeInTheDocument();
+    expect(screen.queryByText('Hard mode unavailable')).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'See your last run' })).toHaveAttribute('href', '/summary?mode=hard');
   });
 });

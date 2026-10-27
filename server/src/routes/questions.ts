@@ -13,6 +13,9 @@ import { getTodayPuzzle } from '../services/daily-puzzle.js';
 import { buildLimiterKey, semanticLimit } from '../services/rate-limit.js';
 import { AuthenticationError, AuthorizationError, ExternalServiceError, RateLimitError, ValidationError, NotFoundError } from '../errors/application-error.js';
 
+// enough recent history to avoid repeats without bloating the prompt
+const RECENT_ANSWERED_LIMIT = 60;
+
 type GenerateBody = { topic: string; difficulty?: 'easy' | 'medium' | 'hard' | null };
 
 export type QuestionRouteDependencies = {
@@ -71,14 +74,25 @@ export const questionRoutes: FastifyPluginAsync<RouteOptions> = async (app, opti
     if (!topic) throw new ValidationError('Topic is required');
 
     try {
-      let dailyQuestions: readonly { prompt: string }[] = [];
+      // keep the generator away from today's puzzle and from anything this
+      // player has already answered, so a new set never repeats a question
+      let seenPrompts: string[] = [];
       try {
         const today = await getTodayPuzzle(app.prisma);
-        dailyQuestions = today ? await app.prisma.question.findMany({ where: { id: { in: today.questionIds } }, select: { prompt: true } }) : [];
+        const [dailyQuestions, answered] = await Promise.all([
+          today ? app.prisma.question.findMany({ where: { id: { in: today.questionIds } }, select: { prompt: true } }) : [],
+          app.prisma.guess.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            take: RECENT_ANSWERED_LIMIT,
+            select: { question: { select: { prompt: true } } },
+          }),
+        ]);
+        seenPrompts = [...new Set([...dailyQuestions.map(({ prompt }) => prompt), ...answered.map(({ question }) => question.prompt)])];
       } catch (error) {
-        app.log.warn({ error }, 'Could not load daily questions for AI exclusion');
+        app.log.warn({ error }, 'Could not load seen questions for AI exclusion');
       }
-      const questions = await dependencies.generateQuestionSet({ topic, difficulty: request.body.difficulty ?? null, excludedPrompts: dailyQuestions.map(({ prompt }) => prompt) });
+      const questions = await dependencies.generateQuestionSet({ topic, difficulty: request.body.difficulty ?? null, excludedPrompts: seenPrompts });
       const result = await dependencies.createGeneratedSet(app.prisma, {
         ownerId: userId,
         title: buildGeneratedSetTitle(topic),

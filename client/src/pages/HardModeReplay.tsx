@@ -5,7 +5,7 @@ import { GuessInput } from '../components/GuessInput';
 import { Calculator } from '../components/Calculator';
 import { RevealView } from '../components/RevealView';
 import { HardModeTimer } from '../components/HardModeTimer';
-import { errorMessage, api } from '../lib/api';
+import { ApiError, errorMessage, api } from '../lib/api';
 import { animateSafe } from '../lib/anime';
 import { writeHardMode } from '../lib/hard-mode';
 import {
@@ -24,6 +24,7 @@ type PracticeResult = HardModeResult;
 export function HardModeReplay() {
   const [puzzle, setPuzzle] = useState<HardModePuzzleResponse | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [caughtUp, setCaughtUp] = useState(false);
   const [round, setRound] = useState(0);
   const [index, setIndex] = useState(0);
   const [guessValue, setGuessValue] = useState(0);
@@ -73,12 +74,16 @@ export function HardModeReplay() {
     let active = true;
     setPuzzle(null);
     setLoadError(null);
+    setCaughtUp(false);
     api.getHardModePuzzle([...readSeenHardModePuzzles()], [...readSeenHardModeQuestions()])
       .then((data) => {
         if (active) setPuzzle(data);
       })
       .catch((error: unknown) => {
-        if (active) setLoadError(errorMessage(error, 'Unable to load a hard mode puzzle.'));
+        if (!active) return;
+        // 404 here means every past puzzle has been played, not that something broke
+        if (error instanceof ApiError && error.status === 404) setCaughtUp(true);
+        else setLoadError(errorMessage(error, 'Unable to load a hard mode puzzle.'));
       });
     return () => {
       active = false;
@@ -131,6 +136,24 @@ export function HardModeReplay() {
     setIndex((value) => value + 1);
     busyRef.current = false;
   };
+
+  if (caughtUp) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 py-8">
+        <div ref={cardRef} className="card w-full max-w-md space-y-3 text-center">
+          <span className="chip chip-active mx-auto">All caught up</span>
+          <p className="font-display text-2xl font-bold text-ink dark:text-gray-100">You&apos;ve played every past puzzle</p>
+          <p className="text-sm leading-6 text-ink/70 dark:text-gray-300">
+            Hard mode only uses past daily puzzles you haven&apos;t seen, so you never get the same question twice. A new one unlocks every day.
+          </p>
+          <div className="grid gap-2 pt-2 sm:grid-cols-2">
+            <Link to="/summary?mode=hard" className="btn-primary w-full text-center">See your last run</Link>
+            <Link to="/" className="btn-secondary w-full text-center">Back to home</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loadError) {
     return (

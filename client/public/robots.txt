@@ -2,11 +2,15 @@ User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /profile
+Disallow: /u/
+Disallow: /play/
+Disallow: /reveal/
+Disallow: /summary
+Disallow: /hard-mode
 Disallow: /match
 Disallow: /duels/
 Disallow: /generate
 Disallow: /sets/
-Disallow: /summary
 Disallow: /login
 Disallow: /signup
 Disallow: /forgot-password

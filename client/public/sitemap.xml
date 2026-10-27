@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://guessit.akisarke.xyz/</loc></url>
-  <url><loc>https://guessit.akisarke.xyz/leaderboard</loc></url>
-  <url><loc>https://guessit.akisarke.xyz/duels</loc></url>
-  <url><loc>https://guessit.akisarke.xyz/privacy</loc></url>
-  <url><loc>https://guessit.akisarke.xyz/terms</loc></url>
-  <url><loc>https://guessit.akisarke.xyz/cookies</loc></url>
+  <url><loc>https://guessit.akisarke.xyz/</loc><lastmod>2026-10-28</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://guessit.akisarke.xyz/leaderboard</loc><lastmod>2026-10-28</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://guessit.akisarke.xyz/duels</loc><lastmod>2026-10-28</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://guessit.akisarke.xyz/privacy</loc><lastmod>2026-10-28</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://guessit.akisarke.xyz/terms</loc><lastmod>2026-10-28</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://guessit.akisarke.xyz/cookies</loc><lastmod>2026-10-28</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>

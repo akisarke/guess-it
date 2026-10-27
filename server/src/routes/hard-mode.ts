@@ -49,16 +49,15 @@ export async function hardModeRoutes(app: FastifyInstance) {
       ]);
 
       const protectedIds = new Set(protectedPuzzles.flatMap((puzzle) => puzzle.questionIds));
-      const available = pastPuzzles.filter(
+      // anything that would spoil today's or a scheduled puzzle is never offered
+      const playable = pastPuzzles.filter(
         (puzzle) =>
-          !excludedPuzzles.has(puzzle.puzzleNumber) &&
-          !puzzle.questionIds.some((questionId) => excludedQuestions.has(questionId)) &&
           puzzle.questionIds.length === 3 &&
           puzzle.questionIds.every((questionId) => !protectedIds.has(questionId)),
       );
-      if (available.length === 0) throw new NotFoundError('No new hard mode puzzle is available.');
+      if (playable.length === 0) throw new NotFoundError('There are no past puzzles to replay yet. Come back after a few daily puzzles have gone by.');
 
-      const pastQuestionIds = [...new Set(available.flatMap((puzzle) => puzzle.questionIds))];
+      const pastQuestionIds = [...new Set(playable.flatMap((puzzle) => puzzle.questionIds))];
       const [guesses, questions] = await Promise.all([
         prisma.guess.findMany({
           where: { userId, questionId: { in: pastQuestionIds } },
@@ -72,15 +71,19 @@ export async function hardModeRoutes(app: FastifyInstance) {
 
       const guessedIds = new Set(guesses.map((guess) => guess.questionId));
       const questionById = new Map(questions.map((question) => [question.id, question]));
-      const complete = available.filter(
+      const complete = playable.filter(
         (puzzle) => puzzle.questionIds.every((questionId) => questionById.has(questionId)),
       );
-      const unplayed = complete.filter(
-        (puzzle) => puzzle.questionIds.every((questionId) => !guessedIds.has(questionId)),
+      // a player never sees a question twice: not one they guessed as a daily,
+      // and not one they already met in hard mode
+      const fresh = complete.filter(
+        (puzzle) =>
+          !excludedPuzzles.has(puzzle.puzzleNumber) &&
+          puzzle.questionIds.every((questionId) => !excludedQuestions.has(questionId) && !guessedIds.has(questionId)),
       );
-      if (unplayed.length === 0) throw new NotFoundError('No new hard mode puzzle is available.');
+      if (fresh.length === 0) throw new NotFoundError("You've played every past puzzle. A new one unlocks every day.");
 
-      const chosen = unplayed[Math.floor(Math.random() * unplayed.length)]!;
+      const chosen = fresh[Math.floor(Math.random() * fresh.length)]!;
       return {
         puzzleNumber: chosen.puzzleNumber,
         puzzleDate: chosen.puzzleDate.toISOString(),

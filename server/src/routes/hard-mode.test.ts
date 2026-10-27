@@ -41,7 +41,7 @@ test('returns a random past puzzle without answers and skips played puzzles', as
   }
 });
 
-test('does not fall back to a played puzzle when the unplayed ones are excluded', async () => {
+test('never offers a puzzle the player already guessed as a daily', async () => {
   const { prisma } = gameplayDatabase();
   const extraQuestions = ['q4', 'q5', 'q6'].map((id) => ({ ...questions[0]!, id, prompt: `Estimate ${id}` }));
   const unplayedPuzzle = { ...pastPuzzle, id: 'daily-2', puzzleNumber: 43, questionIds: ['q4', 'q5', 'q6'] };
@@ -56,12 +56,13 @@ test('does not fall back to a played puzzle when the unplayed ones are excluded'
     const response = await app.inject({ url: '/api/hard-mode/puzzle?exclude=43', cookies });
 
     expect(response.statusCode).toBe(404);
+    expect(response.json().code).toBe('NOT_FOUND');
   } finally {
     await app.close();
   }
 });
 
-test('skips a puzzle containing a question the player has already seen', async () => {
+test('never offers a puzzle containing a question already seen in hard mode', async () => {
   const { prisma } = gameplayDatabase();
   const extraQuestions = ['q4', 'q5', 'q6'].map((id) => ({ ...questions[0]!, id, prompt: `Estimate ${id}` }));
   const unplayedPuzzle = { ...pastPuzzle, id: 'daily-2', puzzleNumber: 43, questionIds: ['q4', 'q5', 'q6'] };
@@ -120,6 +121,23 @@ test('rejects questions that are also in today’s puzzle', async () => {
     });
 
     expect(response.statusCode).toBe(403);
+  } finally {
+    await app.close();
+  }
+});
+
+test('explains that nothing can be replayed before any daily puzzle has passed', async () => {
+  const { prisma } = gameplayDatabase();
+  vi.spyOn(prisma.dailyPuzzle, 'findMany')
+    .mockResolvedValueOnce([] as never)
+    .mockResolvedValueOnce([todayPuzzle] as never);
+  const { app, cookies } = await hardModeApp(prisma);
+
+  try {
+    const response = await app.inject({ url: '/api/hard-mode/puzzle', cookies });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json().error).toMatch(/no past puzzles/i);
   } finally {
     await app.close();
   }

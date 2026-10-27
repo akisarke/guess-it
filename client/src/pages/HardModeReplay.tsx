@@ -182,7 +182,7 @@ export function HardModeReplay() {
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <button type="button" onClick={playAgain} className="btn-primary w-full">Play another random puzzle</button>
-            <Link to="/summary" className="btn-secondary w-full text-center">Back to summary</Link>
+            <Link to="/summary?mode=hard" className="btn-secondary w-full text-center">Back to summary</Link>
           </div>
         </div>
       </div>

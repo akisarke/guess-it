@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { errorMessage, api, needsAccount } from '../lib/api';
 import { SCORE_BANDS } from 'shared';
 import { ShareCard } from '../components/ShareCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { formatScore } from '../lib/format-number';
 import { animateSafe } from '../lib/anime';
-import { readHardGuesses } from '../lib/hard-mode';
+import { readHardGuesses, readHardMode } from '../lib/hard-mode';
+import { swipeIn } from '../lib/motion';
 import { readLatestHardModeRun } from '../lib/hard-mode-history';
 import '../reveal.css';
 
@@ -20,6 +21,16 @@ function barHeight(score: number): number {
   if (height >= 100) return 100;
   if (height < 18) return 18;
   return height;
+}
+
+interface SummaryView {
+  label: string;
+  score: string;
+  exact?: string;
+  badge: string;
+  chartLabel: string;
+  rows: { key: string; prompt: string; score: number | null; href?: string; linkLabel?: string }[];
+  actions: ReactNode;
 }
 
 interface TodayPuzzle {
@@ -39,6 +50,22 @@ export function Summary() {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  // open on the hard mode run when that's what you just played or have switched on
+  const [tab, setTab] = useState<'daily' | 'hard'>(() =>
+    (searchParams.get('mode') === 'hard' || readHardMode()) && readLatestHardModeRun() ? 'hard' : 'daily',
+  );
+  const swipedTab = useRef(tab);
+
+  const switchTab = (next: 'daily' | 'hard') => setTab(next);
+
+  useEffect(() => {
+    if (swipedTab.current === tab) return;
+    swipedTab.current = tab;
+    const animation = swipeIn(gridRef.current, tab === 'hard' ? 'forward' : 'back');
+    return () => animation?.cancel();
+  }, [tab]);
 
   useEffect(() => {
     api.getTodayPuzzle().then(setPuzzle).catch((e: unknown) => setError(e instanceof Error ? e : new Error('Unable to load summary.'))).finally(() => setLoading(false));
@@ -126,13 +153,55 @@ export function Summary() {
       ? 'Hard mode'
       : 'Mixed mode';
 
+  const dailyView: SummaryView = {
+    label: `${dailyMode} score`,
+    score: averageDisplay?.visual ?? '-',
+    exact: averageDisplay?.exact,
+    badge: hasAnswers ? `${answered.length}/${puzzle.questions.length} Answered` : 'Play to score',
+    chartLabel: 'Your score for each daily question',
+    rows: puzzle.questions.map((q, index) => {
+      const score = puzzle.userGuesses[q.id];
+      return {
+        key: q.id,
+        prompt: q.prompt,
+        score: score || null,
+        href: score ? `/reveal/${index}` : `/play/${index}`,
+        linkLabel: score ? `View result for question ${index + 1}` : `Play question ${index + 1}`,
+      };
+    }),
+    actions: (
+      <>
+        <ShareCard puzzleNumber={puzzle.puzzle.puzzleNumber} scores={scores} average={average} />
+        {answered.length === puzzle.questions.length && (
+          <Link to="/hard-mode" className="btn-secondary w-full text-center">Random Hard Mode</Link>
+        )}
+        <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
+      </>
+    ),
+  };
+  const hardView: SummaryView | null = hardRun && {
+    label: 'Latest hard mode practice',
+    score: formatScore(hardAverage).visual,
+    exact: formatScore(hardAverage).exact,
+    badge: `Puzzle #${hardRun.puzzleNumber}`,
+    chartLabel: 'Your score for each hard mode question',
+    rows: hardRun.results.map((result, index) => ({ key: `${result.question.id}-${index}`, prompt: result.question.prompt, score: result.score })),
+    actions: (
+      <>
+        <Link to="/hard-mode" className="btn-primary w-full text-center" data-enter>Play another hard mode puzzle</Link>
+        <Link to="/" className="btn-secondary w-full text-center">Back to Home</Link>
+      </>
+    ),
+  };
+  const view = tab === 'hard' && hardView ? hardView : dailyView;
+
   return (
     <div className="summary-page mx-auto w-full max-w-6xl px-4 py-5 sm:py-8">
       <div ref={canvasRef} className="summary-canvas">
         <header className="summary-header">
           <Link to="/" className="font-display text-xl font-extrabold tracking-tight">Guess It!</Link>
           <div className="summary-rounds" aria-label={`Puzzle ${puzzle.puzzle.puzzleNumber}`}>
-            {puzzle.questions.map((q, index) => {
+            {view === dailyView && puzzle.questions.map((q, index) => {
               const answered = Boolean(puzzle.userGuesses[q.id]);
               return (
                 <Link
@@ -146,90 +215,57 @@ export function Summary() {
               );
             })}
           </div>
-          <span className="font-display text-xl font-extrabold">No. {String(puzzle.puzzle.puzzleNumber).padStart(3, '0')}</span>
+          <span className="font-display text-xl font-extrabold">No. {String(view === dailyView || !hardRun ? puzzle.puzzle.puzzleNumber : hardRun.puzzleNumber).padStart(3, '0')}</span>
         </header>
 
-        <div className="summary-grid">
+        {hardRun && (
+          <div className="mt-5 flex flex-wrap gap-2" aria-label="Summary mode">
+            <button type="button" onClick={() => switchTab('daily')} aria-pressed={tab === 'daily'} className={`chip ${tab === 'daily' ? 'chip-active' : 'chip-idle'}`}>
+              Daily
+            </button>
+            <button type="button" onClick={() => switchTab('hard')} aria-pressed={tab === 'hard'} className={`chip ${tab === 'hard' ? 'chip-active' : 'chip-idle'}`}>
+              Hard mode
+            </button>
+          </div>
+        )}
+
+        <div ref={gridRef} className="summary-grid">
           <section className="summary-score-panel">
-            <p className="summary-label">{dailyMode} score</p>
-            <p className="summary-score" title={averageDisplay?.exact}>{averageDisplay?.visual ?? '-'}</p>
-            <span className="summary-badge">{hasAnswers ? `${answered.length}/${puzzle.questions.length} Answered` : 'Play to score'}</span>
+            <p className="summary-label">{view.label}</p>
+            <p className="summary-score" title={view.exact}>{view.score}</p>
+            <span className="summary-badge">{view.badge}</span>
             <p className="summary-label summary-chart-title">Scores by question</p>
-            <div className="summary-chart" role="img" aria-label="Your score for each daily question">
-              {scores.map((score, index) => (
-                <span
-                  key={puzzle.questions[index]?.id ?? index}
-                  className="summary-bar"
-                  style={{ height: `${barHeight(score)}%` }}
-                />
+            <div className="summary-chart" role="img" aria-label={view.chartLabel}>
+              {view.rows.map((row) => (
+                <span key={row.key} className="summary-bar" style={{ height: `${barHeight(row.score ?? 0)}%` }} />
               ))}
             </div>
-            <div className="summary-chart-axis"><span>Q1</span><span>Q{puzzle.questions.length}</span></div>
-            <div className="summary-actions">
-              <ShareCard puzzleNumber={puzzle.puzzle.puzzleNumber} scores={scores} average={average} />
-              {answered.length === puzzle.questions.length && (
-                <Link to="/hard-mode" className="btn-secondary w-full text-center">Random Hard Mode</Link>
-              )}
-              <Link to="/" className="btn-secondary w-full text-center" data-enter>Back to Home</Link>
-            </div>
+            <div className="summary-chart-axis"><span>Q1</span><span>Q{view.rows.length}</span></div>
+            <div className="summary-actions">{view.actions}</div>
           </section>
 
           <section className="summary-question-panel">
             <p className="summary-label">Questions</p>
             <div className="summary-question-list">
-              {puzzle.questions.map((q, index) => {
-                const score = puzzle.userGuesses[q.id];
-                const answeredQuestion = Boolean(score);
-                return (
-                  <Link
-                    key={q.id}
-                    to={answeredQuestion ? `/reveal/${index}` : `/play/${index}`}
-                    aria-label={answeredQuestion ? `View result for question ${index + 1}` : `Play question ${index + 1}`}
-                    className="summary-question-row"
-                  >
+              {view.rows.map((row, index) => {
+                const content = (
+                  <>
                     <span className="summary-question-copy">
                       <span className="summary-question-number">Q{index + 1}</span>
-                      <span>{q.prompt}</span>
+                      <span>{row.prompt}</span>
                     </span>
-                    <strong className={score ? scoreBand(score) : 'text-ink/45'}>{score ? `× ${formatScore(score).visual}` : '-'}</strong>
-                  </Link>
+                    <strong className={row.score ? scoreBand(row.score) : 'text-ink/45'}>{row.score ? `× ${formatScore(row.score).visual}` : '-'}</strong>
+                  </>
+                );
+                return row.href ? (
+                  <Link key={row.key} to={row.href} aria-label={row.linkLabel} className="summary-question-row">{content}</Link>
+                ) : (
+                  <div key={row.key} className="summary-question-row">{content}</div>
                 );
               })}
             </div>
           </section>
         </div>
-
-        {hardRun && (
-          <section className="mt-8 border-t-2 pt-6" style={{ borderColor: 'var(--line-strong)' }}>
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <div>
-                <p className="summary-label">Latest hard mode practice</p>
-                <p className="mt-2 font-display text-3xl font-extrabold">
-                  {formatScore(hardAverage).visual} average
-                </p>
-              </div>
-              <span className="text-[0.66rem] font-bold tracking-[0.04em] opacity-55">
-                Puzzle #{hardRun.puzzleNumber}
-              </span>
-            </div>
-            <div className="mt-4 divide-y divide-[var(--line)] border-y border-[var(--line)]">
-              {hardRun.results.map((result, index) => (
-                <div key={`${result.question.id}-${index}`} className="flex items-center justify-between gap-4 py-3">
-                  <span className="min-w-0 text-sm font-bold">
-                    <span className="mr-2 text-[0.66rem] opacity-60">Q{index + 1}</span>
-                    {result.question.prompt}
-                  </span>
-                  <strong className="shrink-0 font-display text-lg font-extrabold">
-                    {formatScore(result.score).visual}
-                  </strong>
-                </div>
-              ))}
-            </div>
-            <Link to="/hard-mode" className="btn-primary mt-4 w-full text-center sm:w-auto">
-              Play another hard mode puzzle
-            </Link>
-          </section>
-        )}
       </div>
     </div>
   );

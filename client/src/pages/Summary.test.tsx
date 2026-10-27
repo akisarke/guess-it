@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../lib/api';
@@ -120,8 +120,39 @@ describe('Summary', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('Latest hard mode practice')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: 'Hard mode' }));
+    expect(screen.getByText('Latest hard mode practice')).toBeInTheDocument();
     expect(screen.getByText('Puzzle #43')).toBeInTheDocument();
     expect(screen.getByText('Hard question?')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Daily' }));
+    expect(screen.getByText('how many')).toBeInTheDocument();
+    expect(screen.queryByText('Hard question?')).not.toBeInTheDocument();
+  });
+
+  it('opens on the hard mode run when coming back from hard mode', async () => {
+    saveHardModeRun({
+      puzzleNumber: 44,
+      puzzleDate: '2026-10-02T00:00:00.000Z',
+      completedAt: '2026-10-27T12:00:00.000Z',
+      results: [{ question: { id: 'hq9', prompt: 'Back from hard mode?', unit: 'm' }, guess: 10, answer: 10, score: 1 }],
+    });
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
+      puzzle: { id: 'p12', puzzleDate: '2026-10-21', puzzleNumber: 12, questionIds: ['q1'] },
+      source: { kind: 'daily', id: 'p12' },
+      questions: [{ id: 'q1', prompt: 'how many', unit: 'x' }],
+      userGuesses: {},
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/summary?mode=hard']}>
+        <Routes>
+          <Route path="/summary" element={<Summary />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('Back from hard mode?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hard mode' })).toHaveAttribute('aria-pressed', 'true');
   });
 });

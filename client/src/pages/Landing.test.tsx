@@ -4,6 +4,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PuzzleResponse } from 'shared';
 import { Landing } from './Landing';
+import { saveHardModeRun } from '../lib/hard-mode-history';
 import { ApiError, api } from '../lib/api';
 
 const authenticatedUser = {
@@ -108,8 +109,14 @@ describe('Landing progress rehydration', () => {
     expect(screen.getByRole('button', { name: /see your summary/i })).toBeInTheDocument();
   });
 
-  it('hides easy-mode results while hard mode is active', async () => {
+  it('shows the latest hard mode run while hard mode is active', async () => {
 
+    saveHardModeRun({
+      puzzleNumber: 2,
+      puzzleDate: '2026-10-26T00:00:00.000Z',
+      completedAt: '2026-10-27T12:00:00.000Z',
+      results: [{ question: { id: 'h1', prompt: 'Hard one?', unit: 'm' }, guess: 9, answer: 10, score: 1.5 }],
+    });
     vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
     vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
 
@@ -120,7 +127,9 @@ describe('Landing progress rehydration', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
 
-    expect(screen.getByLabelText('Puzzle 1: result hidden')).toBeInTheDocument();
+    expect(screen.getByText('Last hard mode run')).toBeInTheDocument();
+    expect(screen.getByLabelText('Puzzle 1: off by 1.5 times in hard mode')).toBeInTheDocument();
+    expect(screen.getByLabelText('Puzzle 2: no hard mode score yet')).toBeInTheDocument();
     expect(screen.queryByLabelText('Puzzle 1: off by 2 times')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));

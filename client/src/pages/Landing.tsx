@@ -8,6 +8,7 @@ import { HardModeToggle } from '../components/HardModeToggle';
 import { formatCompactNumber, formatScore } from '../lib/format-number';
 import { animateSafe, stagger } from '../lib/anime';
 import { readHardGuesses, readHardMode, writeHardMode } from '../lib/hard-mode';
+import { readLatestHardModeRun } from '../lib/hard-mode-history';
 import { useLandingState } from '../hooks/use-landing-state';
 import '../reveal.css';
 
@@ -18,6 +19,7 @@ export function Landing() {
   const total = puzzle?.questions.length ?? 3;
   const [hardMode, setHardMode] = useState(readHardMode);
   const [hardGuesses, setHardGuesses] = useState(readHardGuesses);
+  const [hardRun, setHardRun] = useState(readLatestHardModeRun);
   const scoreListRef = useRef<HTMLUListElement>(null);
   const playButtonRef = useRef<HTMLButtonElement>(null);
   const mounted = useRef(false);
@@ -27,9 +29,14 @@ export function Landing() {
     writeHardMode(next);
     setHardMode(next);
     setHardGuesses(readHardGuesses());
+    setHardRun(readLatestHardModeRun());
   };
 
   const hardModeComplete = hardMode && isComplete;
+  // in hard mode the board shows hard scores: today's questions you played in
+  // hard mode, and your latest hard mode run for the rest
+  const dailyAllHard = Boolean(puzzle?.questions.length) && puzzle!.questions.every((question) => hardGuesses.has(question.id));
+  const showHardRun = hardMode && !dailyAllHard;
   const playLabel = hardModeComplete ? 'Play Hard Mode' : ctaLabel;
   const startPlay = () => {
     if (hardModeComplete) {
@@ -110,10 +117,16 @@ export function Landing() {
 
       <div className="mt-9 sm:mt-11">
         <div className="flex items-baseline justify-between gap-4 text-xs font-bold tracking-[0.03em]">
-          <span>
-            {answeredCount} of {total} solved
-            {puzzle && <span className="opacity-55"> · Puzzle #{puzzle.puzzle.puzzleNumber}</span>}
-          </span>
+          {showHardRun ? (
+            <span>
+              {hardRun ? <>Last hard mode run<span className="opacity-55"> · Puzzle #{hardRun.puzzleNumber}</span></> : 'No hard mode runs yet'}
+            </span>
+          ) : (
+            <span>
+              {answeredCount} of {total} solved
+              {puzzle && <span className="opacity-55"> · Puzzle #{puzzle.puzzle.puzzleNumber}</span>}
+            </span>
+          )}
           {isComplete && <span className="text-brand">All done</span>}
         </div>
 
@@ -122,10 +135,10 @@ export function Landing() {
             const question = puzzle?.questions[index];
             const rawScore = (question && puzzle?.userGuesses[question.id]) || 0;
             const isHardGuess = question ? hardGuesses.has(question.id) : false;
-            const showScore = hardMode === isHardGuess;
-            const visibleScore = showScore ? rawScore : 0;
-            const solved = rawScore > 0;
-            const hidden = solved && !showScore;
+            const hardScore = isHardGuess ? rawScore : hardRun?.results[index]?.score ?? 0;
+            const visibleScore = !hardMode ? (isHardGuess ? 0 : rawScore) : hardScore;
+            // an easy-mode box that was only played in hard mode stays empty
+            const hidden = !hardMode && isHardGuess && rawScore > 0;
 
             return (
               <li
@@ -134,8 +147,10 @@ export function Landing() {
                   hidden
                     ? `Puzzle ${index + 1}: result hidden`
                     : visibleScore > 0
-                      ? `Puzzle ${index + 1}: off by ${formatCompactNumber(visibleScore)} times`
-                      : `Puzzle ${index + 1}: not answered yet`
+                      ? `Puzzle ${index + 1}: off by ${formatCompactNumber(visibleScore)} times${hardMode ? ' in hard mode' : ''}`
+                      : hardMode
+                        ? `Puzzle ${index + 1}: no hard mode score yet`
+                        : `Puzzle ${index + 1}: not answered yet`
                 }
                 className="border-r border-[var(--line)] px-4 py-4 first:pl-0 last:border-r-0 last:pr-0 sm:px-6"
               >
@@ -143,7 +158,7 @@ export function Landing() {
                   aria-hidden="true"
                   className="block whitespace-nowrap text-[0.62rem] font-bold tracking-[0.03em] opacity-60"
                 >
-                  {`Q${index + 1} ${hidden ? 'hidden' : 'off by'}`}
+                  {`Q${index + 1} ${hidden ? 'played in hard mode' : 'off by'}`}
                 </span>
 
                 <span

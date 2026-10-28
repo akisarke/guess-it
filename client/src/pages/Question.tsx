@@ -8,10 +8,9 @@ import type { QuestionPublic } from 'shared';
 import { useSoloGame } from '../hooks/use-solo-game';
 import { GeneratedSetContext } from '../components/GeneratedSetContext';
 import { SoloLoadError } from '../components/SoloLoadError';
-import { HardModeToggle } from '../components/HardModeToggle';
 import { HardModeTimer } from '../components/HardModeTimer';
 import { animateSafe } from '../lib/anime';
-import { readHardMode, writeHardMode } from '../lib/hard-mode';
+import { readHardMode } from '../lib/hard-mode';
 
 export function Question() {
   const navigate = useNavigate();
@@ -20,7 +19,8 @@ export function Question() {
   const [guessValue, setGuessValue] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [hardMode, setHardMode] = useState(readHardMode);
+  // the mode is picked on the landing page; a question just follows it
+  const [hardMode] = useState(readHardMode);
   const cardRef = useRef<HTMLDivElement>(null);
   const currentQuestionId = puzzle?.questions?.[idx]?.id;
 
@@ -35,11 +35,6 @@ export function Question() {
     };
   }, [currentQuestionId]);
 
-  const toggleHardMode = () => {
-    const next = !hardMode;
-    writeHardMode(next);
-    setHardMode(next);
-  };
 
   if (setId !== undefined && error) return <SoloLoadError error={error} />;
 
@@ -112,8 +107,8 @@ export function Question() {
         <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 border-b border-[var(--line)] pb-3">
           <span className="text-[0.66rem] font-bold tracking-[0.04em] opacity-55">Question {idx + 1} of {puzzle.questions?.length ?? 3}</span>
           <div className="flex flex-wrap items-center gap-3">
-            {setId === undefined && (
-              <HardModeToggle enabled={hardMode} onToggle={toggleHardMode} />
+            {hardMode && setId === undefined && (
+              <span className="text-[0.66rem] font-bold tracking-[0.04em] text-brand">Hard mode</span>
             )}
             {hardMode && (
               <HardModeTimer

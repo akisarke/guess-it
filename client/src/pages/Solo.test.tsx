@@ -1,3 +1,4 @@
+import { writeHardMode } from '../lib/hard-mode';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -44,19 +45,23 @@ describe('source-aware solo routes', () => {
 
   it('locks in the current guess when hard mode runs out', async () => {
     const submit = vi.spyOn(api, 'submitGuess').mockRejectedValue(new ApiError(500, 'Try again'));
+    writeHardMode(true);
+    vi.useFakeTimers({ shouldAdvanceTime: true });
 
-    open('/play/0');
-    await screen.findByLabelText('Guess in fish');
-    fireEvent.change(screen.getByLabelText('Guess in fish'), { target: { value: '50' } });
-    vi.useFakeTimers();
-    fireEvent.click(screen.getByRole('button', { name: /hard mode/i }));
+    try {
+      open('/play/0');
+      await screen.findByLabelText('Guess in fish');
+      fireEvent.change(screen.getByLabelText('Guess in fish'), { target: { value: '50' } });
 
-    await act(async () => {
-      vi.advanceTimersByTime(10_000);
-    });
-    vi.useRealTimers();
+      await act(async () => {
+        vi.advanceTimersByTime(10_000);
+      });
 
-    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50, mode: 'hard' });
+      expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50, mode: 'hard' });
+    } finally {
+      vi.useRealTimers();
+      writeHardMode(false);
+    }
   });
 
   it('loads generated play without revealing private details and submits its source', async () => {

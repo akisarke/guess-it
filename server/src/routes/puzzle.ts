@@ -1,3 +1,4 @@
+import type { GuessMode } from 'shared';
 import type { FastifyInstance } from 'fastify';
 import { authenticate, requireRegistered } from '../middleware/auth.js';
 import { getTodayPuzzle, utcDayRange } from '../services/daily-puzzle.js';
@@ -41,7 +42,7 @@ export async function puzzleRoutes(app: FastifyInstance) {
     };
   });
 
-  app.get('/today', { preHandler: [authenticate] }, async (request) => {
+  app.get<{ Querystring: { mode?: string } }>('/today', { preHandler: [authenticate] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     const puzzle = await getTodayPuzzle(prisma);
@@ -50,10 +51,10 @@ export async function puzzleRoutes(app: FastifyInstance) {
       throw new NotFoundError('No puzzle for today');
     }
 
-    return loadGameSource(prisma, { kind: 'daily', id: puzzle.id }, userId);
+    return loadGameSource(prisma, { kind: 'daily', id: puzzle.id }, userId, modeFromQuery(request.query));
   });
 
-  app.get<{ Params: { puzzleNumber: string } }>('/:puzzleNumber', { preHandler: [authenticate, requireRegistered] }, async (request) => {
+  app.get<{ Params: { puzzleNumber: string }; Querystring: { mode?: string } }>('/:puzzleNumber', { preHandler: [authenticate, requireRegistered] }, async (request) => {
     const userId = request.userId;
     if (!userId) throw new AuthenticationError('Not authenticated');
     const { puzzleNumber } = request.params;
@@ -67,6 +68,10 @@ export async function puzzleRoutes(app: FastifyInstance) {
       throw new NotFoundError('Puzzle not found');
     }
 
-    return loadGameSource(prisma, { kind: 'daily', id: puzzle.id }, userId);
+    return loadGameSource(prisma, { kind: 'daily', id: puzzle.id }, userId, modeFromQuery(request.query));
   });
+}
+
+export function modeFromQuery(query: { mode?: string }): GuessMode {
+  return query.mode === 'hard' ? 'hard' : 'easy';
 }

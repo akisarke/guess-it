@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { Prisma } from '@prisma/client';
-import type { GuessRequest } from 'shared';
+import type { GuessMode, GuessRequest } from 'shared';
+import { modeFromQuery } from './puzzle.js';
 import { GameSourceForbidden, loadGameSource } from '../services/game-source.js';
 import { authenticate } from '../middleware/auth.js';
 import { computeScore } from '../services/scoring.js';
@@ -33,6 +34,7 @@ export async function guessRoutes(app: FastifyInstance) {
         },
         questionId: { type: 'string', minLength: 1 },
          value: { type: 'number', minimum: 1, maximum: 1e15, multipleOf: 1 },
+        mode: { type: 'string', enum: ['easy', 'hard'] },
       },
     } },
   }, async (request) => {
@@ -51,8 +53,26 @@ export async function guessRoutes(app: FastifyInstance) {
     if (!Number.isFinite(score)) {
       throw new InvalidAnswerError();
     }
+    // a daily can be played once in each mode. the first attempt counts; one in
+    // the other mode afterwards is a practice replay that never touches scores
+    const mode: GuessMode = source.kind === 'daily' && request.body.mode === 'hard' ? 'hard' : 'easy';
+    if (source.kind === 'daily') {
+      const first = await prisma.guess.findUnique({ where: { userId_questionId: { userId, questionId } }, select: { mode: true } });
+      if (first) {
+        if (first.mode === mode) throw new ConflictError('Already guessed this question');
+        try {
+          await prisma.practiceGuess.create({ data: { userId, questionId, value, score, mode } });
+        } catch (error) {
+          if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            throw new ConflictError('Already guessed this question');
+          }
+          throw error;
+        }
+        return { score, answer, direction, scoreBand, napkinMath: question.napkinMath, counted: false };
+      }
+    }
     try {
-      await prisma.guess.create({ data: { userId, questionId, value, score } });
+      await prisma.guess.create({ data: { userId, questionId, value, score, mode } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictError('Already guessed this question');
@@ -61,10 +81,10 @@ export async function guessRoutes(app: FastifyInstance) {
     }
     await updateStreak(prisma, userId, new Date());
     await checkAndAwardBadges(prisma, userId, questionId, score);
-    return { score, answer, direction, scoreBand, napkinMath: question.napkinMath };
+    return { score, answer, direction, scoreBand, napkinMath: question.napkinMath, counted: true };
   });
 
-  app.get<{ Params: { id: string } }>('/puzzle/:id/distribution', {
+  app.get<{ Params: { id: string }; Querystring: { mode?: string } }>('/puzzle/:id/distribution', {
     preHandler: [authenticate],
   }, async (request) => {
     const userId = request.userId;
@@ -76,7 +96,14 @@ export async function guessRoutes(app: FastifyInstance) {
     const guess = await prisma.guess.findUnique({
       where: { userId_questionId: { userId, questionId: request.params.id } },
     });
-    if (!guess) throw new AuthorizationError('Submit your guess before viewing the answer');
-    return computeDistribution(prisma, request.params.id, userId);
+    const mode = request.query.mode === undefined ? null : modeFromQuery(request.query);
+    // the crowd only ever holds first attempts; a practice replay just moves your own marker
+    const practice = mode && guess?.mode !== mode
+      ? await prisma.practiceGuess.findUnique({ where: { userId_questionId: { userId, questionId: request.params.id } } })
+      : null;
+    if (!guess && !practice) throw new AuthorizationError('Submit your guess before viewing the answer');
+    const distribution = await computeDistribution(prisma, request.params.id, userId);
+    if (practice && practice.mode === mode) return { ...distribution, userGuess: Number(practice.value) };
+    return distribution;
   });
 }

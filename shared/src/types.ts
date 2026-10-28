@@ -100,6 +100,7 @@ export interface PuzzleResponse {
   puzzle: DailyPuzzle;
   questions: QuestionPublic[];
   userGuesses: Record<string, number>;
+  guessesByMode?: Record<GuessMode, Record<string, number>>;
 }
 
 export interface ProfileSkill {
@@ -126,10 +127,14 @@ export interface ArchiveResponse {
   hasMore: boolean;
 }
 
+export type GuessMode = 'easy' | 'hard';
+
 export interface GuessRequest {
   source: GameSourceRef;
   questionId: string;
   value: number;
+  // daily only: which mode this attempt is played in (defaults to easy)
+  mode?: GuessMode;
 }
 
 export interface GuessResponse {
@@ -137,6 +142,8 @@ export interface GuessResponse {
   answer: number;
   direction: ScoreDirection;
   scoreBand: ScoreBand;
+  // false when this was a replay in the other mode, which doesn't count
+  counted?: boolean;
 }
 
 export interface DistributionBin {

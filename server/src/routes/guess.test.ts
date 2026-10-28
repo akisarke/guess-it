@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { describe, expect, test } from 'vitest';
-import { gameplayApp, gameplayDatabase, set } from '../test/gameplay.js';
+import { describe, expect, test, vi } from 'vitest';
+import { gameplayApp, gameplayDatabase, savedGuess, set } from '../test/gameplay.js';
 import { guessRoutes } from './guess.js';
 import { registerHttpErrorHandler } from '../errors/http-error-handler.js';
 
@@ -76,8 +76,8 @@ describe('source-authorized guesses', () => {
         payload: { source: { kind, id: kind === 'daily' ? 'daily-uuid' : set.id }, questionId: 'q3', value: 50 } });
 
       expect(response.statusCode).toBe(200);
-      expect(response.json()).toEqual({ answer: 100, score: 2, direction: 'Too Low', scoreBand: 'medium', napkinMath: 'private explanation' });
-      expect(createGuess).toHaveBeenCalledWith({ data: { userId: 'owner', questionId: 'q3', value: 50, score: 2 } });
+      expect(response.json()).toEqual({ answer: 100, score: 2, direction: 'Too Low', scoreBand: 'medium', napkinMath: 'private explanation', counted: true });
+      expect(createGuess).toHaveBeenCalledWith({ data: { userId: 'owner', questionId: 'q3', value: 50, score: 2, mode: 'easy' } });
       const sourceRead = kind === 'daily' ? reads.daily : reads.set;
       expect(sourceRead.mock.invocationCallOrder[0]).toBeLessThan(reads.answer.mock.invocationCallOrder[0]);
     } finally { await app.close(); }
@@ -98,5 +98,27 @@ describe('source-authorized guesses', () => {
       expect(response.json().code).toBe('CONFLICT');
       expect(response.json()).not.toHaveProperty('answer');
     } finally { await app.close(); }
+  });
+
+  test('lets a daily be replayed once in the other mode without counting it', async () => {
+    const { prisma, createGuess, createPracticeGuess } = gameplayDatabase();
+    vi.spyOn(prisma.guess, 'findUnique').mockResolvedValue({ ...savedGuess, mode: 'hard' });
+    const { app, cookies } = await gameplayApp(prisma);
+    registerHttpErrorHandler(app);
+    await app.register(guessRoutes, { prefix: '/api' });
+    try {
+      const payload = { source: { kind: 'daily', id: 'daily-uuid' }, questionId: 'q3', value: 50 };
+      const replay = await app.inject({ method: 'POST', url: '/api/guess', cookies, payload: { ...payload, mode: 'easy' } });
+
+      expect(replay.statusCode).toBe(200);
+      expect(replay.json()).toMatchObject({ score: 2, counted: false });
+      expect(createPracticeGuess).toHaveBeenCalledWith({ data: { userId: 'owner', questionId: 'q3', value: 50, score: 2, mode: 'easy' } });
+      expect(createGuess).not.toHaveBeenCalled();
+
+      const sameMode = await app.inject({ method: 'POST', url: '/api/guess', cookies, payload: { ...payload, mode: 'hard' } });
+      expect(sameMode.statusCode).toBe(409);
+    } finally {
+      await app.close();
+    }
   });
 });

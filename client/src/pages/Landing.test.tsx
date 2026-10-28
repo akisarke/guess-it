@@ -109,16 +109,14 @@ describe('Landing progress rehydration', () => {
     expect(screen.getByRole('button', { name: /see your summary/i })).toBeInTheDocument();
   });
 
-  it('shows the latest hard mode run while hard mode is active', async () => {
+  it('shows the daily played in hard mode separately from easy mode', async () => {
 
-    saveHardModeRun({
-      puzzleNumber: 2,
-      puzzleDate: '2026-10-26T00:00:00.000Z',
-      completedAt: '2026-10-27T12:00:00.000Z',
-      results: [{ question: { id: 'h1', prompt: 'Hard one?', unit: 'm' }, guess: 9, answer: 10, score: 1.5 }],
-    });
+    const puzzle = puzzleWithScores([2, 3, 4]);
     vi.spyOn(api, 'getMe').mockResolvedValue({ user: authenticatedUser });
-    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue(puzzleWithScores([2, 3, 4]));
+    vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
+      ...puzzle,
+      guessesByMode: { easy: puzzle.userGuesses, hard: { 'question-1': 1.5 } },
+    });
 
     renderLanding();
 
@@ -127,10 +125,10 @@ describe('Landing progress rehydration', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
 
-    expect(screen.getByText('Last hard mode run')).toBeInTheDocument();
+    expect(screen.getByText('1 of 3 solved in hard mode')).toBeInTheDocument();
     expect(screen.getByLabelText('Puzzle 1: off by 1.5 times in hard mode')).toBeInTheDocument();
-    expect(screen.getByLabelText('Puzzle 2: no hard mode score yet')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Puzzle 1: off by 2 times')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Puzzle 2: not answered yet in hard mode')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resume puzzle/i })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /^hard mode/i }));
 

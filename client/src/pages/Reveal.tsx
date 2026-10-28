@@ -7,6 +7,7 @@ import { SoloLoadError } from '../components/SoloLoadError';
 import { RevealView } from '../components/RevealView';
 import { DistributionResponse, QuestionPublic } from 'shared';
 import { play } from '../lib/sounds';
+import { currentMode } from '../lib/daily-mode';
 
 export function Reveal() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export function Reveal() {
     if (!question || !hasAnswered) return;
     let active = true;
     api
-      .getDistribution(question.id)
+      .getDistribution(question.id, puzzle && puzzle.source?.kind === 'daily' ? currentMode() : undefined)
       .then((data) => { if (active) setDist({ questionId: question.id, data }); })
       .catch(() => { if (active) setDist(null); });
     return () => { active = false; };

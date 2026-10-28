@@ -39,7 +39,7 @@ describe('source-aware solo routes', () => {
     await userEvent.type(await screen.findByLabelText('Guess in fish'), '50');
     await userEvent.click(screen.getByRole('button', { name: 'Lock it in' }));
 
-    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50 });
+    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50, mode: 'easy' });
   });
 
   it('locks in the current guess when hard mode runs out', async () => {
@@ -56,7 +56,7 @@ describe('source-aware solo routes', () => {
     });
     vi.useRealTimers();
 
-    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50 });
+    expect(submit).toHaveBeenCalledWith({ source: daily.source, questionId: 'q1', value: 50, mode: 'hard' });
   });
 
   it('loads generated play without revealing private details and submits its source', async () => {

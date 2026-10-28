@@ -1,4 +1,4 @@
-import type { ErrorCode, GenerateQuestionSetRequest, GenerateQuestionSetResponse, PuzzleResponse, HardModePuzzleResponse, ProfileSkill, GeneratedGameSourceResponse, GeneratedGameSummaryResponse, GuessRequest, GuessResponse, DistributionResponse, GeneratedQuestionSetSummary } from 'shared';
+import type { GuessMode, ErrorCode, GenerateQuestionSetRequest, GenerateQuestionSetResponse, PuzzleResponse, HardModePuzzleResponse, ProfileSkill, GeneratedGameSourceResponse, GeneratedGameSummaryResponse, GuessRequest, GuessResponse, DistributionResponse, GeneratedQuestionSetSummary } from 'shared';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 const HARD_MODE_EXCLUDE_PUZZLES = 500;
@@ -379,7 +379,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(input),
     }),
-  getDistribution: (id: string) => request<DistributionResponse>(`/api/puzzle/${encodeURIComponent(id)}/distribution`),
+  getDistribution: (id: string, mode?: GuessMode) =>
+    request<DistributionResponse>(`/api/puzzle/${encodeURIComponent(id)}/distribution${mode ? `?mode=${mode}` : ''}`),
   getQuestionSetPlay: (id: string) => request<GeneratedGameSourceResponse>(`/api/question-sets/${encodeURIComponent(id)}/play`),
   getQuestionSetSummary: (id: string) => request<GeneratedGameSummaryResponse>(`/api/question-sets/${encodeURIComponent(id)}/summary`),
 

@@ -74,6 +74,9 @@ interface GameSourceProgress {
 export interface DailyGameSourceResponse extends GameSourceProgress {
   source: { kind: 'daily'; id: string };
   puzzle: DailyPuzzle;
+  // your scores split by the mode you played each question in; userGuesses
+  // holds the slice for the mode that was asked for
+  guessesByMode?: Record<'easy' | 'hard', Record<string, number>>;
 }
 
 export interface GeneratedGameSourceResponse extends GameSourceProgress {

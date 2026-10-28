@@ -13,6 +13,14 @@ export async function mergeAnonymousProgress(prisma: PrismaClient, fromUserId: s
       });
     }
 
+    const practice = await tx.practiceGuess.findMany({ where: { userId: fromUserId } });
+    if (practice.length > 0) {
+      await tx.practiceGuess.createMany({
+        data: practice.map(({ id, userId, ...guess }) => ({ ...guess, userId: toUserId })),
+        skipDuplicates: true,
+      });
+    }
+
     const streak = await tx.streak.findUnique({ where: { userId: fromUserId } });
     if (streak) {
       const destinationStreak = await tx.streak.findUnique({ where: { userId: toUserId }, select: { userId: true } });

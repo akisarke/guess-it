@@ -11,7 +11,7 @@ import { SoloLoadError } from '../components/SoloLoadError';
 import { HardModeToggle } from '../components/HardModeToggle';
 import { HardModeTimer } from '../components/HardModeTimer';
 import { animateSafe } from '../lib/anime';
-import { markHardGuess, readHardMode, writeHardMode } from '../lib/hard-mode';
+import { readHardMode, writeHardMode } from '../lib/hard-mode';
 
 export function Question() {
   const navigate = useNavigate();
@@ -95,8 +95,7 @@ export function Question() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await api.submitGuess({ source: puzzle.source, questionId: question.id, value });
-      if (hardMode && setId === undefined) markHardGuess(question.id);
+      await api.submitGuess({ source: puzzle.source, questionId: question.id, value, ...(puzzle.source.kind === 'daily' ? { mode: hardMode ? 'hard' : 'easy' } : {}) });
       navigate(`${prefix}/reveal/${idx}${puzzleQuery}`);
     } catch (err) {
       play('error');

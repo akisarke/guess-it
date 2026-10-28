@@ -6,7 +6,8 @@ import { ShareCard } from '../components/ShareCard';
 import { NotLoggedIn } from '../components/NotLoggedIn';
 import { formatScore } from '../lib/format-number';
 import { animateSafe } from '../lib/anime';
-import { readHardGuesses, readHardMode } from '../lib/hard-mode';
+import { readHardMode } from '../lib/hard-mode';
+import { currentMode, withMode } from '../lib/daily-mode';
 import { swipeIn } from '../lib/motion';
 import { readLatestHardModeRun } from '../lib/hard-mode-history';
 import '../reveal.css';
@@ -37,6 +38,7 @@ interface TodayPuzzle {
   puzzle: { puzzleNumber: number };
   questions: { id: string; prompt: string; unit: string }[];
   userGuesses: Record<string, number>;
+  guessesByMode?: Record<'easy' | 'hard', Record<string, number>>;
 }
 
 function scoreBand(score: number): string {
@@ -68,7 +70,8 @@ export function Summary() {
   }, [tab]);
 
   useEffect(() => {
-    api.getTodayPuzzle().then(setPuzzle).catch((e: unknown) => setError(e instanceof Error ? e : new Error('Unable to load summary.'))).finally(() => setLoading(false));
+    // the daily is played once per mode; show the mode you're in
+    api.getTodayPuzzle().then((today) => setPuzzle(withMode(today, currentMode()))).catch((e: unknown) => setError(e instanceof Error ? e : new Error('Unable to load summary.'))).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -145,13 +148,7 @@ export function Summary() {
   const hardAverage = hardRun
     ? hardRun.results.reduce((sum, result) => sum + result.score, 0) / Math.max(1, hardRun.results.length)
     : 0;
-  const hardGuessIds = readHardGuesses();
-  const hardDailyCount = puzzle.questions.filter((question) => hardGuessIds.has(question.id)).length;
-  const dailyMode = hardDailyCount === 0
-    ? 'Easy mode'
-    : hardDailyCount === puzzle.questions.length
-      ? 'Hard mode'
-      : 'Mixed mode';
+  const dailyMode = readHardMode() ? 'Hard mode' : 'Easy mode';
 
   const dailyView: SummaryView = {
     label: `${dailyMode} score`,

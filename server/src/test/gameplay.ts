@@ -26,7 +26,7 @@ export const set = {
 };
 export const savedGuess = {
   id: 'guess-1', userId: owner.id, questionId: 'q3', value: new Prisma.Decimal(50),
-  score: new Prisma.Decimal(2), createdAt: new Date('2026-09-12'),
+  score: new Prisma.Decimal(2), mode: 'easy' as const, createdAt: new Date('2026-09-12'),
 };
 
 export function gameplayDatabase() {
@@ -43,7 +43,10 @@ export function gameplayDatabase() {
   vi.spyOn(prisma.streak, 'findUnique').mockResolvedValue(null);
   const createGuess = vi.spyOn(prisma.guess, 'create').mockResolvedValue(savedGuess);
   vi.spyOn(prisma.guess, 'findUnique').mockResolvedValue(null);
-  return { prisma, reads, createGuess };
+  vi.spyOn(prisma.practiceGuess, 'findMany').mockResolvedValue([]);
+  vi.spyOn(prisma.practiceGuess, 'findUnique').mockResolvedValue(null);
+  const createPracticeGuess = vi.spyOn(prisma.practiceGuess, 'create').mockResolvedValue({ ...savedGuess, mode: 'hard' });
+  return { prisma, reads, createGuess, createPracticeGuess };
 }
 
 export async function gameplayApp(prisma: PrismaClient) {

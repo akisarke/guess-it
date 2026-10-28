@@ -58,6 +58,7 @@ async function makeApp(
     return { ...base, ...data } as typeof hackClubUser;
   }) as never);
   vi.spyOn(prisma, '$transaction').mockImplementation(async (callback) => callback(prisma));
+  vi.spyOn(prisma.practiceGuess, 'findMany').mockResolvedValue([]);
   app.decorate('prisma', prisma);
   registerHttpErrorHandler(app);
   await app.register(authRoutes, { prefix: '/auth' });
@@ -134,7 +135,7 @@ describe('Hack Club login', () => {
     mockHackClubProfile({ sub: 'hc-1', email: 'member@example.com' });
     vi.spyOn(app.prisma.guess, 'findMany').mockResolvedValue([{
       id: 'guess-1', userId: anonymousUser.id, questionId: 'q1',
-      value: new Prisma.Decimal(50), score: new Prisma.Decimal(99.5), createdAt: new Date(),
+      value: new Prisma.Decimal(50), score: new Prisma.Decimal(99.5), mode: 'easy' as const, createdAt: new Date(),
     }]);
     vi.spyOn(app.prisma.guess, 'createMany').mockResolvedValue({ count: 1 });
     vi.spyOn(app.prisma.streak, 'findUnique').mockImplementation((async ({ where }: { where: { userId: string } }) => (

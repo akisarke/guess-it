@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum GuessMode {
+  easy
+  hard
+}
+
 enum AuthProvider {
   anonymous
   hackclub
@@ -67,6 +72,7 @@ model User {
   createdAt      DateTime     @default(now())
 
   guesses             Guess[]
+  practiceGuesses     PracticeGuess[]
   streak              Streak?
   userBadges          UserBadge[]
   queueEntries        MatchmakingQueueEntry[]
@@ -170,6 +176,7 @@ model Question {
   creator      User?                   @relation("CreatedBy", fields: [createdBy], references: [id])
   setQuestions QuestionSetQuestion[]
   guesses      Guess[]
+  practiceGuesses PracticeGuess[]
   queueEntries MatchmakingQueueEntry[]
 
   @@index([createdBy])
@@ -217,13 +224,15 @@ model GenerationAttempt {
   @@index([userId, utcDay])
 }
 
+// the attempt that counts for scores, streaks and leaderboards: the first one
 model Guess {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   userId     String
   questionId String
-  value      Decimal  @db.Decimal(20, 2)
-  score      Decimal  @db.Decimal(30, 4)
-  createdAt  DateTime @default(now())
+  value      Decimal   @db.Decimal(20, 2)
+  score      Decimal   @db.Decimal(30, 4)
+  mode       GuessMode @default(easy)
+  createdAt  DateTime  @default(now())
 
   user     User     @relation(fields: [userId], references: [id])
   question Question @relation(fields: [questionId], references: [id])
@@ -231,6 +240,23 @@ model Guess {
   @@unique([userId, questionId])
   @@index([questionId])
   @@index([createdAt])
+}
+
+// a replay of a daily question in the other mode; practice only, never counted
+model PracticeGuess {
+  id         String    @id @default(uuid())
+  userId     String
+  questionId String
+  value      Decimal   @db.Decimal(20, 2)
+  score      Decimal   @db.Decimal(30, 4)
+  mode       GuessMode
+  createdAt  DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([questionId])
 }
 
 model Streak {

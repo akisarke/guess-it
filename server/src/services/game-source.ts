@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@prisma/client';
-import type { DailyGameSourceResponse, GeneratedGameSourceResponse, GameSourceRef, GameSourceResponse, QuestionPublic } from 'shared';
+import type { DailyGameSourceResponse, GeneratedGameSourceResponse, GameSourceRef, GameSourceResponse, GuessMode, QuestionPublic } from 'shared';
 import { NotFoundError, AuthorizationError } from '../errors/application-error.js';
 
 export class GameSourceNotFound extends NotFoundError {
@@ -30,10 +30,28 @@ async function viewerGuesses(prisma: PrismaClient, userId: string, questions: re
   return Object.fromEntries(guesses.map((guess) => [guess.questionId, Number(guess.score)]));
 }
 
-export function loadGameSource(prisma: PrismaClient, ref: DailyGameSourceResponse['source'], userId: string): Promise<DailyGameSourceResponse>;
-export function loadGameSource(prisma: PrismaClient, ref: GeneratedGameSourceResponse['source'], userId: string): Promise<GeneratedGameSourceResponse>;
-export function loadGameSource(prisma: PrismaClient, ref: GameSourceRef, userId: string): Promise<GameSourceResponse>;
-export async function loadGameSource(prisma: PrismaClient, ref: GameSourceRef, userId: string): Promise<GameSourceResponse> {
+// a daily can be played once per mode: the first attempt (Guess) in whichever
+// mode it was made, and one practice replay (PracticeGuess) in the other
+async function dailyProgress(prisma: PrismaClient, userId: string, questions: readonly QuestionPublic[], mode: GuessMode) {
+  const guessesByMode = await dailyGuessesByMode(prisma, userId, questions);
+  return { userGuesses: guessesByMode[mode], guessesByMode };
+}
+
+async function dailyGuessesByMode(prisma: PrismaClient, userId: string, questions: readonly QuestionPublic[]) {
+  const questionIds = questions.map((question) => question.id);
+  const [counted, practice] = await Promise.all([
+    prisma.guess.findMany({ where: { userId, questionId: { in: questionIds } }, select: { questionId: true, score: true, mode: true } }),
+    prisma.practiceGuess.findMany({ where: { userId, questionId: { in: questionIds } }, select: { questionId: true, score: true, mode: true } }),
+  ]);
+  const byMode: Record<GuessMode, Record<string, number>> = { easy: {}, hard: {} };
+  for (const guess of [...counted, ...practice]) byMode[guess.mode][guess.questionId] = Number(guess.score);
+  return byMode;
+}
+
+export function loadGameSource(prisma: PrismaClient, ref: DailyGameSourceResponse['source'], userId: string, mode?: GuessMode): Promise<DailyGameSourceResponse>;
+export function loadGameSource(prisma: PrismaClient, ref: GeneratedGameSourceResponse['source'], userId: string, mode?: GuessMode): Promise<GeneratedGameSourceResponse>;
+export function loadGameSource(prisma: PrismaClient, ref: GameSourceRef, userId: string, mode?: GuessMode): Promise<GameSourceResponse>;
+export async function loadGameSource(prisma: PrismaClient, ref: GameSourceRef, userId: string, mode: GuessMode = 'easy'): Promise<GameSourceResponse> {
   switch (ref.kind) {
     case 'daily': {
       const puzzle = await prisma.dailyPuzzle.findUnique({ where: { id: ref.id } });
@@ -49,7 +67,7 @@ export async function loadGameSource(prisma: PrismaClient, ref: GameSourceRef, u
       return {
         source: { kind: 'daily', id: puzzle.id },
         puzzle: { ...puzzle, puzzleDate: puzzle.puzzleDate.toISOString() },
-        questions, userGuesses: await viewerGuesses(prisma, userId, questions),
+        questions, ...await dailyProgress(prisma, userId, questions, mode),
       };
     }
     case 'generated': {

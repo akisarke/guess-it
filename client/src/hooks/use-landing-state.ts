@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { PuzzleResponse } from 'shared';
+import type { GuessMode, PuzzleResponse } from 'shared';
 import { errorMessage, ApiError, api } from '../lib/api';
 import { derivePuzzleProgress } from '../lib/puzzle-progress';
+import { withMode } from '../lib/daily-mode';
 
 type LandingAuthState = 'checking' | 'authenticated' | 'signed-out' | 'anonymous' | 'unavailable';
 
-export function useLandingState() {
+export function useLandingState(mode: GuessMode = 'easy') {
   const navigate = useNavigate();
   const [puzzle, setPuzzle] = useState<PuzzleResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,7 +81,8 @@ export function useLandingState() {
       const todayPuzzle = await api.getTodayPuzzle();
       if (generationRef.current !== playGeneration || !mountedRef.current) return;
       setPuzzle(todayPuzzle);
-      const nextQuestion = todayPuzzle.questions.findIndex((question) => !todayPuzzle.userGuesses[question.id]);
+      const scores = withMode(todayPuzzle, mode).userGuesses;
+      const nextQuestion = todayPuzzle.questions.findIndex((question) => !scores[question.id]);
       navigate(nextQuestion === -1 ? '/summary' : `/play/${nextQuestion}`);
     } catch (requestError: unknown) {
       if (generationRef.current !== playGeneration || !mountedRef.current) return;
@@ -91,7 +93,7 @@ export function useLandingState() {
     }
   };
 
-  const progress = puzzle ? derivePuzzleProgress(puzzle) : { answeredCount: 0, firstUnansweredIndex: -1, isComplete: false };
+  const progress = puzzle ? derivePuzzleProgress(withMode(puzzle, mode)) : { answeredCount: 0, firstUnansweredIndex: -1, isComplete: false };
   const ctaLabel = progress.isComplete
     ? 'See Your Summary'
     : progress.answeredCount > 0

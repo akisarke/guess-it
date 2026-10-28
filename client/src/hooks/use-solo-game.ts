@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import type { GeneratedGameSourceResponse, PuzzleResponse } from 'shared';
 import { api, ApiError } from '../lib/api';
+import { currentMode, withMode } from '../lib/daily-mode';
 
 export function useSoloRoute() {
   const { setId, questionIndex } = useParams();
@@ -46,5 +47,6 @@ export function useSoloGame() {
   }, [setId, archivePuzzleNumber, key]);
 
   const current = state?.key === key ? state : null;
-  return { ...route, puzzle: current?.puzzle ?? null, error: current?.error ?? null, loading: current === null };
+  const puzzle = current?.puzzle ? withMode(current.puzzle, currentMode()) : null;
+  return { ...route, puzzle, error: current?.error ?? null, loading: current === null };
 }

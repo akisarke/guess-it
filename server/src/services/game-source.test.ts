@@ -39,7 +39,7 @@ describe('loadGameSource', () => {
     expect(result.userGuesses).toEqual({ q3: 2 });
     expect(reads.guesses).toHaveBeenCalledWith({
       where: { userId: 'owner', questionId: { in: result.questions.map((q) => q.id) } },
-      select: { questionId: true, score: true },
+      select: kind === 'daily' ? { questionId: true, score: true, mode: true } : { questionId: true, score: true },
     });
   });
 

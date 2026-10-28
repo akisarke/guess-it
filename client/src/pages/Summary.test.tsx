@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../lib/api';
-import { markHardGuess } from '../lib/hard-mode';
+import { writeHardMode } from '../lib/hard-mode';
 import { saveHardModeRun } from '../lib/hard-mode-history';
 import { Summary } from './Summary';
 
@@ -66,9 +66,7 @@ describe('Summary', () => {
   });
 
   it('labels the daily score with the mode it was played in', async () => {
-    markHardGuess('q1');
-    markHardGuess('q2');
-    markHardGuess('q3');
+    writeHardMode(true);
     vi.spyOn(api, 'getTodayPuzzle').mockResolvedValue({
       puzzle: { id: 'p12', puzzleDate: '2026-10-21', puzzleNumber: 12, questionIds: ['q1', 'q2', 'q3'] },
       source: { kind: 'daily', id: 'p12' },
@@ -78,6 +76,7 @@ describe('Summary', () => {
         { id: 'q3', prompt: 'how far', unit: 'z' },
       ],
       userGuesses: { q1: 2, q2: 3, q3: 4 },
+      guessesByMode: { easy: { q1: 2, q2: 3, q3: 4 }, hard: { q1: 7 } },
     });
 
     render(
@@ -89,6 +88,7 @@ describe('Summary', () => {
     );
 
     expect(await screen.findByText('Hard mode score')).toBeInTheDocument();
+    expect(screen.getByText('1/3 Answered')).toBeInTheDocument();
   });
 
   it('shows the latest saved hard mode practice run', async () => {
